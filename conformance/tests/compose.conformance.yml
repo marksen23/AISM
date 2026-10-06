@@ -71,6 +71,8 @@ services:
       AISM_AUDIT_LOG: /audit/audit.jsonl
       AISM_POLICY_FILE: /repo/conformance/tests/run/policy/policy.yaml
       AISM_ALLOWED_SIGNERS: /repo/conformance/tests/run/trust/allowed_signers
+      AISM_KEYRING: /repo/conformance/tests/run/trust/keyring.yaml
+      AISM_SIGNING_KEYS: /repo/conformance/tests/run/keys/manifest
       AISM_POLICY_FAULT_INJECTION: ${AISM_POLICY_FAULT_INJECTION:-1}
       AISM_REPORT: ${AISM_REPORT:-/repo/conformance/tests/aism-report.json}
     volumes:

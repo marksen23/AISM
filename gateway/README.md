@@ -9,8 +9,8 @@ Minimal but working implementation of the governance gateway described in
 |---|---|---|
 | OpenAI-compatible API | `POST /v1/chat/completions` (JSON and SSE passthrough), `POST /v1/embeddings`, `GET /v1/models` (local models only unless `cloudEnabled`) | M-06 |
 | Policy | loads `POLICY_PATH`, validates against `policy.schema.json` plus semantic checks (references, duplicate IDs/priorities, regexes, tool schemas); SHA-256 digest of the file bytes; reload on file change, the last valid policy stays active on errors | M-15, Policy-Format §6 |
-| Policy signature | detached SSHSIG/Ed25519 signature (`metadata.signature.method: ssh-sig`, `policy.yaml.sig`, namespace `aism-policy`) verified against `POLICY_ALLOWED_SIGNERS` (OpenSSH `allowed_signers`) **before** schema validation; unsigned, invalid-signature, unknown-signer or rollback (`effectiveFrom` older than active) policies are refused, the active policy is kept (`policy.load_failed` with `kept_active`); interoperable with `ssh-keygen -Y sign/verify` | S-11, Spez. §6.2.1 |
-| Policy endpoint | `GET /aism/v1/policy` → `name`, `version`, `revision`, `digest`, `effective_from`, `signature` (`verified`, `required`, signer, key fingerprint), `last_load_error` (no rule contents) | Spez. §6.2 |
+| Policy signature | detached SSHSIG/Ed25519. One signature (`policy.yaml.sig`) is checked against `POLICY_ALLOWED_SIGNERS`. A bundle (`policy.yaml.sigs`) is checked against a quorum keyring (`keyring.yaml` next to that file, or `POLICY_KEYRING`): threshold (K3 default 2), distinct identities, validity window, revocation. Checked **before** schema validation. Unsigned, tampered, under-threshold, unknown, expired, revoked or rolled-back policies are refused; the active policy stays (`policy.load_failed`, `kept_active`) unless the new keyring revokes its signers. Keyring updates need a quorum of the previous ring and a monotonic version | S-11, Spez. §6.2.1 |
+| Policy endpoint | `GET /aism/v1/policy` → `name`, `version`, `revision`, `digest`, `effective_from`, `signature` (`verified`, `required`, `signers`, `threshold`, fingerprints), `keyring` (version, signer ids and status) when a ring is loaded, `last_load_error` (no rule contents) | Spez. §6.2 |
 | Confirmations | `GET /aism/v1/confirmations`, `POST /aism/v1/confirmations/{id}/approve|reject`: proxied to S3 with the caller's identity; result is demasked for the caller like a chat answer | S-03, Spez. §6.3.1 |
 | Health | `GET /health` → 200 only with a valid policy and working PII detectors | Spez. §6.2 |
 | Fail-closed | no valid policy or a detector that cannot load → 503 for all requests; `defaults.decision/route/failMode` are schema constants | M-12, PEP-3 |
@@ -49,9 +49,11 @@ pip install -r gateway/requirements.txt -r gateway/requirements-gliner.txt
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `POLICY_PATH` | `/etc/aism/policy/policy.yaml` | policy file; mount the directory read-only so that policy and `.sig` change together |
-| `POLICY_ALLOWED_SIGNERS` | – | trust anchor (`allowed_signers`); compose: `/etc/aism/trust/allowed_signers` |
-| `POLICY_REQUIRE_SIGNATURE` | `true` if `POLICY_ALLOWED_SIGNERS` is set, else `false` | refuse unsigned policies |
+| `POLICY_PATH` | `/etc/aism/policy/policy.yaml` | policy file; mount the directory read-only so that policy and `.sig`/`.sigs` change together |
+| `POLICY_ALLOWED_SIGNERS` | – | single-signature trust anchor (`allowed_signers`); compose: `/etc/aism/trust/allowed_signers` |
+| `POLICY_KEYRING` | `keyring.yaml` next to `allowed_signers`, if that file exists | quorum keyring; when set, it is the trust anchor (the policy cannot lower its threshold) |
+| `POLICY_KEYRING_STATE` | `<dir of AUDIT_LOG_PATH>/keyring-state.json` when a keyring is used | last accepted ring (version, digest); rollback of the keyring fails closed |
+| `POLICY_REQUIRE_SIGNATURE` | `true` if `POLICY_ALLOWED_SIGNERS` or a keyring is set, else `false` | refuse unsigned policies |
 | `POLICY_SCHEMA_PATH` | `../policy/policy.schema.json` (image: `/app/policy.schema.json`) | JSON Schema |
 | `LISTEN_PUBLIC` / `LISTEN_INTERNAL` | `0.0.0.0:8000` / `0.0.0.0:8001` | listeners |
 | `UPSTREAM_ORCHESTRATOR` | `http://orchestrator:9000/v1` | S3 |

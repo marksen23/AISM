@@ -13,6 +13,7 @@
 | Nachtrag 05.10.2026 (3) | Projekt umbenannt: Spezifikation und Referenzimplementierung heißen einheitlich **AISM** (Referenzimplementierung: *AISM Reference Stack*); Header `X-AISM-*`, Umgebungsvariablen `AISM_*`, Policy-`apiVersion` `aism/v1alpha1`, Schema-`$id` `urn:aism:schema:policy:v1alpha1`. Keine inhaltlichen Änderungen an Kriterien. |
 | Nachtrag 06.10.2026 | Personen-Gazetteer und Kontextregeln als Policy-Detektor (`type: gazetteer`); NER-Modelle `spacy:` und `gliner:` in der Policy wählbar. Standard bleibt `spacy:xx_ent_wiki_sm` plus Gazetteer. Messung auf einem frischen Held-out-Set: [`conformance/pii-eval/README.md`](conformance/pii-eval/README.md). CI führt Lint, Unit-Tests, Schema, Signatur, PII-Gate, reproduzierbaren Build und die Konformitätssuite (Mocks) aus. |
 | Nachtrag 06.10.2026 (2) | Optionale NER-Kaskade (`ner.cascade`): das schnelle Modell läuft immer, ein schwereres Modell nur auf verdächtigen Sätzen, fail-closed wenn das Sekundärmodell konfiguriert aber nicht ladbar ist. Standard-Policy und Standard-Image bleiben ohne torch. Messung: [`conformance/pii-eval/README.md`](conformance/pii-eval/README.md) Abschnitt H. |
+| Nachtrag 06.10.2026 (3) | Schlüsselrotation und Vier-Augen-Signaturen (§6.2.1): quorum-signierter Schlüsselring mit Gültigkeitsfenstern und Widerruf, Bündel `policy.yaml.sigs`, Schwelle (K3-Standard 2), Anti-Rollback des Rings. Tests AISM-K3-11, AISM-K3-12. Kein HSM, kein Transparenzlog. |
 | Sprache | Deutsch; Protokoll-, Feld- und Produktnamen im Original |
 
 > **Hinweis:** „AISM“ bezeichnet das Referenzmodell; die Referenzimplementierung heißt „AISM Reference Stack“. AISM ist ein unabhängiges Projekt ohne Verbindung zu anderen Produkten ähnlichen Namens oder Zwecks. Die mit „AISM-Bezeichnung“ gekennzeichneten Kürzel (z. B. *SSGP*, *GVP*) sind **ausschließlich interne Modellbegriffe**. Es handelt sich **nicht** um Protokolle oder Standards. Auf der Leitung werden ausschließlich die jeweils genannten realen Standards verwendet.
@@ -250,7 +251,7 @@ Das Gateway ist ein **HTTP-Reverse-Proxy**, der **seine eigene TLS-Verbindung te
 **Schnittstellenvertrag**
 - Eingang und Ausgang sind OpenAI-kompatibel (`/v1/chat/completions`, `/v1/models`).
 - Zusätzliche **AISM-eigene** Endpunkte (keine Standards), siehe Tabelle unten. Port 8001 ist nur im `backend`-Netz zu verwenden und MUSS ein internes Token (`INTERNAL_TOKEN`) verlangen.
-- Die Policy wird gemäß [`policy/AISM-Policy-Format.md`](policy/AISM-Policy-Format.md) aus `/etc/aism/policy/policy.yaml` geladen (Verzeichnis-Mount, read-only, mit Signaturdatei `policy.yaml.sig`), siehe §6.2.1.
+- Die Policy wird gemäß [`policy/AISM-Policy-Format.md`](policy/AISM-Policy-Format.md) aus `/etc/aism/policy/policy.yaml` geladen (Verzeichnis-Mount, read-only, mit Signaturdatei `policy.yaml.sig` oder Bündel `policy.yaml.sigs`), siehe §6.2.1.
 - Request-Kontext wird intern über Header weitergereicht, z. B. `X-AISM-Request-ID`, `X-AISM-Route: local`, `X-AISM-Policy-Decision: <id>`. Diese Header sind AISM-intern und MÜSSEN an der Egress-Grenze entfernt werden. Der W3C-Trace-Context-Header `traceparent` wird übernommen bzw. erzeugt und weitergereicht (S-10).
 
 **AISM-eigene Endpunkte von S2**
@@ -258,7 +259,7 @@ Das Gateway ist ein **HTTP-Reverse-Proxy**, der **seine eigene TLS-Verbindung te
 | Endpunkt | Port | Zweck |
 |---|---|---|
 | `GET /health` | 8000 | Liveness/Readiness; `200` nur mit gültig geladener Policy |
-| `GET /aism/v1/policy` | 8000 | Metadaten der aktiven Policy: `name`, `version`, `revision`, `digest`, `effective_from`, Signaturstatus (`signature_verified`, Signer), letzter Ladefehler (keine Regelinhalte) |
+| `GET /aism/v1/policy` | 8000 | Metadaten der aktiven Policy: `name`, `version`, `revision`, `digest`, `effective_from`, Signaturstatus (`signature.verified`, `signature.signers`, Schwelle), bei Schlüsselring dessen Version, letzter Ladefehler (keine Regelinhalte) |
 | `GET /aism/v1/confirmations` | 8000 | Offene Bestätigungen des angemeldeten Benutzers (§6.3.1) |
 | `POST /aism/v1/confirmations/{id}/approve` bzw. `/reject` | 8000 | Schreibende Tool-Aktion freigeben oder verwerfen; nur derselbe Benutzer |
 | `POST /internal/v1/mask` | 8001 | Maskierung von Tool-Ergebnissen und RAG-Chunks für S3 mit der Platzhaltertabelle des Requests (PEP-8) |
@@ -316,11 +317,14 @@ Fällt die PII-Erkennung aus, MUSS das Gateway **fail-closed** reagieren: keine 
 
 #### 6.2.1 Policy-Signatur und Aktivierung
 
-- Die Policy SOLLTE signiert sein (S-11). Referenzverfahren: **SSHSIG mit Ed25519** (`ssh-keygen -Y sign -n aism-policy`), abgelegte Signatur `policy.yaml.sig` neben der Policy, Vertrauensanker als `allowed_signers`-Datei (OpenSSH-Format). Begründung: offline nutzbar, keine Infrastruktur (kein Rekor/Fulcio), Werkzeug auf jedem Admin-Rechner vorhanden, mit `ssh-keygen -Y verify` unabhängig prüfbar. Sigstore `cosign sign-blob` ist eine gleichwertige Alternative (`method: sigstore`), im Prototyp nicht umgesetzt.
-- Signiert werden die Bytes der Policy-Datei; `metadata.signature` (`method: ssh-sig`, `ref`, `signer`) steht in der Datei und ist damit mitsigniert. `metadata.revision` (Git-Commit oder Inhalts-SHA-256) MUSS gesetzt sein.
-- Ist eine Signatur gefordert (`POLICY_REQUIRE_SIGNATURE`, Standard sobald `POLICY_ALLOWED_SIGNERS` gesetzt ist), MUSS S2 eine Policy ohne Signatur, mit ungültiger Signatur oder von einem nicht vertrauten Signer **ablehnen**; die zuvor aktive Policy bleibt aktiv (Audit `policy.load_failed`, `kept_active: true`). Beim Start ohne gültige Policy leitet S2 nichts weiter (M-15).
-- Anti-Rollback: Eine Policy mit älterem `metadata.effectiveFrom` als die aktive wird abgelehnt.
-- Werkzeug: [`tools/aism-policy-sign.py`](tools/aism-policy-sign.py) (`keygen`, `sign`, `verify`). Private Schlüssel gehören nicht in das Repository; die Konformitätssuite erzeugt ihren Testschlüssel zur Laufzeit.
+- Die Policy SOLLTE signiert sein (S-11). Referenzverfahren: **SSHSIG mit Ed25519**. Begründung: offline nutzbar, keine Infrastruktur (kein Rekor/Fulcio), mit `ssh-keygen -Y verify -n aism-policy` je Signatur unabhängig prüfbar. Sigstore `cosign sign-blob` bleibt eine gleichwertige Alternative (`method: sigstore`) und ist im Prototyp nicht umgesetzt.
+- Signiert werden die exakten Bytes der Policy-Datei. `metadata.revision` (Git-Commit oder Inhalts-SHA-256) MUSS gesetzt sein und ist mitsigniert. `metadata.signature` verweist auf `policy.yaml.sig` (eine Signatur, `signer`) oder `policy.yaml.sigs` (Bündel, `threshold`). Das Bündel nennt zusätzlich Revision und SHA-256-Digest; jede Signatur ist an diese Bytes gebunden.
+- Vertrauensanker, nicht Teil der Policy: für Schwelle 1 eine `allowed_signers`-Datei; für mehrere Signierer ein Schlüsselring (`keyring.yaml`, Namespace `aism-keyring`). Der Ring nennt Identität, öffentlichen Schlüssel, Rollen (`policy`, `keyring`), `notBefore`/`notAfter` und Widerruf. `policyThreshold` ist die Mindestzahl verschiedener gültiger Identitäten (K3-Standard **2**; K1/K2 dürfen 1 setzen). Eine Policy darf diese Schwelle nicht senken. Dieselbe Identität zählt einmal. Abgelaufene, widerrufene und unbekannte Schlüssel zählen nicht.
+- Den Ring ändert nur ein Quorum (`keyringThreshold`) von Schlüsseln, die im **bisherigen** Ring gültig sind. Ein Schlüssel kann sich nicht allein eintragen und andere nicht allein entfernen. Die Version steigt streng monoton; `prev` bindet den Digest des Vorgängers. Eine ältere oder abweichende Fassung wird abgelehnt (Anti-Rollback). Rotation überlappt: der neue Schlüssel wird gültig, bevor der alte endet oder widerrufen wird. Das Gateway speichert den akzeptierten Ring (`POLICY_KEYRING_STATE`, sonst neben dem Audit-Log) und prüft ihn beim Start und beim Neuladen.
+- Ist eine Signatur gefordert (`POLICY_REQUIRE_SIGNATURE`, Standard sobald `POLICY_ALLOWED_SIGNERS` oder ein `keyring.yaml` gesetzt ist), MUSS S2 eine Policy ohne ausreichende gültige Signaturen **ablehnen**. Die zuvor aktive Policy bleibt aktiv (`policy.load_failed`, `kept_active: true`), es sei denn, der neue Ring widerruft ihre Signierer; dann verwirft S2 sie (fail-closed). Beim Start ohne gültige Policy leitet S2 nichts weiter (M-15).
+- Anti-Rollback der Policy: eine signierte Policy mit älterem `metadata.effectiveFrom` als die aktive wird abgelehnt.
+- `GET /aism/v1/policy` MUSS Revision, Digest und die Identitäten der gezählten Signierer liefern, bei einem Schlüsselring auch dessen Version. Dieselben Identitäten (keine privaten Schlüssel) stehen in `policy.loaded` in der Audit-Hash-Kette.
+- Werkzeug: [`tools/aism-policy-sign.py`](tools/aism-policy-sign.py) (`keygen`, `init-keyring`, `add-key`, `rotate-key`, `revoke-key`, `sign`, `verify`, `status`). Private Schlüssel gehören nicht in das Repository; die Konformitätssuite erzeugt ihre Testschlüssel zur Laufzeit. Format: [`policy/AISM-Policy-Format.md`](policy/AISM-Policy-Format.md) §6.1–§6.2.
 
 **Sicherheitsanforderungen**
 - Keine TLS-Interception; ausgehende TLS-Verbindungen zu Cloud-APIs MÜSSEN Zertifikate regulär validieren.
@@ -813,7 +817,7 @@ Weiterhin offen:
 5. **MCP-Transport:** Auswahl stdio vs. HTTP-basierter Transport und deren Authentifizierung im Container-Kontext.
 6. **Apple Silicon:** Native Inferenz außerhalb von Containern (geplant, README §8) liegt außerhalb des Device-Mapping-Modells von S7 und braucht eine eigene Beschreibung.
 7. **Leistungskennzahlen:** Diese Spezifikation enthält bewusst keine Latenz- oder Durchsatzwerte. Messmethodik und Referenzmessungen sind separat zu erstellen.
-8. **Signatur-Betrieb:** Schlüsselrotation, Mehrfachsignaturen (Vier-Augen-Prinzip), Widerruf und Transparenzlog sind nicht festgelegt. Prüfsummen der Modelldateien (S-07) fehlen weiterhin.
+8. **Signatur-Betrieb:** Rotation, Vier-Augen-Schwelle und Widerruf sind in §6.2.1 festgelegt (Software-Ed25519, Gateway-Uhr, State-Datei). Offen bleiben ein Transparenzlog, HSM-/`sk`-Schlüssel und die Prüfsummen der Modelldateien (S-07).
 9. **Bestätigungen:** Der Speicher ausstehender Aktionen liegt im Prototyp im Arbeitsspeicher (geht bei Neustart verloren, nicht skalierbar); die angezeigten Argumente können Platzhalter enthalten. Eine UI-Integration in Open WebUI fehlt.
 10. **Web-Such-Freigabe:** Die Freigabe richtet sich nach der Datenklasse der Eingangsnachricht; eine Neubewertung je Suchanfrage ist nicht umgesetzt. RAG-Ingest und OpenTelemetry-Export fehlen im Orchestrator.
 11. **Nicht gelaufen:** Open WebUI, llama.cpp (keine GPU auf dem Testhost), n8n und SearXNG wurden in der Konformitätssuite durch Mocks ersetzt; Docker-Betrieb mit `vfs`-Storage-Treiber auf einem Testhost ohne systemd. Dieselben Mocks laufen in CI. Ein Lauf mit den echten Komponenten fehlt weiterhin.

@@ -82,7 +82,8 @@ services:
       - "127.0.0.1:8000:8000"     # OpenAI-compatible API for local API clients / conformance tests
     environment:
       POLICY_PATH: /etc/aism/policy/policy.yaml
-      # K3-01/K3-08: only policies with a valid SSHSIG signature by a key in allowed_signers are loaded
+      # K3-01/K3-08/K3-11: refuse unsigned policies. keyring.yaml next to allowed_signers, when present,
+      # is the quorum trust anchor (threshold, validity, revocation); otherwise the single-sig file is.
       POLICY_REQUIRE_SIGNATURE: ${AISM_POLICY_REQUIRE_SIGNATURE:-true}
       POLICY_ALLOWED_SIGNERS: /etc/aism/trust/allowed_signers
       LISTEN_PUBLIC: 0.0.0.0:8000         # /v1/*, /health, /aism/v1/policy
@@ -95,7 +96,7 @@ services:
       AUDIT_LOG_PATH: /audit/audit.jsonl
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
     volumes:
-      # directory mount (not a single-file mount): atomic replacements of policy.yaml / policy.yaml.sig
+      # directory mount (not a single-file mount): atomic replacements of policy.yaml / policy.yaml.sig / policy.yaml.sigs
       # are visible to the hot reload
       - ./policy:/etc/aism/policy:ro
       - ./config/policy-trust:/etc/aism/trust:ro   # trust anchor, separate from the policy repo

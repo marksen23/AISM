@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| Dokumentstatus | Entwurf 0.2 (Testsuite 0.2.0, Nachtrag 05.10.2026: K2-13 automatisiert, K2-19 bis K2-21, K3-08 automatisiert, K3-09, K3-10) |
+| Dokumentstatus | Entwurf 0.2 (Testsuite 0.2.1, Nachtrag 06.10.2026: K3-11 Vier-Augen, K3-12 Schlüsselrotation) |
 | Datum | 05.10.2026 |
 | Bezug | [`../AISM-Spezifikation.md`](../AISM-Spezifikation.md) §9 (M-xx, S-xx), [`../policy/AISM-Policy-Format.md`](../policy/AISM-Policy-Format.md), Testsuite [`tests/`](tests/) |
 | Normative Sprache | MUSS / SOLLTE gemäß RFC 2119 |
@@ -94,7 +94,7 @@ Spalte **Art**: `live`, `capture`, `audit`, `static`, `manuell`. Spalte **Status
 
 | ID | Anf. (in K3) | Spez. | Art | Verfahren | Erwartetes Ergebnis | Status |
 |---|---|---|---|---|---|---|
-| AISM-K3-01 | MUSS | S-11 | static | `metadata.signature` und `metadata.revision` der Policy; mit `AISM_ALLOWED_SIGNERS` zusätzlich Signaturprüfung (SSHSIG) der Datei | vorhanden; Signatur gültig | impl. |
+| AISM-K3-01 | MUSS | S-11 | static | `metadata.signature` und `metadata.revision` der Policy; mit `AISM_KEYRING` Prüfung des Bündels (`.sigs`) gegen den Schlüsselring, sonst mit `AISM_ALLOWED_SIGNERS` die Einzelsignatur (SSHSIG) | vorhanden; Signatur gültig, Schwelle erreicht | impl. |
 | AISM-K3-02 | MUSS | S-10 | capture | Request mit W3C-`traceparent`; Header am Mock prüfen | gleiche Trace-ID im Inferenz-Request | impl. |
 | AISM-K3-03 | MUSS | S-10, AUD | audit | `trace_id` in request-bezogenen Audit-Einträgen | 32 Hex-Zeichen | impl. |
 | AISM-K3-04 | MUSS | S-13, M-04 | audit | Lauf mit Test-Policy `cloudEnabled: true` und Mock-Cloud-Provider; `egress.cloud`-Einträge prüfen | jeder Eintrag enthält `rule_ids`, `provider`, `policy`, `payload_sha256` | impl. (Szenario: `scenario_cloud_fallback.py`) |
@@ -104,6 +104,8 @@ Spalte **Art**: `live`, `capture`, `audit`, `static`, `manuell`. Spalte **Status
 | AISM-K3-08 | MUSS | S-11 | live (Fehlerinjektion, opt-in `AISM_POLICY_FAULT_INJECTION=1`, Marker `inject`) | gemountete Policy nacheinander durch unsignierte und durch manipulierte Fassung (gültige alte Signatur) ersetzen, dann Original wiederherstellen | Digest von `/aism/v1/policy` unverändert; `policy.load_failed` mit `kept_active: true` im Audit | impl. |
 | AISM-K3-09 | MUSS | S-11 | live | `GET /aism/v1/policy` | `revision` gesetzt; `signature.verified: true` und `signature.required: true` | impl. |
 | AISM-K3-10 | SOLLTE | M-04, PEP-4, PEP-9, S-13 | Szenario | lokales Modell gestoppt, Cloud-Test-Policy, HTTPS-Mock-Provider (`compose.cloud-fallback.yml`) | ohne PII und mit Rolle `it-ops`: Antwort vom Cloud-Modell (JSON und Stream), keine `X-AISM-*`-Header beim Provider, Audit `egress.cloud` mit `reason: local_unavailable`; mit PII bzw. ohne Rolle: `503`, nichts beim Provider | impl. |
+| AISM-K3-11 | MUSS | S-11 | live | `GET /aism/v1/policy` und der letzte Audit-Eintrag `policy.loaded` | `signature.threshold` ≥ 2; mindestens zwei verschiedene Identitäten in `signature.signers`; dieselben Identitäten (keine privaten Schlüssel) im Audit | impl. |
+| AISM-K3-12 | MUSS | S-11 | live | Schlüsselring zur Laufzeit um einen überlappend gültigen Schlüssel erweitern (`AISM_KEYRING`, `AISM_SIGNING_KEYS`, Quorum der bisherigen Schlüssel); danach eine Änderung mit nur einer Signatur versuchen | Gateway bleibt bereit, Policy-Digest unverändert, `keyring.version` steigt um 1; die quorumlose Änderung wird abgelehnt und die Version bleibt | impl. |
 
 ## 4. Testdaten
 
@@ -195,8 +197,8 @@ Ein Badge DARF nur zusammen mit dem zugehörigen Bericht (Datum, Suite-Version, 
 - Stack: `docker-compose.yml` + [`tests/compose.conformance.yml`](tests/compose.conformance.yml) + [`../deploy/firewall/test/compose.ipv6.yml`](../deploy/firewall/test/compose.ipv6.yml) (Dual-Stack). Gestartet: `governance-proxy`, `orchestrator` (beide lokal gebaut), `qdrant`, Capture-Mock `aism-mock` (statt llama.cpp, Embedding, n8n und SearXNG), Test-IdP `mock-idp`. Nicht gestartet: Open WebUI, llama.cpp (keine GPU), n8n, SearXNG, Perplexica.
 - Referenz-Host-Firewall Variante A ([`../deploy/firewall/docker-user.sh`](../deploy/firewall/docker-user.sh)) aktiv.
 - Runner: Container `aism-runner` (Image aus [`tests/Dockerfile`](tests/Dockerfile)), nur im Netz `aism_frontend`, über [`tests/run_in_docker.sh`](tests/run_in_docker.sh). Benutzer-JWT (HS256, Open-WebUI-Format, `groups: [it-ops]`) und OIDC-Tokens des Test-IdP werden zur Laufzeit erzeugt.
-- Policy: [`tests/testdata/policy.conformance.yaml`](tests/testdata/policy.conformance.yaml), zur Laufzeit von [`tests/prepare_signed_policy.sh`](tests/prepare_signed_policy.sh) mit einem **frisch erzeugten Test-Schlüssel** signiert (Identität `aism-conformance-test@localhost`) und als Verzeichnis read-only gemountet. Der private Schlüssel liegt nur unter `tests/run/` (nicht im Paket).
-- `AISM_POLICY_FAULT_INJECTION=1` (K3-08), `AISM_ALLOWED_SIGNERS` (K3-01).
+- Policy: [`tests/testdata/policy.conformance.yaml`](tests/testdata/policy.conformance.yaml), zur Laufzeit von [`tests/prepare_signed_policy.sh`](tests/prepare_signed_policy.sh) mit **zwei frisch erzeugten Test-Schlüsseln** signiert (Schwelle 2, Identitäten `aism-conformance-a@localhost` und `aism-conformance-b@localhost`) und als Verzeichnis read-only gemountet. Der Schlüsselring liegt unter `tests/run/trust/`, die privaten Schlüssel nur unter `tests/run/keys/` (nicht im Paket). Der Lauf vom 05.10.2026 nutzte noch einen einzelnen Testschlüssel; K3-11 und K3-12 gibt es seit dem Nachtrag vom 06.10.2026.
+- `AISM_POLICY_FAULT_INJECTION=1` (K3-08), `AISM_ALLOWED_SIGNERS` (K3-01, Einzelsignatur), `AISM_KEYRING` und `AISM_SIGNING_KEYS` (K3-01 Bündel, K3-11, K3-12).
 
 ### 7.2 Ergebnis
 

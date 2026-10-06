@@ -7,7 +7,9 @@ import json
 import os
 import pathlib
 import re
+import subprocess
 import sys
+import tempfile
 import time
 
 import pytest
@@ -35,6 +37,19 @@ def test_static_policy_signature_declared(cfg, policy):
     sig = policy.get("metadata", {}).get("signature")
     assert sig and sig.get("method") and sig.get("ref"), "metadata.signature fehlt"
     assert policy["metadata"].get("revision"), "metadata.revision fehlt"
+    if sig["method"] == "ssh-sig" and str(sig["ref"]).endswith(".sigs"):
+        kr = os.environ.get("AISM_KEYRING")
+        if not kr:
+            pytest.fail("Mehrfachsignatur (.sigs) ohne AISM_KEYRING")
+        sys.path.insert(0, str(REPO / "gateway"))
+        from aism_gateway.keyring import accept_path, verify_policy
+        try:
+            doc = accept_path(kr, state_path=None, persist=False)
+            bundle = (cfg.policy_file.parent / sig["ref"]).read_text(encoding="utf-8")
+            verify_policy(cfg.policy_file.read_bytes(), bundle, doc, str(policy["metadata"]["revision"]), sig.get("threshold"))
+        except Exception as exc:  # noqa: BLE001 — conformance assertion, any verifier error is a failure
+            pytest.fail(f"Signaturprüfung fehlgeschlagen: {exc}")
+        return
     anchors = os.environ.get("AISM_ALLOWED_SIGNERS")
     if sig["method"] == "ssh-sig" and anchors:
         ps = _policysig()
@@ -163,3 +178,100 @@ def test_unsigned_or_tampered_policy_not_activated(cfg, gateway):
             restore()
     finally:
         restore()
+
+
+def _manifest_keys(manifest: pathlib.Path) -> list[tuple[str, pathlib.Path]]:
+    rows = []
+    for line in manifest.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        ident, rel = line.split("\t", 1)
+        rows.append((ident, manifest.parent / rel))
+    return rows
+
+
+@pytest.mark.live
+@pytest.mark.aism(id="AISM-K3-11", level="K3", req="MUSS", refs=["S-11"])
+def test_four_eyes_signers_reported(cfg, gateway):
+    info = gateway.get("/aism/v1/policy").json()
+    sig = info.get("signature") or {}
+    signers = list(sig.get("signers") or [])
+    assert sig.get("threshold", 0) >= 2, f"K3-Schwelle unter 2: {sig}"
+    assert len(set(signers)) >= 2, f"weniger als zwei Signierer: {signers}"
+    assert info.get("digest", "").startswith("sha256:")
+    if not cfg.audit_log or not cfg.audit_log.exists():
+        pytest.fail("AISM_AUDIT_LOG fehlt; Signierer müssen in der Hash-Kette stehen")
+    loaded = []
+    for line in cfg.audit_log.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        entry = json.loads(line)
+        if entry.get("event") == "policy.loaded":
+            loaded.append(entry)
+    assert loaded, "kein policy.loaded im Audit"
+    audited = (loaded[-1].get("signature") or {}).get("signers") or []
+    assert set(audited) == set(signers), f"Audit-Signierer {audited} passen nicht zu {signers}"
+    assert "BEGIN OPENSSH PRIVATE" not in json.dumps(loaded[-1])
+
+
+@pytest.mark.live
+@pytest.mark.aism(id="AISM-K3-12", level="K3", req="MUSS", refs=["S-11", "Policy-Format §6.2"])
+def test_keyring_rotation_overlap(cfg, gateway):
+    kr = os.environ.get("AISM_KEYRING")
+    manifest = os.environ.get("AISM_SIGNING_KEYS")
+    if not kr or not manifest or not os.path.isfile(kr) or not os.path.isfile(manifest):
+        pytest.skip("AISM_KEYRING oder AISM_SIGNING_KEYS fehlt")
+    keys = _manifest_keys(pathlib.Path(manifest))
+    assert len(keys) >= 2, "Quorum braucht mindestens zwei Testschlüssel"
+    sign = REPO / "tools" / "aism-policy-sign.py"
+    wait = float(os.environ.get("AISM_POLICY_RELOAD_WAIT", "15"))
+    before = gateway.get("/aism/v1/policy").json()
+    assert (before.get("keyring") or {}).get("version"), f"Gateway meldet keinen Schlüsselring: {before}"
+    digest = before["digest"]
+    version = before["keyring"]["version"]
+
+    def wait_for(pred):
+        deadline = time.time() + wait
+        last = before
+        while time.time() < deadline:
+            last = gateway.get("/aism/v1/policy").json()
+            if pred(last):
+                return last
+            time.sleep(0.5)
+        return last
+
+    with tempfile.TemporaryDirectory() as tmp:
+        new_dir, rejected_dir = pathlib.Path(tmp) / "new", pathlib.Path(tmp) / "rejected"
+        gen = subprocess.run([sys.executable, str(sign), "keygen", "--out", str(new_dir), "--identity", "aism-rotate@localhost"],
+                             capture_output=True, text=True)
+        assert gen.returncode == 0, gen.stderr
+        gen2 = subprocess.run([sys.executable, str(sign), "keygen", "--out", str(rejected_dir),
+                               "--identity", "aism-rejected@localhost"], capture_output=True, text=True)
+        assert gen2.returncode == 0, gen2.stderr
+        member = (
+            "id=aism-rotate@localhost,"
+            f"pub={new_dir / 'policy-signing.key.pub'},roles=policy+keyring,"
+            "not-before=2020-01-01T00:00:00Z,not-after=2035-01-01T00:00:00Z"
+        )
+        cmd = [sys.executable, str(sign), "rotate-key", "--keyring", kr,
+               "--retire", keys[0][0], "--retire-not-after", "2030-01-01T00:00:00Z",
+               "--member", member]
+        for ident, path in keys[:2]:
+            cmd += ["--sign", f"{path}={ident}"]
+        rotated = subprocess.run(cmd, capture_output=True, text=True)
+        assert rotated.returncode == 0, rotated.stderr + rotated.stdout
+        info = wait_for(lambda i: (i.get("keyring") or {}).get("version") == version + 1)
+        assert (info.get("keyring") or {}).get("version") == version + 1, f"Rotation nicht übernommen: {info.get('keyring')}"
+        assert info.get("digest") == digest, "Policy-Digest hat sich bei der überlappenden Rotation geändert"
+        assert gateway.get("/health").status_code == 200
+        # one currently valid key must not add another
+        solo = [sys.executable, str(sign), "add-key", "--keyring", kr, "--member",
+                "id=aism-rejected@localhost,"
+                f"pub={rejected_dir / 'policy-signing.key.pub'},roles=policy+keyring,"
+                "not-before=2020-01-01T00:00:00Z,not-after=2035-01-01T00:00:00Z",
+                "--sign", f"{keys[1][1]}={keys[1][0]}"]
+        refused = subprocess.run(solo, capture_output=True, text=True)
+        assert refused.returncode != 0 and "Quorum" in (refused.stderr + refused.stdout)
+        stayed = gateway.get("/aism/v1/policy").json()
+        assert stayed["keyring"]["version"] == version + 1 and stayed["digest"] == digest
+        assert gateway.get("/health").status_code == 200
