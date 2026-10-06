@@ -87,6 +87,10 @@ Bekannte Stolperstellen auf dem Testhost: ohne systemd `dockerd` manuell starten
 
 Die Test-Schlüssel unter `run/` sind Wegwerfschlüssel; `run/` ist in `.gitignore` und gehört nicht ins Paket.
 
+## CI
+
+`.github/workflows/ci.yml` und `tools/ci-local.sh conformance` führen denselben Ablauf aus dem Repository-Root aus: `.env` nur anlegen, wenn keine existiert; `prepare_cloud_scenario.sh`; Cloud-Fallback-Szenario (lokales Modell gestoppt, Teilmenge `fallback or audit or egress`); `docker compose down` **ohne** `-v`; danach der vollständige Lauf. Der vollständige Bericht muss Stufe K3 erreichen, mit `failed: 0` und `skipped: 0`. Berichte und Badges liegen unter `conformance/reports/ci/` (nicht versioniert) und werden als Artifact hochgeladen. `aism-runner` nutzt das lokal von `mock-idp` gebaute Image (`pull_policy: never`) und zieht `ghcr.io/marksen23/aism-test-tools:dev` nicht.
+
 `TEST_USER_JWT` ist ein mit `AISM_FORWARD_JWT_SECRET` (HS256) signiertes Testtoken, dessen Claims auf die Rolle `it-ops` abgebildet werden (Test-Policy: Claim `groups` enthält `it-ops`). **Hinweis:** Open WebUI selbst überträgt keinen `groups`-Claim (nur `sub`, `email`, `name`, `role`); das Testtoken steht für eine Identität mit Gruppeninformation, z. B. aus OIDC. Beispiel:
 
 ```bash

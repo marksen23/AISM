@@ -32,7 +32,7 @@ metadata:   { name, version, revision, owner, effectiveFrom, changeRef, signatur
 spec:
   defaults:      # Bewertungsgrundsätze (default deny, fail-closed, local)
   subjects:      # Identitätsquellen, Rollen, Agenten
-  piiDetectors:  # Regex/NER/Prüfsummen-Detektoren, Maskierungsstrategie
+  piiDetectors:  # Regex-, NER-, Gazetteer- und Prüfsummen-Detektoren, Maskierungsstrategie
   dataClasses:   # Datenklassen mit Rang und Zuordnungsregeln
   routing:       # Provider-Allowlist, Routing-Regeln, Cloud-Fallback
   tools:         # Tool-Allowlist mit Argumentschema, Zugriffsart, Rate-Limits
@@ -101,9 +101,16 @@ Die festen Werte sind im Schema als `const` definiert. Eine Policy, die sie änd
 | Feld | Bedeutung |
 |---|---|
 | `entity` | Entitätstyp, z. B. `EMAIL`, `PERSON`, `SECRET`, `IBAN` |
-| `type` | `regex` (Muster), `ner` (Named Entity Recognition per Modell), `checksum` (Muster plus Prüfsumme, z. B. IBAN Mod-97, Luhn) |
+| `type` | `regex` (Muster), `ner` (Named Entity Recognition per Modell), `gazetteer` (Namenslisten plus Kontextregeln), `checksum` (Muster plus Prüfsumme, z. B. IBAN Mod-97, Luhn) |
 | `patterns` | Reguläre Ausdrücke (für `regex` und `checksum`). Enthält ein Muster die benannte Gruppe `(?P<pii>…)`, wird nur diese Gruppe maskiert (Beispiel `person-title`: „Frau Dr. Müller“ → „Frau Dr. <PERSON_1>“). Bei `checksum` gilt die längste prüfsummengültige Teilspanne, die an einer Token-Grenze endet (sonst würden z. B. auf eine IBAN folgende Großbuchstaben-Token die Prüfung scheitern lassen). |
-| `ner` | Modell, Labels, Mindest-Score, Sprachen. Der Gateway-Prototyp unterstützt `model: "spacy:<modellname>"` (Beispiel: `spacy:xx_ent_wiki_sm`); `minScore` wird dort nicht ausgewertet, weil spaCy-Kleinmodelle keinen Score je Entität liefern. Ist das Modell nicht ladbar, verweigert das Gateway alle Requests (fail-closed). |
+| `ner.model` | `spacy:<modell>` oder `gliner:<modell>`. Beispiel-Standard: `spacy:xx_ent_wiki_sm`. `de_core_news_md`, `de_core_news_lg` und `gliner:urchade/gliner_multi_pii-v1` sind zulässige Alternativen; sie sind nicht im Gateway-Image. Ist das Modell nicht ladbar, verweigert das Gateway alle Requests (fail-closed, M-12). |
+| `ner.labels` | Labels, die als Treffer gelten. Deutsche spaCy-Modelle und `xx_ent_wiki_sm` liefern `PER`. Das genannte GLiNER-Modell liefert `person`. |
+| `ner.minScore` | Schwelle 0–1. Für spaCy wird sie ignoriert (kein Score je Entität). Für GLiNER ist sie die Schwelle. |
+| `ner.languages` | Optionale Sprachcodes (`de`, `en`). Der Prototyp wertet sie nicht aus. |
+| `gazetteer.givenNames` / `surnames` | `builtin:de-given` und `builtin:de-surnames` (Listen im Gateway, Lizenzen in `gateway/aism_gateway/data/README.md`) oder `file:<relativer Pfad>` zum Verzeichnis der Policy-Datei. Absolute Pfade und `..` sind unzulässig. |
+| `gazetteer.matchPairs` | `true` (Standard): unmittelbar benachbarter Vor- und Nachname, auch kleingeschrieben, optional mit Partikel (`von`, `van`, `de`, …). |
+| `gazetteer.contextPreset` | `de` (Standard, wenn der Schlüssel fehlt): feste Regeln für „mein Name ist“ / „ich heiße“, Signaturen und Grußformeln (`cue`: ein Token nur wenn gelistet, zwei oder drei namensförmige Token auch sonst) sowie Anreden, „Danke <Name>“ und „<Name> sagt“ (`gazetteer-all`: jedes Token gelistet). `none`: keine Kontextregeln. |
+| `gazetteer.contextRules` | Ersetzt das Preset vollständig. Jede Regel hat `accept` (`cue`, `gazetteer-all`, `gazetteer-any`) und `patterns` mit der Gruppe `(?P<pii>…)`. |
 | `applyTo` | Anwendungsorte: `prompt`, `tool_result`, `rag_ingest`, `web_query`, `response` |
 | `masking.strategy` | `placeholder` (nummerierter Platzhalter), `redact` (entfernen), `hash` (Hash-Wert) |
 | `masking.placeholderFormat` | z. B. `<EMAIL_{n}>`; `{n}` wird pro Request fortlaufend vergeben |
@@ -116,7 +123,7 @@ Regeln:
 - Für `SECRET`-Entitäten SOLLTE `reversible: false` gelten; Secrets werden nie demaskiert.
 - Gleicher Klartext im selben Request erhält denselben Platzhalter.
 - Überschneiden sich Treffer mehrerer Detektoren, gilt der längste Treffer; bei gleicher Länge die Entität der höheren Datenklasse.
-- Erkennungsqualität (insbesondere NER) ist **nicht garantiert** und MUSS vom Betreiber mit eigenen Testdaten gemessen werden (Spez. §10). Referenzmessung auf synthetischen deutschen Daten: [`../conformance/pii-eval/README.md`](../conformance/pii-eval/README.md) (Namen: Recall maskiert 0,86 auf dem Held-out-Set).
+- Erkennungsqualität (insbesondere NER) ist **nicht garantiert** und MUSS vom Betreiber mit eigenen Testdaten gemessen werden (Spez. §10). Referenzmessung auf synthetischen deutschen Daten: [`../conformance/pii-eval/README.md`](../conformance/pii-eval/README.md). Auf dem älteren Held-out-Set lag der maskierte Personen-Recall bei 0,86 und mit dem jetzigen Standard (Gazetteer plus `xx_ent_wiki_sm`) bei 0,94. Das frische Held-out-Set v2 ist härter (0,70 maskiert). Das ist eine Obergrenze für Schablonentexte, kein Qualitätsnachweis auf echten Texten.
 
 ### 4.5 Datenklassen (`spec.dataClasses`)
 

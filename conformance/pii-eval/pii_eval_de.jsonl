@@ -163,3 +163,74 @@
 {"id": "de-162", "text": "Die Nummer DE31273171922215047753 hat eine falsche Prüfziffer.", "entities": [], "tags": ["negative", "bad_iban"]}
 {"id": "de-163", "text": "Die Nummer DE14670175630298620942 hat eine falsche Prüfziffer.", "entities": [], "tags": ["negative", "bad_iban"]}
 {"id": "de-164", "text": "Die Nummer DE65937417086133667360 hat eine falsche Prüfziffer.", "entities": [], "tags": ["negative", "bad_iban"]}
+{"id": "dx-000", "text": "mein name ist ülkü schmidt.", "entities": [{"start": 14, "end": 26, "type": "PERSON", "value": "ülkü schmidt", "oov": true}], "tags": ["person", "lower", "ext"]}
+{"id": "dx-001", "text": "mein name ist ayşe fischer.", "entities": [{"start": 14, "end": 26, "type": "PERSON", "value": "ayşe fischer", "oov": true}], "tags": ["person", "lower", "ext"]}
+{"id": "dx-002", "text": "mein name ist ayşe kaltenegger.", "entities": [{"start": 14, "end": 30, "type": "PERSON", "value": "ayşe kaltenegger", "oov": true}], "tags": ["person", "lower", "ext"]}
+{"id": "dx-003", "text": "mein name ist svetlana mustermann.", "entities": [{"start": 14, "end": 33, "type": "PERSON", "value": "svetlana mustermann", "oov": true}], "tags": ["person", "lower", "ext"]}
+{"id": "dx-004", "text": "Ich heiße Anna Fischer.", "entities": [{"start": 10, "end": 22, "type": "PERSON", "value": "Anna Fischer", "oov": false}], "tags": ["person", "full", "ext"]}
+{"id": "dx-005", "text": "Ich heiße Ayşe Weber.", "entities": [{"start": 10, "end": 20, "type": "PERSON", "value": "Ayşe Weber", "oov": true}], "tags": ["person", "full", "ext"]}
+{"id": "dx-006", "text": "Ich heiße Ines Becker.", "entities": [{"start": 10, "end": 21, "type": "PERSON", "value": "Ines Becker", "oov": true}], "tags": ["person", "full", "ext"]}
+{"id": "dx-007", "text": "Ich heiße Sophie Schneider.", "entities": [{"start": 10, "end": 26, "type": "PERSON", "value": "Sophie Schneider", "oov": false}], "tags": ["person", "full", "ext"]}
+{"id": "dx-008", "text": "Mit freundlichen Grüßen\nErika Schneider\nBuchhaltung", "entities": [{"start": 24, "end": 39, "type": "PERSON", "value": "Erika Schneider", "oov": false}], "tags": ["person", "full", "ext"]}
+{"id": "dx-009", "text": "Mit freundlichen Grüßen\nLukas Müller\nBuchhaltung", "entities": [{"start": 24, "end": 36, "type": "PERSON", "value": "Lukas Müller", "oov": false}], "tags": ["person", "full", "ext"]}
+{"id": "dx-010", "text": "Mit freundlichen Grüßen\nSophie Schneider\nBuchhaltung", "entities": [{"start": 24, "end": 40, "type": "PERSON", "value": "Sophie Schneider", "oov": false}], "tags": ["person", "full", "ext"]}
+{"id": "dx-011", "text": "Mit freundlichen Grüßen\nNkechi Krüger\nBuchhaltung", "entities": [{"start": 24, "end": 37, "type": "PERSON", "value": "Nkechi Krüger", "oov": true}], "tags": ["person", "full", "ext"]}
+{"id": "dx-012", "text": "Hallo Katharina, der Job ist durch.", "entities": [{"start": 6, "end": 15, "type": "PERSON", "value": "Katharina", "oov": false}], "tags": ["person", "first", "ext"]}
+{"id": "dx-013", "text": "Hallo Ülkü, der Job ist durch.", "entities": [{"start": 6, "end": 10, "type": "PERSON", "value": "Ülkü", "oov": true}], "tags": ["person", "first", "ext"]}
+{"id": "dx-014", "text": "Hallo Michael, der Job ist durch.", "entities": [{"start": 6, "end": 13, "type": "PERSON", "value": "Michael", "oov": false}], "tags": ["person", "first", "ext"]}
+{"id": "dx-015", "text": "Hallo Ülkü, der Job ist durch.", "entities": [{"start": 6, "end": 10, "type": "PERSON", "value": "Ülkü", "oov": true}], "tags": ["person", "first", "ext"]}
+{"id": "dx-016", "text": "Danke, Ines!", "entities": [{"start": 7, "end": 11, "type": "PERSON", "value": "Ines", "oov": true}], "tags": ["person", "first", "ext"]}
+{"id": "dx-017", "text": "Danke, Sabine!", "entities": [{"start": 7, "end": 13, "type": "PERSON", "value": "Sabine", "oov": true}], "tags": ["person", "first", "ext"]}
+{"id": "dx-018", "text": "Danke, Chinedu!", "entities": [{"start": 7, "end": 14, "type": "PERSON", "value": "Chinedu", "oov": true}], "tags": ["person", "first", "ext"]}
+{"id": "dx-019", "text": "Danke, Ülkü!", "entities": [{"start": 7, "end": 11, "type": "PERSON", "value": "Ülkü", "oov": true}], "tags": ["person", "first", "ext"]}
+{"id": "dx-020", "text": "Thomas sagt, das Deployment war erfolgreich.", "entities": [{"start": 0, "end": 6, "type": "PERSON", "value": "Thomas", "oov": false}], "tags": ["person", "first", "ext"]}
+{"id": "dx-021", "text": "Michael sagt, das Deployment war erfolgreich.", "entities": [{"start": 0, "end": 7, "type": "PERSON", "value": "Michael", "oov": false}], "tags": ["person", "first", "ext"]}
+{"id": "dx-022", "text": "Michael sagt, das Deployment war erfolgreich.", "entities": [{"start": 0, "end": 7, "type": "PERSON", "value": "Michael", "oov": false}], "tags": ["person", "first", "ext"]}
+{"id": "dx-023", "text": "Mehmet sagt, das Deployment war erfolgreich.", "entities": [{"start": 0, "end": 6, "type": "PERSON", "value": "Mehmet", "oov": false}], "tags": ["person", "first", "ext"]}
+{"id": "dx-024", "text": "Liebe Sophie, anbei das Protokoll.", "entities": [{"start": 6, "end": 12, "type": "PERSON", "value": "Sophie", "oov": false}], "tags": ["person", "first", "ext"]}
+{"id": "dx-025", "text": "Liebe Chinedu, anbei das Protokoll.", "entities": [{"start": 6, "end": 13, "type": "PERSON", "value": "Chinedu", "oov": true}], "tags": ["person", "first", "ext"]}
+{"id": "dx-026", "text": "Liebe Frank, anbei das Protokoll.", "entities": [{"start": 6, "end": 11, "type": "PERSON", "value": "Frank", "oov": false}], "tags": ["person", "first", "ext"]}
+{"id": "dx-027", "text": "Liebe Laura, anbei das Protokoll.", "entities": [{"start": 6, "end": 11, "type": "PERSON", "value": "Laura", "oov": false}], "tags": ["person", "first", "ext"]}
+{"id": "dx-028", "text": "Sehr geehrte Herr Çelik, wir bestätigen den Eingang.", "entities": [{"start": 18, "end": 23, "type": "PERSON", "value": "Çelik", "oov": true}], "tags": ["person", "title_last", "ext"]}
+{"id": "dx-029", "text": "Sehr geehrte Herr Schneider, wir bestätigen den Eingang.", "entities": [{"start": 18, "end": 27, "type": "PERSON", "value": "Schneider", "oov": false}], "tags": ["person", "title_last", "ext"]}
+{"id": "dx-030", "text": "Sehr geehrte Herr Krüger, wir bestätigen den Eingang.", "entities": [{"start": 18, "end": 24, "type": "PERSON", "value": "Krüger", "oov": false}], "tags": ["person", "title_last", "ext"]}
+{"id": "dx-031", "text": "Sehr geehrte Prof. Krüger, wir bestätigen den Eingang.", "entities": [{"start": 19, "end": 25, "type": "PERSON", "value": "Krüger", "oov": false}], "tags": ["person", "title_last", "ext"]}
+{"id": "dx-032", "text": "Absender: Ülkü Hoffmann", "entities": [{"start": 10, "end": 23, "type": "PERSON", "value": "Ülkü Hoffmann", "oov": true}], "tags": ["person", "full", "ext"]}
+{"id": "dx-033", "text": "Absender: Ülkü Fischer", "entities": [{"start": 10, "end": 22, "type": "PERSON", "value": "Ülkü Fischer", "oov": true}], "tags": ["person", "full", "ext"]}
+{"id": "dx-034", "text": "Absender: Ines Krüger", "entities": [{"start": 10, "end": 21, "type": "PERSON", "value": "Ines Krüger", "oov": true}], "tags": ["person", "full", "ext"]}
+{"id": "dx-035", "text": "Absender: Svetlana Krüger", "entities": [{"start": 10, "end": 25, "type": "PERSON", "value": "Svetlana Krüger", "oov": true}], "tags": ["person", "full", "ext"]}
+{"id": "dx-036", "text": "Unterschrift: Svetlana Weber", "entities": [{"start": 14, "end": 28, "type": "PERSON", "value": "Svetlana Weber", "oov": true}], "tags": ["person", "full", "ext"]}
+{"id": "dx-037", "text": "Unterschrift: Erika Krüger", "entities": [{"start": 14, "end": 26, "type": "PERSON", "value": "Erika Krüger", "oov": false}], "tags": ["person", "full", "ext"]}
+{"id": "dx-038", "text": "Unterschrift: Svetlana Holtkamp", "entities": [{"start": 14, "end": 31, "type": "PERSON", "value": "Svetlana Holtkamp", "oov": true}], "tags": ["person", "full", "ext"]}
+{"id": "dx-039", "text": "Unterschrift: Sabine Hoffmann", "entities": [{"start": 14, "end": 29, "type": "PERSON", "value": "Sabine Hoffmann", "oov": true}], "tags": ["person", "full", "ext"]}
+{"id": "dx-040", "text": "i. A. Ülkü Hoffmann", "entities": [{"start": 6, "end": 19, "type": "PERSON", "value": "Ülkü Hoffmann", "oov": true}], "tags": ["person", "full", "ext"]}
+{"id": "dx-041", "text": "i. A. Thomas Krüger", "entities": [{"start": 6, "end": 19, "type": "PERSON", "value": "Thomas Krüger", "oov": false}], "tags": ["person", "full", "ext"]}
+{"id": "dx-042", "text": "i. A. Anna Krüger", "entities": [{"start": 6, "end": 17, "type": "PERSON", "value": "Anna Krüger", "oov": false}], "tags": ["person", "full", "ext"]}
+{"id": "dx-043", "text": "i. A. Sabine Hoffmann", "entities": [{"start": 6, "end": 21, "type": "PERSON", "value": "Sabine Hoffmann", "oov": true}], "tags": ["person", "full", "ext"]}
+{"id": "dx-044", "text": "kannst du ülkü ngono bescheid geben", "entities": [{"start": 10, "end": 20, "type": "PERSON", "value": "ülkü ngono", "oov": true}], "tags": ["person", "lower", "ext"]}
+{"id": "dx-045", "text": "kannst du anna hoffmann bescheid geben", "entities": [{"start": 10, "end": 23, "type": "PERSON", "value": "anna hoffmann", "oov": false}], "tags": ["person", "lower", "ext"]}
+{"id": "dx-046", "text": "kannst du ines müller bescheid geben", "entities": [{"start": 10, "end": 21, "type": "PERSON", "value": "ines müller", "oov": true}], "tags": ["person", "lower", "ext"]}
+{"id": "dx-047", "text": "kannst du svetlana ngono bescheid geben", "entities": [{"start": 10, "end": 24, "type": "PERSON", "value": "svetlana ngono", "oov": true}], "tags": ["person", "lower", "ext"]}
+{"id": "dx-048", "text": "Für Prof. Ayşe Holtkamp liegt eine Nachricht im Postfach.", "entities": [{"start": 10, "end": 23, "type": "PERSON", "value": "Ayşe Holtkamp", "oov": true}], "tags": ["person", "title_full", "ext"]}
+{"id": "dx-049", "text": "Für Frau Dr. Michael Holtkamp liegt eine Nachricht im Postfach.", "entities": [{"start": 13, "end": 29, "type": "PERSON", "value": "Michael Holtkamp", "oov": true}], "tags": ["person", "title_full", "ext"]}
+{"id": "dx-050", "text": "Für Frau Sabine Ngono liegt eine Nachricht im Postfach.", "entities": [{"start": 9, "end": 21, "type": "PERSON", "value": "Sabine Ngono", "oov": true}], "tags": ["person", "title_full", "ext"]}
+{"id": "dx-051", "text": "Für Herr Dr. Ayşe Çelik liegt eine Nachricht im Postfach.", "entities": [{"start": 13, "end": 23, "type": "PERSON", "value": "Ayşe Çelik", "oov": true}], "tags": ["person", "title_full", "ext"]}
+{"id": "dx-052", "text": "Der Account anna bierstedt wurde heute gesperrt.", "entities": [{"start": 12, "end": 26, "type": "PERSON", "value": "anna bierstedt", "oov": true}], "tags": ["person", "lower", "ext"]}
+{"id": "dx-053", "text": "Der Account erika hoffmann wurde heute gesperrt.", "entities": [{"start": 12, "end": 26, "type": "PERSON", "value": "erika hoffmann", "oov": false}], "tags": ["person", "lower", "ext"]}
+{"id": "dx-054", "text": "Der Account katharina schneider wurde heute gesperrt.", "entities": [{"start": 12, "end": 31, "type": "PERSON", "value": "katharina schneider", "oov": false}], "tags": ["person", "lower", "ext"]}
+{"id": "dx-055", "text": "Der Account ines holtkamp wurde heute gesperrt.", "entities": [{"start": 12, "end": 25, "type": "PERSON", "value": "ines holtkamp", "oov": true}], "tags": ["person", "lower", "ext"]}
+{"id": "dx-056", "text": "Hallo zusammen, das Meeting beginnt pünktlich.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "dx-057", "text": "Danke für die schnelle Hilfe beim Deployment.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "dx-058", "text": "Liebe Kolleginnen und Kollegen, kurze Info.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "dx-059", "text": "Mein Name ist im Telefonbuch der Abteilung.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "dx-060", "text": "Viele Grüße\nIT-Service\nStandort Berlin", "entities": [], "tags": ["negative", "ext"]}
+{"id": "dx-061", "text": "Wer sagt, dass der Build grün ist?", "entities": [], "tags": ["negative", "ext"]}
+{"id": "dx-062", "text": "Bitte Max. 3 Kopien anfertigen.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "dx-063", "text": "Wir haben frank und frei über den Zeitplan diskutiert.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "dx-064", "text": "Projekt Phoenix startet im Mai.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "dx-065", "text": "Die Firma Müller GmbH liefert das Rack morgen.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "dx-066", "text": "Schick das Protokoll an das Team, nicht an eine Person.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "dx-067", "text": "Leite die Meldung an die Rufbereitschaft weiter.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "dx-068", "text": "Meine Adresse steht im Intranet unter Kontakte.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "dx-069", "text": "Office und Teams sind heute langsam.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "dx-070", "text": "Der Wolf im Logo ist nur eine Zeichnung.", "entities": [], "tags": ["negative", "ext"]}

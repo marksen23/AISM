@@ -231,10 +231,10 @@ Ein früherer Docker-Lauf **ohne** vorheriges Cloud-Szenario ergab 36 bestanden 
 
 ### 7.5 Einordnung
 
-- Der Lauf belegt das Verhalten der **Prototypen** mit **Mocks** statt Open WebUI, llama.cpp, n8n und SearXNG. Er ist kein Nachweis für eine produktive Installation.
+- Der Lauf belegt das Verhalten der **Prototypen** mit **Mocks** statt Open WebUI, llama.cpp, n8n und SearXNG. Er ist kein Nachweis für eine produktive Installation. CI (`.github/workflows/ci.yml`, lokal `tools/ci-local.sh conformance`) wiederholt diesen Mock-Lauf: zuerst das Cloud-Fallback-Szenario, danach den vollständigen Lauf. Die echten Komponenten starten auch dort nicht.
 - OIDC (K2-21) ist nur gegen den Test-IdP [`tests/mock_idp.py`](tests/mock_idp.py) geprüft, nicht gegen einen echten IdP.
 - K3-05 prüft bei lokal gebauten Images nur das Basis-Image; die gebauten Images sind reproduzierbar (README), aber nicht per Digest referenziert, solange sie nicht in einer Registry liegen.
-- AISM-K2-03 und -18 prüfen nur die synthetischen Testdaten. Eine erste Messung der Erkennungsquote auf einem synthetischen deutschen Datensatz steht in [`pii-eval/README.md`](pii-eval/README.md); reale Daten sind nicht gemessen.
+- AISM-K2-03 und -18 prüfen nur die synthetischen Testdaten. Die Erkennungsquote auf synthetischen deutschen Sätzen steht in [`pii-eval/README.md`](pii-eval/README.md) (CI-Schwelle: maskierter Personen-Recall auf dem frischen Held-out-Set). Reale Daten sind nicht gemessen.
 - Firewall-Ergebnisse auf dem Docker-Host (inkl. IPv6): [`../deploy/firewall/README.md`](../deploy/firewall/README.md).
 
 ### 7.6 Früherer Lauf ohne Docker (05.10.2026)
@@ -244,6 +244,6 @@ Gateway-Prototyp und Orchestrator-Stub lokal (Python 3.13, uvicorn), Runner in e
 ## 8. Offene Punkte
 
 1. AISM-K2-14 (Ausfall des PII-Detektors) als automatisierte Fehlerinjektion; K3-06 (Modell-Prüfsummen) mit echten Modelldateien.
-2. Lauf mit den echten Komponenten (Open WebUI, llama.cpp auf GPU, n8n, SearXNG) und einem echten IdP; Lauf in CI.
+2. Lauf mit den echten Komponenten (Open WebUI, llama.cpp auf GPU, n8n, SearXNG) und einem echten IdP. Der Mock-Lauf läuft in CI; die echten Komponenten nicht.
 3. K3-04 hängt davon ab, dass vorher Cloud-Egress stattfand. Für Installationen mit dauerhaft deaktiviertem Cloud-Routing ist zu klären, ob K3-04 „nicht anwendbar“ statt „übersprungen“ werten soll.
 4. Prüfung des Bestätigungsablaufs über die Oberfläche (Open WebUI) fehlt; die Suite prüft nur die API.

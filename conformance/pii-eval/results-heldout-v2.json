@@ -1,0 +1,751 @@
+{
+ "dataset": [
+  "pii_eval_de_heldout_v2.jsonl"
+ ],
+ "sentences": 94,
+ "entities": {
+  "PERSON": 64,
+  "EMAIL": 8,
+  "IBAN": 12,
+  "SECRET": 4
+ },
+ "runs": [
+  {
+   "profile": "before",
+   "dropped_detectors": [],
+   "ms_per_sentence": 1.68,
+   "per_type": {
+    "PERSON": {
+     "gold": 64,
+     "strict": 24,
+     "masked": 38,
+     "partial": 0,
+     "pred": 45,
+     "pred_ok": 38,
+     "recall_strict": 0.375,
+     "recall_masked": 0.594,
+     "precision": 0.844
+    },
+    "EMAIL": {
+     "gold": 8,
+     "strict": 8,
+     "masked": 8,
+     "partial": 0,
+     "pred": 8,
+     "pred_ok": 8,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 12,
+     "strict": 12,
+     "masked": 12,
+     "partial": 0,
+     "pred": 12,
+     "pred_ok": 12,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 4,
+     "strict": 4,
+     "masked": 4,
+     "partial": 0,
+     "pred": 4,
+     "pred_ok": 4,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 23,
+     "masked": 15,
+     "strict": 7,
+     "recall_masked": 0.652,
+     "recall_strict": 0.304
+    },
+    "oov": {
+     "gold": 41,
+     "masked": 23,
+     "strict": 17,
+     "recall_masked": 0.561,
+     "recall_strict": 0.415
+    }
+   }
+  },
+  {
+   "profile": "spacy-md",
+   "dropped_detectors": [],
+   "ms_per_sentence": 4.76,
+   "per_type": {
+    "PERSON": {
+     "gold": 64,
+     "strict": 26,
+     "masked": 47,
+     "partial": 0,
+     "pred": 51,
+     "pred_ok": 47,
+     "recall_strict": 0.406,
+     "recall_masked": 0.734,
+     "precision": 0.922
+    },
+    "EMAIL": {
+     "gold": 8,
+     "strict": 8,
+     "masked": 8,
+     "partial": 0,
+     "pred": 8,
+     "pred_ok": 8,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 12,
+     "strict": 12,
+     "masked": 12,
+     "partial": 0,
+     "pred": 12,
+     "pred_ok": 12,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 4,
+     "strict": 4,
+     "masked": 4,
+     "partial": 0,
+     "pred": 4,
+     "pred_ok": 4,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 23,
+     "masked": 19,
+     "strict": 6,
+     "recall_masked": 0.826,
+     "recall_strict": 0.261
+    },
+    "oov": {
+     "gold": 41,
+     "masked": 28,
+     "strict": 20,
+     "recall_masked": 0.683,
+     "recall_strict": 0.488
+    }
+   }
+  },
+  {
+   "profile": "spacy-lg",
+   "dropped_detectors": [],
+   "ms_per_sentence": 3.98,
+   "per_type": {
+    "PERSON": {
+     "gold": 64,
+     "strict": 24,
+     "masked": 39,
+     "partial": 0,
+     "pred": 45,
+     "pred_ok": 39,
+     "recall_strict": 0.375,
+     "recall_masked": 0.609,
+     "precision": 0.867
+    },
+    "EMAIL": {
+     "gold": 8,
+     "strict": 8,
+     "masked": 8,
+     "partial": 0,
+     "pred": 8,
+     "pred_ok": 8,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 12,
+     "strict": 12,
+     "masked": 12,
+     "partial": 0,
+     "pred": 12,
+     "pred_ok": 12,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 4,
+     "strict": 4,
+     "masked": 4,
+     "partial": 0,
+     "pred": 4,
+     "pred_ok": 4,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 23,
+     "masked": 13,
+     "strict": 5,
+     "recall_masked": 0.565,
+     "recall_strict": 0.217
+    },
+    "oov": {
+     "gold": 41,
+     "masked": 26,
+     "strict": 19,
+     "recall_masked": 0.634,
+     "recall_strict": 0.463
+    }
+   }
+  },
+  {
+   "profile": "pairs",
+   "dropped_detectors": [],
+   "ms_per_sentence": 0.02,
+   "per_type": {
+    "PERSON": {
+     "gold": 64,
+     "strict": 15,
+     "masked": 16,
+     "partial": 1,
+     "pred": 17,
+     "pred_ok": 17,
+     "recall_strict": 0.234,
+     "recall_masked": 0.25,
+     "precision": 1.0
+    },
+    "EMAIL": {
+     "gold": 8,
+     "strict": 8,
+     "masked": 8,
+     "partial": 0,
+     "pred": 8,
+     "pred_ok": 8,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 12,
+     "strict": 12,
+     "masked": 12,
+     "partial": 0,
+     "pred": 12,
+     "pred_ok": 12,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 4,
+     "strict": 4,
+     "masked": 4,
+     "partial": 0,
+     "pred": 4,
+     "pred_ok": 4,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 23,
+     "masked": 11,
+     "strict": 10,
+     "recall_masked": 0.478,
+     "recall_strict": 0.435
+    },
+    "oov": {
+     "gold": 41,
+     "masked": 5,
+     "strict": 5,
+     "recall_masked": 0.122,
+     "recall_strict": 0.122
+    }
+   }
+  },
+  {
+   "profile": "context",
+   "dropped_detectors": [],
+   "ms_per_sentence": 0.03,
+   "per_type": {
+    "PERSON": {
+     "gold": 64,
+     "strict": 21,
+     "masked": 21,
+     "partial": 0,
+     "pred": 21,
+     "pred_ok": 21,
+     "recall_strict": 0.328,
+     "recall_masked": 0.328,
+     "precision": 1.0
+    },
+    "EMAIL": {
+     "gold": 8,
+     "strict": 8,
+     "masked": 8,
+     "partial": 0,
+     "pred": 8,
+     "pred_ok": 8,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 12,
+     "strict": 12,
+     "masked": 12,
+     "partial": 0,
+     "pred": 12,
+     "pred_ok": 12,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 4,
+     "strict": 4,
+     "masked": 4,
+     "partial": 0,
+     "pred": 4,
+     "pred_ok": 4,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 23,
+     "masked": 14,
+     "strict": 14,
+     "recall_masked": 0.609,
+     "recall_strict": 0.609
+    },
+    "oov": {
+     "gold": 41,
+     "masked": 7,
+     "strict": 7,
+     "recall_masked": 0.171,
+     "recall_strict": 0.171
+    }
+   }
+  },
+  {
+   "profile": "gazetteer",
+   "dropped_detectors": [],
+   "ms_per_sentence": 0.04,
+   "per_type": {
+    "PERSON": {
+     "gold": 64,
+     "strict": 25,
+     "masked": 26,
+     "partial": 1,
+     "pred": 27,
+     "pred_ok": 27,
+     "recall_strict": 0.391,
+     "recall_masked": 0.406,
+     "precision": 1.0
+    },
+    "EMAIL": {
+     "gold": 8,
+     "strict": 8,
+     "masked": 8,
+     "partial": 0,
+     "pred": 8,
+     "pred_ok": 8,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 12,
+     "strict": 12,
+     "masked": 12,
+     "partial": 0,
+     "pred": 12,
+     "pred_ok": 12,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 4,
+     "strict": 4,
+     "masked": 4,
+     "partial": 0,
+     "pred": 4,
+     "pred_ok": 4,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 23,
+     "masked": 19,
+     "strict": 18,
+     "recall_masked": 0.826,
+     "recall_strict": 0.783
+    },
+    "oov": {
+     "gold": 41,
+     "masked": 7,
+     "strict": 7,
+     "recall_masked": 0.171,
+     "recall_strict": 0.171
+    }
+   }
+  },
+  {
+   "profile": "gaz-xx",
+   "dropped_detectors": [],
+   "ms_per_sentence": 1.51,
+   "per_type": {
+    "PERSON": {
+     "gold": 64,
+     "strict": 31,
+     "masked": 45,
+     "partial": 1,
+     "pred": 53,
+     "pred_ok": 46,
+     "recall_strict": 0.484,
+     "recall_masked": 0.703,
+     "precision": 0.868
+    },
+    "EMAIL": {
+     "gold": 8,
+     "strict": 8,
+     "masked": 8,
+     "partial": 0,
+     "pred": 8,
+     "pred_ok": 8,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 12,
+     "strict": 12,
+     "masked": 12,
+     "partial": 0,
+     "pred": 12,
+     "pred_ok": 12,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 4,
+     "strict": 4,
+     "masked": 4,
+     "partial": 0,
+     "pred": 4,
+     "pred_ok": 4,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 23,
+     "masked": 21,
+     "strict": 13,
+     "recall_masked": 0.913,
+     "recall_strict": 0.565
+    },
+    "oov": {
+     "gold": 41,
+     "masked": 24,
+     "strict": 18,
+     "recall_masked": 0.585,
+     "recall_strict": 0.439
+    }
+   }
+  },
+  {
+   "profile": "gaz-md",
+   "dropped_detectors": [],
+   "ms_per_sentence": 3.94,
+   "per_type": {
+    "PERSON": {
+     "gold": 64,
+     "strict": 26,
+     "masked": 47,
+     "partial": 0,
+     "pred": 51,
+     "pred_ok": 47,
+     "recall_strict": 0.406,
+     "recall_masked": 0.734,
+     "precision": 0.922
+    },
+    "EMAIL": {
+     "gold": 8,
+     "strict": 8,
+     "masked": 8,
+     "partial": 0,
+     "pred": 8,
+     "pred_ok": 8,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 12,
+     "strict": 12,
+     "masked": 12,
+     "partial": 0,
+     "pred": 12,
+     "pred_ok": 12,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 4,
+     "strict": 4,
+     "masked": 4,
+     "partial": 0,
+     "pred": 4,
+     "pred_ok": 4,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 23,
+     "masked": 19,
+     "strict": 6,
+     "recall_masked": 0.826,
+     "recall_strict": 0.261
+    },
+    "oov": {
+     "gold": 41,
+     "masked": 28,
+     "strict": 20,
+     "recall_masked": 0.683,
+     "recall_strict": 0.488
+    }
+   }
+  },
+  {
+   "profile": "gaz-lg",
+   "dropped_detectors": [],
+   "ms_per_sentence": 4.28,
+   "per_type": {
+    "PERSON": {
+     "gold": 64,
+     "strict": 31,
+     "masked": 47,
+     "partial": 0,
+     "pred": 53,
+     "pred_ok": 47,
+     "recall_strict": 0.484,
+     "recall_masked": 0.734,
+     "precision": 0.887
+    },
+    "EMAIL": {
+     "gold": 8,
+     "strict": 8,
+     "masked": 8,
+     "partial": 0,
+     "pred": 8,
+     "pred_ok": 8,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 12,
+     "strict": 12,
+     "masked": 12,
+     "partial": 0,
+     "pred": 12,
+     "pred_ok": 12,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 4,
+     "strict": 4,
+     "masked": 4,
+     "partial": 0,
+     "pred": 4,
+     "pred_ok": 4,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 23,
+     "masked": 19,
+     "strict": 10,
+     "recall_masked": 0.826,
+     "recall_strict": 0.435
+    },
+    "oov": {
+     "gold": 41,
+     "masked": 28,
+     "strict": 21,
+     "recall_masked": 0.683,
+     "recall_strict": 0.512
+    }
+   }
+  },
+  {
+   "profile": "gliner",
+   "dropped_detectors": [],
+   "ms_per_sentence": 81.79,
+   "per_type": {
+    "PERSON": {
+     "gold": 64,
+     "strict": 53,
+     "masked": 64,
+     "partial": 0,
+     "pred": 73,
+     "pred_ok": 64,
+     "recall_strict": 0.828,
+     "recall_masked": 1.0,
+     "precision": 0.877
+    },
+    "EMAIL": {
+     "gold": 8,
+     "strict": 8,
+     "masked": 8,
+     "partial": 0,
+     "pred": 8,
+     "pred_ok": 8,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 12,
+     "strict": 12,
+     "masked": 12,
+     "partial": 0,
+     "pred": 12,
+     "pred_ok": 12,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 4,
+     "strict": 4,
+     "masked": 4,
+     "partial": 0,
+     "pred": 4,
+     "pred_ok": 4,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 23,
+     "masked": 23,
+     "strict": 19,
+     "recall_masked": 1.0,
+     "recall_strict": 0.826
+    },
+    "oov": {
+     "gold": 41,
+     "masked": 41,
+     "strict": 34,
+     "recall_masked": 1.0,
+     "recall_strict": 0.829
+    }
+   }
+  },
+  {
+   "profile": "gaz-gliner",
+   "dropped_detectors": [],
+   "ms_per_sentence": 81.49,
+   "per_type": {
+    "PERSON": {
+     "gold": 64,
+     "strict": 52,
+     "masked": 64,
+     "partial": 0,
+     "pred": 73,
+     "pred_ok": 64,
+     "recall_strict": 0.812,
+     "recall_masked": 1.0,
+     "precision": 0.877
+    },
+    "EMAIL": {
+     "gold": 8,
+     "strict": 8,
+     "masked": 8,
+     "partial": 0,
+     "pred": 8,
+     "pred_ok": 8,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 12,
+     "strict": 12,
+     "masked": 12,
+     "partial": 0,
+     "pred": 12,
+     "pred_ok": 12,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 4,
+     "strict": 4,
+     "masked": 4,
+     "partial": 0,
+     "pred": 4,
+     "pred_ok": 4,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 23,
+     "masked": 23,
+     "strict": 18,
+     "recall_masked": 1.0,
+     "recall_strict": 0.783
+    },
+    "oov": {
+     "gold": 41,
+     "masked": 41,
+     "strict": 34,
+     "recall_masked": 1.0,
+     "recall_strict": 0.829
+    }
+   }
+  }
+ ]
+}

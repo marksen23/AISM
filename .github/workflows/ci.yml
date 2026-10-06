@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint-unit-policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install lint and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install ruff pytest
+          python -m pip install -r gateway/requirements.txt -r orchestrator/requirements.txt
+      - name: Ruff
+        run: bash tools/ci-local.sh lint
+      - name: Unit tests
+        run: bash tools/ci-local.sh unit
+      - name: Policy schema
+        run: bash tools/ci-local.sh policy
+      - name: Policy signature
+        run: bash tools/ci-local.sh signature
+      - name: PII recall gate
+        run: bash tools/ci-local.sh pii
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pii-eval
+          path: conformance/pii-eval/results-ci.json
+          if-no-files-found: warn
+
+  reproducible-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Create the reproducible builder
+        run: docker buildx inspect aism-repro >/dev/null 2>&1 || docker buildx create --name aism-repro --driver docker-container
+      - name: Build gateway and orchestrator twice
+        run: bash tools/ci-local.sh repro
+
+  conformance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install policy signing dependencies
+        run: python -m pip install "PyYAML==6.0.3" "cryptography==50.0.2"
+      - name: Conformance suite
+        run: bash tools/ci-local.sh conformance
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: conformance-report
+          path: conformance/reports/ci/**
+          if-no-files-found: warn

@@ -2,9 +2,12 @@
 __pycache__/
 *.pyc
 .pytest_cache/
+.ruff_cache/
 .env
 policy/policy.yaml
 conformance/tests/aism-report*
+conformance/reports/ci/
+conformance/pii-eval/results-ci.json
 models/
 conformance/tests/run/
 config/policy-trust/*.key

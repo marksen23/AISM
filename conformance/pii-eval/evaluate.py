@@ -1,16 +1,35 @@
 #!/usr/bin/env python3
-"""Measures PII detection of the AISM gateway detectors on pii_eval_de.jsonl.
+"""Measures PII detection of the AISM gateway detectors.
 
-Uses the gateway's own detector + overlap-resolution code (aism_gateway.pii.Masker.resolve) with the
-piiDetectors of a policy (default: conformance test policy). The NER model can be swapped:
-  python3 evaluate.py --ner spacy:xx_ent_wiki_sm --ner spacy:de_core_news_sm --ner none
+Uses the gateway's own detector and overlap resolution (aism_gateway.pii.Masker.resolve) with the
+piiDetectors of a policy (default: conformance test policy). Profiles swap the person-name setup
+without editing the policy file:
+
+  before      person-title regex + spacy:xx_ent_wiki_sm, no gazetteer (the previous default)
+  spacy-md    person-title + spacy:de_core_news_md, no gazetteer
+  spacy-lg    person-title + spacy:de_core_news_lg, no gazetteer
+  pairs       person-title + gazetteer pairs only
+  context     person-title + gazetteer context preset "de", no pairs
+  gazetteer   person-title + pairs + context, no NER
+  gaz-xx      gazetteer + spacy:xx_ent_wiki_sm
+  gaz-md      gazetteer + spacy:de_core_news_md
+  gaz-lg      gazetteer + spacy:de_core_news_lg
+  gliner      person-title + gliner:urchade/gliner_multi_pii-v1 (label "person", minScore 0.35)
+  gaz-gliner  gazetteer + that GLiNER model
+  policy      detectors exactly as in the policy file
+
 Metrics per entity type (gold spans = annotated values; titles like "Herr Dr." are not annotated):
   recall_strict   predicted span of the same type with identical boundaries
-  recall_masked   every non-space character of the gold span is covered by some predicted span (any
-                  type) -> the value does not leave S2 in plaintext. This is the privacy-relevant number.
-  partial         gold spans only partly covered (part of the value leaks)
-  precision       predicted spans of this type that overlap a gold span of the same type / all
-                  predicted spans of this type (false positives = over-masking, utility loss)
+  recall_masked   every non-space character of the gold span is covered by some predicted span
+                  (any type) -> the value does not leave S2 in plaintext. Privacy-relevant.
+  partial         gold spans only partly covered
+  precision       predicted spans of this type that overlap a gold span of the same type
+                  (false positives = over-masking, utility loss)
+
+--gate FILE  JSON object {"PERSON": {"recall_masked": 0.90}, ...}. Exit 1 if a measured
+recall_masked (rounded to 3 decimals, same as the table) is below the threshold.
+Entities may carry "oov": true when not every name token is on the built-in gazetteer;
+person_by_vocab then splits PERSON recall.
 """
 from __future__ import annotations
 
@@ -29,25 +48,85 @@ import yaml  # noqa: E402
 from aism_gateway.pii import Masker, build_detectors  # noqa: E402
 
 TYPES = ["PERSON", "EMAIL", "IBAN", "SECRET"]
+GLINER_MODEL = "gliner:urchade/gliner_multi_pii-v1"
+GLINER_SCORE = 0.35
+PROFILES = (
+    "before", "spacy-md", "spacy-lg", "pairs", "context", "gazetteer",
+    "gaz-xx", "gaz-md", "gaz-lg", "gliner", "gaz-gliner", "policy",
+)
 
 
-def run(rows, spec, ner, drop=()):
+def _ner(spec, model, labels, score=None):
+    det = next(d for d in spec["piiDetectors"] if d["id"] == "person-name")
+    det["ner"]["model"] = model
+    det["ner"]["labels"] = list(labels)
+    if score is not None:
+        det["ner"]["minScore"] = score
+    return det
+
+
+def _gaz(spec):
+    return next(d for d in spec["piiDetectors"] if d["id"] == "person-gazetteer")
+
+
+def apply_profile(spec, profile):
     spec = copy.deepcopy(spec)
-    dets = []
-    for d in spec["piiDetectors"]:
-        if d["id"] in drop:
-            continue
-        if d["type"] == "ner":
-            if ner == "none":
-                continue
-            d["ner"]["model"] = ner
-        dets.append(d)
-    spec["piiDetectors"] = dets
-    detectors, errs = build_detectors(spec)
+    if profile == "policy":
+        return spec
+    drop = set()
+    if profile == "before":
+        drop.add("person-gazetteer")
+        _ner(spec, "spacy:xx_ent_wiki_sm", ["PER"])
+    elif profile == "spacy-md":
+        drop.add("person-gazetteer")
+        _ner(spec, "spacy:de_core_news_md", ["PER"])
+    elif profile == "spacy-lg":
+        drop.add("person-gazetteer")
+        _ner(spec, "spacy:de_core_news_lg", ["PER"])
+    elif profile == "pairs":
+        drop.add("person-name")
+        g = _gaz(spec)["gazetteer"]
+        g["matchPairs"] = True
+        g["contextPreset"] = "none"
+        g.pop("contextRules", None)
+    elif profile == "context":
+        drop.add("person-name")
+        g = _gaz(spec)["gazetteer"]
+        g["matchPairs"] = False
+        g["contextPreset"] = "de"
+        g.pop("contextRules", None)
+    elif profile == "gazetteer":
+        drop.add("person-name")
+    elif profile == "gaz-xx":
+        _ner(spec, "spacy:xx_ent_wiki_sm", ["PER"])
+    elif profile == "gaz-md":
+        _ner(spec, "spacy:de_core_news_md", ["PER"])
+    elif profile == "gaz-lg":
+        _ner(spec, "spacy:de_core_news_lg", ["PER"])
+    elif profile == "gliner":
+        drop.add("person-gazetteer")
+        _ner(spec, GLINER_MODEL, ["person"], GLINER_SCORE)
+    elif profile == "gaz-gliner":
+        _ner(spec, GLINER_MODEL, ["person"], GLINER_SCORE)
+    else:
+        raise SystemExit(f"unknown profile {profile!r}; choose from {', '.join(PROFILES)}")
+    spec["piiDetectors"] = [d for d in spec["piiDetectors"] if d["id"] not in drop]
+    return spec
+
+
+def _ratio(num, den):
+    return round(num / den, 3) if den else None
+
+
+def run(rows, spec, profile, policy_dir, drop=()):
+    spec = apply_profile(spec, profile)
+    spec["piiDetectors"] = [d for d in spec["piiDetectors"] if d["id"] not in drop]
+    detectors, errs = build_detectors(spec, base_dir=policy_dir)
     if errs:
         raise SystemExit(f"detector errors: {errs}")
     masker = Masker(detectors, {"PERSON": 2, "EMAIL": 2, "IBAN": 2, "SECRET": 3})
     st = {t: {"gold": 0, "strict": 0, "masked": 0, "partial": 0, "pred": 0, "pred_ok": 0} for t in TYPES}
+    vocab = {k: {"gold": 0, "masked": 0, "strict": 0} for k in ("inv", "oov")}
     misses, fps = [], []
     t0 = time.perf_counter()
     for r in rows:
@@ -58,17 +137,24 @@ def run(rows, spec, ner, drop=()):
         for g in r["entities"]:
             x = st[g["type"]]
             x["gold"] += 1
-            if any(s == g["start"] and e == g["end"] and t == g["type"] for s, e, t in pred):
+            strict = any(s == g["start"] and e == g["end"] and t == g["type"] for s, e, t in pred)
+            if strict:
                 x["strict"] += 1
             chars = [i for i in range(g["start"], g["end"]) if not r["text"][i].isspace()]
             n = sum(1 for i in chars if i in covered)
-            if n == len(chars):
+            masked = n == len(chars) and bool(chars)
+            if masked:
                 x["masked"] += 1
             else:
                 if n:
                     x["partial"] += 1
                 misses.append({"id": r["id"], "type": g["type"], "value": g["value"], "covered": f"{n}/{len(chars)}",
-                               "tags": r["tags"]})
+                               "tags": r["tags"], "oov": g.get("oov")})
+            if g["type"] == "PERSON" and "oov" in g:
+                bucket = vocab["oov" if g["oov"] else "inv"]
+                bucket["gold"] += 1
+                bucket["masked"] += int(masked)
+                bucket["strict"] += int(strict)
         for s, e, t in pred:
             if t not in st:
                 continue
@@ -77,38 +163,83 @@ def run(rows, spec, ner, drop=()):
                 st[t]["pred_ok"] += 1
             else:
                 fps.append({"id": r["id"], "type": t, "text": r["text"][s:e], "tags": r["tags"]})
-    ms = (time.perf_counter() - t0) * 1000 / len(rows)
+    ms = (time.perf_counter() - t0) * 1000 / max(len(rows), 1)
     res = {}
     for t, x in st.items():
-        res[t] = {**x,
-                  "recall_strict": round(x["strict"] / x["gold"], 3) if x["gold"] else None,
-                  "recall_masked": round(x["masked"] / x["gold"], 3) if x["gold"] else None,
-                  "precision": round(x["pred_ok"] / x["pred"], 3) if x["pred"] else None}
-    return {"ner": ner, "dropped_detectors": list(drop), "ms_per_sentence": round(ms, 2), "per_type": res, "misses": misses, "false_positives": fps}
+        res[t] = {**x, "recall_strict": _ratio(x["strict"], x["gold"]),
+                  "recall_masked": _ratio(x["masked"], x["gold"]),
+                  "precision": _ratio(x["pred_ok"], x["pred"])}
+    by_vocab = {}
+    for key, bucket in vocab.items():
+        if bucket["gold"]:
+            by_vocab[key] = {**bucket, "recall_masked": _ratio(bucket["masked"], bucket["gold"]),
+                             "recall_strict": _ratio(bucket["strict"], bucket["gold"])}
+    return {"profile": profile, "dropped_detectors": list(drop), "ms_per_sentence": round(ms, 2),
+            "per_type": res, "person_by_vocab": by_vocab, "misses": misses, "false_positives": fps}
+
+
+def _check_gate(runs, gate):
+    failures = []
+    for r in runs:
+        for typ, limits in gate.items():
+            got = r["per_type"].get(typ, {}).get("recall_masked")
+            need = limits.get("recall_masked")
+            if need is None or got is None:
+                continue
+            if got + 1e-9 < need:
+                failures.append(f"{r['profile']} {typ} recall_masked {got:.3f} < {need:.3f}")
+    return failures
 
 
 def main():
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--policy", default=str(ROOT / "conformance/tests/testdata/policy.conformance.yaml"))
-    ap.add_argument("--data", default=str(HERE / "pii_eval_de.jsonl"))
-    ap.add_argument("--ner", action="append")
+    ap.add_argument("--data", action="append", help="JSONL file; repeat to concatenate. Default: pii_eval_de.jsonl")
+    ap.add_argument("--profile", action="append", choices=PROFILES)
     ap.add_argument("--out", default=str(HERE / "results.json"))
     ap.add_argument("--drop-detector", action="append", default=[], help="disable a policy detector (ablation)")
+    ap.add_argument("--gate", help="JSON recall_masked thresholds; exit 1 on regression")
+    ap.add_argument("--no-misses", action="store_true", help="omit miss and false-positive lists from the JSON")
     a = ap.parse_args()
-    rows = [json.loads(line) for line in open(a.data, encoding="utf-8")]
-    spec = yaml.safe_load(open(a.policy, encoding="utf-8"))["spec"]
-    out = {"dataset": pathlib.Path(a.data).name, "sentences": len(rows),
+    paths = a.data or [str(HERE / "pii_eval_de.jsonl")]
+    rows = []
+    for p in paths:
+        rows.extend(json.loads(line) for line in open(p, encoding="utf-8") if line.strip())
+    raw = yaml.safe_load(open(a.policy, encoding="utf-8"))
+    spec = raw["spec"]
+    policy_dir = str(pathlib.Path(a.policy).resolve().parent)
+    profiles = a.profile or ["policy"]
+    runs = [run(rows, spec, n, policy_dir, a.drop_detector) for n in profiles]
+    if a.no_misses:
+        for r in runs:
+            r.pop("misses", None)
+            r.pop("false_positives", None)
+    out = {"dataset": [pathlib.Path(p).name for p in paths], "sentences": len(rows),
            "entities": {t: sum(1 for r in rows for g in r["entities"] if g["type"] == t) for t in TYPES},
-           "runs": [run(rows, spec, n, a.drop_detector) for n in (a.ner or ["none", "spacy:xx_ent_wiki_sm"])]}
+           "runs": runs}
     pathlib.Path(a.out).write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
+    def fmt(v):
+        return "–" if v is None else f"{v:.3f}"
+
     for r in out["runs"]:
         drop = f", ohne {','.join(r['dropped_detectors'])}" if r["dropped_detectors"] else ""
-        print(f"\n== NER: {r['ner']}{drop}  ({r['ms_per_sentence']} ms/Satz)")
+        print(f"\n== {r['profile']}{drop}  ({r['ms_per_sentence']} ms/Satz)")
         print(f"{'Typ':8} {'n':>4} {'R strikt':>9} {'R maskiert':>11} {'teilweise':>10} {'Präzision':>10} {'FP':>4}")
         for t, x in r["per_type"].items():
-            f = lambda v: "–" if v is None else f"{v:.3f}"
-            print(f"{t:8} {x['gold']:>4} {f(x['recall_strict']):>9} {f(x['recall_masked']):>11} {x['partial']:>10} "
-                  f"{f(x['precision']):>10} {x['pred'] - x['pred_ok']:>4}")
+            print(f"{t:8} {x['gold']:>4} {fmt(x['recall_strict']):>9} {fmt(x['recall_masked']):>11} {x['partial']:>10} "
+                  f"{fmt(x['precision']):>10} {x['pred'] - x['pred_ok']:>4}")
+        if r.get("person_by_vocab"):
+            for key, bucket in r["person_by_vocab"].items():
+                print(f"  PERSON {key:3} n={bucket['gold']}  R maskiert={bucket['recall_masked']:.3f}")
+    if a.gate:
+        gate = json.loads(pathlib.Path(a.gate).read_text(encoding="utf-8"))
+        failures = _check_gate(runs, gate)
+        if failures:
+            print("\nGATE FAILED")
+            for line in failures:
+                print(" ", line)
+            raise SystemExit(1)
+        print("\nGATE OK")
 
 
 if __name__ == "__main__":

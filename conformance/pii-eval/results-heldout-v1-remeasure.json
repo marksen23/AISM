@@ -1,0 +1,326 @@
+{
+ "dataset": [
+  "pii_eval_de_heldout.jsonl"
+ ],
+ "sentences": 73,
+ "entities": {
+  "PERSON": 50,
+  "EMAIL": 10,
+  "IBAN": 15,
+  "SECRET": 5
+ },
+ "runs": [
+  {
+   "profile": "before",
+   "dropped_detectors": [],
+   "ms_per_sentence": 2.25,
+   "per_type": {
+    "PERSON": {
+     "gold": 50,
+     "strict": 36,
+     "masked": 43,
+     "partial": 0,
+     "pred": 45,
+     "pred_ok": 43,
+     "recall_strict": 0.72,
+     "recall_masked": 0.86,
+     "precision": 0.956
+    },
+    "EMAIL": {
+     "gold": 10,
+     "strict": 10,
+     "masked": 10,
+     "partial": 0,
+     "pred": 10,
+     "pred_ok": 10,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 15,
+     "strict": 15,
+     "masked": 15,
+     "partial": 0,
+     "pred": 15,
+     "pred_ok": 15,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 5,
+     "strict": 5,
+     "masked": 5,
+     "partial": 0,
+     "pred": 5,
+     "pred_ok": 5,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {}
+  },
+  {
+   "profile": "gazetteer",
+   "dropped_detectors": [],
+   "ms_per_sentence": 0.06,
+   "per_type": {
+    "PERSON": {
+     "gold": 50,
+     "strict": 42,
+     "masked": 42,
+     "partial": 0,
+     "pred": 42,
+     "pred_ok": 42,
+     "recall_strict": 0.84,
+     "recall_masked": 0.84,
+     "precision": 1.0
+    },
+    "EMAIL": {
+     "gold": 10,
+     "strict": 10,
+     "masked": 10,
+     "partial": 0,
+     "pred": 10,
+     "pred_ok": 10,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 15,
+     "strict": 15,
+     "masked": 15,
+     "partial": 0,
+     "pred": 15,
+     "pred_ok": 15,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 5,
+     "strict": 5,
+     "masked": 5,
+     "partial": 0,
+     "pred": 5,
+     "pred_ok": 5,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {}
+  },
+  {
+   "profile": "gaz-xx",
+   "dropped_detectors": [],
+   "ms_per_sentence": 1.7,
+   "per_type": {
+    "PERSON": {
+     "gold": 50,
+     "strict": 40,
+     "masked": 47,
+     "partial": 0,
+     "pred": 49,
+     "pred_ok": 47,
+     "recall_strict": 0.8,
+     "recall_masked": 0.94,
+     "precision": 0.959
+    },
+    "EMAIL": {
+     "gold": 10,
+     "strict": 10,
+     "masked": 10,
+     "partial": 0,
+     "pred": 10,
+     "pred_ok": 10,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 15,
+     "strict": 15,
+     "masked": 15,
+     "partial": 0,
+     "pred": 15,
+     "pred_ok": 15,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 5,
+     "strict": 5,
+     "masked": 5,
+     "partial": 0,
+     "pred": 5,
+     "pred_ok": 5,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {}
+  },
+  {
+   "profile": "gaz-md",
+   "dropped_detectors": [],
+   "ms_per_sentence": 5.22,
+   "per_type": {
+    "PERSON": {
+     "gold": 50,
+     "strict": 45,
+     "masked": 49,
+     "partial": 0,
+     "pred": 53,
+     "pred_ok": 49,
+     "recall_strict": 0.9,
+     "recall_masked": 0.98,
+     "precision": 0.925
+    },
+    "EMAIL": {
+     "gold": 10,
+     "strict": 10,
+     "masked": 10,
+     "partial": 0,
+     "pred": 10,
+     "pred_ok": 10,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 15,
+     "strict": 15,
+     "masked": 15,
+     "partial": 0,
+     "pred": 15,
+     "pred_ok": 15,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 5,
+     "strict": 5,
+     "masked": 5,
+     "partial": 0,
+     "pred": 5,
+     "pred_ok": 5,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {}
+  },
+  {
+   "profile": "gaz-lg",
+   "dropped_detectors": [],
+   "ms_per_sentence": 5.28,
+   "per_type": {
+    "PERSON": {
+     "gold": 50,
+     "strict": 45,
+     "masked": 50,
+     "partial": 0,
+     "pred": 50,
+     "pred_ok": 50,
+     "recall_strict": 0.9,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "EMAIL": {
+     "gold": 10,
+     "strict": 10,
+     "masked": 10,
+     "partial": 0,
+     "pred": 10,
+     "pred_ok": 10,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 15,
+     "strict": 15,
+     "masked": 15,
+     "partial": 0,
+     "pred": 15,
+     "pred_ok": 15,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 5,
+     "strict": 5,
+     "masked": 5,
+     "partial": 0,
+     "pred": 5,
+     "pred_ok": 5,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {}
+  },
+  {
+   "profile": "gliner",
+   "dropped_detectors": [],
+   "ms_per_sentence": 80.47,
+   "per_type": {
+    "PERSON": {
+     "gold": 50,
+     "strict": 40,
+     "masked": 50,
+     "partial": 0,
+     "pred": 52,
+     "pred_ok": 50,
+     "recall_strict": 0.8,
+     "recall_masked": 1.0,
+     "precision": 0.962
+    },
+    "EMAIL": {
+     "gold": 10,
+     "strict": 10,
+     "masked": 10,
+     "partial": 0,
+     "pred": 10,
+     "pred_ok": 10,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 15,
+     "strict": 15,
+     "masked": 15,
+     "partial": 0,
+     "pred": 15,
+     "pred_ok": 15,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 5,
+     "strict": 5,
+     "masked": 5,
+     "partial": 0,
+     "pred": 5,
+     "pred_ok": 5,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {}
+  }
+ ]
+}

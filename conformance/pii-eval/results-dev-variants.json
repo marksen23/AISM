@@ -1,0 +1,4595 @@
+{
+ "dataset": [
+  "pii_eval_de.jsonl"
+ ],
+ "sentences": 236,
+ "entities": {
+  "PERSON": 146,
+  "EMAIL": 45,
+  "IBAN": 30,
+  "SECRET": 20
+ },
+ "runs": [
+  {
+   "profile": "before",
+   "dropped_detectors": [],
+   "ms_per_sentence": 1.99,
+   "per_type": {
+    "PERSON": {
+     "gold": 146,
+     "strict": 109,
+     "masked": 124,
+     "partial": 1,
+     "pred": 143,
+     "pred_ok": 125,
+     "recall_strict": 0.747,
+     "recall_masked": 0.849,
+     "precision": 0.874
+    },
+    "EMAIL": {
+     "gold": 45,
+     "strict": 45,
+     "masked": 45,
+     "partial": 0,
+     "pred": 45,
+     "pred_ok": 45,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 30,
+     "strict": 30,
+     "masked": 30,
+     "partial": 0,
+     "pred": 30,
+     "pred_ok": 30,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 20,
+     "strict": 20,
+     "masked": 20,
+     "partial": 0,
+     "pred": 20,
+     "pred_ok": 20,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 23,
+     "masked": 21,
+     "strict": 14,
+     "recall_masked": 0.913,
+     "recall_strict": 0.609
+    },
+    "oov": {
+     "gold": 33,
+     "masked": 18,
+     "strict": 15,
+     "recall_masked": 0.545,
+     "recall_strict": 0.455
+    }
+   },
+   "misses": [
+    {
+     "id": "de-029",
+     "type": "PERSON",
+     "value": "Lena Hoffmann",
+     "covered": "0/12",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-034",
+     "type": "PERSON",
+     "value": "ayşe schneider",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "lower"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-038",
+     "type": "PERSON",
+     "value": "Ülkü Müller",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-053",
+     "type": "PERSON",
+     "value": "Björn",
+     "covered": "0/5",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-054",
+     "type": "PERSON",
+     "value": "Jürgen",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "dx-000",
+     "type": "PERSON",
+     "value": "ülkü schmidt",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-001",
+     "type": "PERSON",
+     "value": "ayşe fischer",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-002",
+     "type": "PERSON",
+     "value": "ayşe kaltenegger",
+     "covered": "0/15",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-013",
+     "type": "PERSON",
+     "value": "Ülkü",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-015",
+     "type": "PERSON",
+     "value": "Ülkü",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-016",
+     "type": "PERSON",
+     "value": "Ines",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-018",
+     "type": "PERSON",
+     "value": "Chinedu",
+     "covered": "0/7",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-019",
+     "type": "PERSON",
+     "value": "Ülkü",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-032",
+     "type": "PERSON",
+     "value": "Ülkü Hoffmann",
+     "covered": "8/12",
+     "tags": [
+      "person",
+      "full",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-033",
+     "type": "PERSON",
+     "value": "Ülkü Fischer",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "full",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-044",
+     "type": "PERSON",
+     "value": "ülkü ngono",
+     "covered": "0/9",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-046",
+     "type": "PERSON",
+     "value": "ines müller",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-047",
+     "type": "PERSON",
+     "value": "svetlana ngono",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-052",
+     "type": "PERSON",
+     "value": "anna bierstedt",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-053",
+     "type": "PERSON",
+     "value": "erika hoffmann",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": false
+    },
+    {
+     "id": "dx-054",
+     "type": "PERSON",
+     "value": "katharina schneider",
+     "covered": "0/18",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": false
+    },
+    {
+     "id": "dx-055",
+     "type": "PERSON",
+     "value": "ines holtkamp",
+     "covered": "0/12",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    }
+   ],
+   "false_positives": [
+    {
+     "id": "de-019",
+     "type": "PERSON",
+     "text": "Herr Dr",
+     "tags": [
+      "person",
+      "title_full"
+     ]
+    },
+    {
+     "id": "de-040",
+     "type": "PERSON",
+     "text": "Wer",
+     "tags": [
+      "person",
+      "title_last"
+     ]
+    },
+    {
+     "id": "de-041",
+     "type": "PERSON",
+     "text": "Wer",
+     "tags": [
+      "person",
+      "title_last"
+     ]
+    },
+    {
+     "id": "de-042",
+     "type": "PERSON",
+     "text": "Wer",
+     "tags": [
+      "person",
+      "title_last"
+     ]
+    },
+    {
+     "id": "de-042",
+     "type": "PERSON",
+     "text": "Herr Dr",
+     "tags": [
+      "person",
+      "title_last"
+     ]
+    },
+    {
+     "id": "de-043",
+     "type": "PERSON",
+     "text": "Wer",
+     "tags": [
+      "person",
+      "title_last"
+     ]
+    },
+    {
+     "id": "de-044",
+     "type": "PERSON",
+     "text": "Wer",
+     "tags": [
+      "person",
+      "title_last"
+     ]
+    },
+    {
+     "id": "de-060",
+     "type": "PERSON",
+     "text": "Meine Adresse",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-061",
+     "type": "PERSON",
+     "text": "Meine Adresse",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-062",
+     "type": "PERSON",
+     "text": "Meine Adresse",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-063",
+     "type": "PERSON",
+     "text": "Meine Adresse",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-064",
+     "type": "PERSON",
+     "text": "Meine Adresse",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-144",
+     "type": "PERSON",
+     "text": "Max",
+     "tags": [
+      "negative"
+     ]
+    },
+    {
+     "id": "dx-017",
+     "type": "PERSON",
+     "text": "Danke",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-058",
+     "type": "PERSON",
+     "text": "Liebe Kolleginnen",
+     "tags": [
+      "negative",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-059",
+     "type": "PERSON",
+     "text": "Mein Name",
+     "tags": [
+      "negative",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-062",
+     "type": "PERSON",
+     "text": "Max",
+     "tags": [
+      "negative",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-068",
+     "type": "PERSON",
+     "text": "Meine Adresse",
+     "tags": [
+      "negative",
+      "ext"
+     ]
+    }
+   ]
+  },
+  {
+   "profile": "spacy-md",
+   "dropped_detectors": [],
+   "ms_per_sentence": 3.57,
+   "per_type": {
+    "PERSON": {
+     "gold": 146,
+     "strict": 115,
+     "masked": 130,
+     "partial": 2,
+     "pred": 149,
+     "pred_ok": 132,
+     "recall_strict": 0.788,
+     "recall_masked": 0.89,
+     "precision": 0.886
+    },
+    "EMAIL": {
+     "gold": 45,
+     "strict": 45,
+     "masked": 45,
+     "partial": 0,
+     "pred": 45,
+     "pred_ok": 45,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 30,
+     "strict": 30,
+     "masked": 30,
+     "partial": 0,
+     "pred": 30,
+     "pred_ok": 30,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 20,
+     "strict": 20,
+     "masked": 20,
+     "partial": 0,
+     "pred": 20,
+     "pred_ok": 20,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 23,
+     "masked": 21,
+     "strict": 14,
+     "recall_masked": 0.913,
+     "recall_strict": 0.609
+    },
+    "oov": {
+     "gold": 33,
+     "masked": 23,
+     "strict": 18,
+     "recall_masked": 0.697,
+     "recall_strict": 0.545
+    }
+   },
+   "misses": [
+    {
+     "id": "de-023",
+     "type": "PERSON",
+     "value": "Emma",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-030",
+     "type": "PERSON",
+     "value": "ines wagner",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "lower"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-034",
+     "type": "PERSON",
+     "value": "ayşe schneider",
+     "covered": "9/13",
+     "tags": [
+      "person",
+      "lower"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-051",
+     "type": "PERSON",
+     "value": "Emma",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "dx-001",
+     "type": "PERSON",
+     "value": "ayşe fischer",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-002",
+     "type": "PERSON",
+     "value": "ayşe kaltenegger",
+     "covered": "0/15",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-017",
+     "type": "PERSON",
+     "value": "Sabine",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-018",
+     "type": "PERSON",
+     "value": "Chinedu",
+     "covered": "0/7",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-019",
+     "type": "PERSON",
+     "value": "Ülkü",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-033",
+     "type": "PERSON",
+     "value": "Ülkü Fischer",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "full",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-044",
+     "type": "PERSON",
+     "value": "ülkü ngono",
+     "covered": "5/9",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-045",
+     "type": "PERSON",
+     "value": "anna hoffmann",
+     "covered": "0/12",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": false
+    },
+    {
+     "id": "dx-046",
+     "type": "PERSON",
+     "value": "ines müller",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-047",
+     "type": "PERSON",
+     "value": "svetlana ngono",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-053",
+     "type": "PERSON",
+     "value": "erika hoffmann",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": false
+    },
+    {
+     "id": "dx-055",
+     "type": "PERSON",
+     "value": "ines holtkamp",
+     "covered": "0/12",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    }
+   ],
+   "false_positives": [
+    {
+     "id": "de-050",
+     "type": "PERSON",
+     "text": "Schick",
+     "tags": [
+      "person",
+      "first"
+     ]
+    },
+    {
+     "id": "de-051",
+     "type": "PERSON",
+     "text": "Schick",
+     "tags": [
+      "person",
+      "first"
+     ]
+    },
+    {
+     "id": "de-052",
+     "type": "PERSON",
+     "text": "Schick",
+     "tags": [
+      "person",
+      "first"
+     ]
+    },
+    {
+     "id": "de-053",
+     "type": "PERSON",
+     "text": "Schick",
+     "tags": [
+      "person",
+      "first"
+     ]
+    },
+    {
+     "id": "de-054",
+     "type": "PERSON",
+     "text": "Schick",
+     "tags": [
+      "person",
+      "first"
+     ]
+    },
+    {
+     "id": "de-070",
+     "type": "PERSON",
+     "text": "Leite",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-071",
+     "type": "PERSON",
+     "text": "Leite",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-072",
+     "type": "PERSON",
+     "text": "Leite",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-073",
+     "type": "PERSON",
+     "text": "Leite",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-074",
+     "type": "PERSON",
+     "text": "Leite",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-145",
+     "type": "PERSON",
+     "text": "frank",
+     "tags": [
+      "negative"
+     ]
+    },
+    {
+     "id": "dx-016",
+     "type": "PERSON",
+     "text": "Danke",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-059",
+     "type": "PERSON",
+     "text": "Mein Name",
+     "tags": [
+      "negative",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-062",
+     "type": "PERSON",
+     "text": "Bitte Max",
+     "tags": [
+      "negative",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-063",
+     "type": "PERSON",
+     "text": "frank",
+     "tags": [
+      "negative",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-066",
+     "type": "PERSON",
+     "text": "Schick",
+     "tags": [
+      "negative",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-067",
+     "type": "PERSON",
+     "text": "Leite",
+     "tags": [
+      "negative",
+      "ext"
+     ]
+    }
+   ]
+  },
+  {
+   "profile": "spacy-lg",
+   "dropped_detectors": [],
+   "ms_per_sentence": 3.12,
+   "per_type": {
+    "PERSON": {
+     "gold": 146,
+     "strict": 112,
+     "masked": 134,
+     "partial": 0,
+     "pred": 151,
+     "pred_ok": 134,
+     "recall_strict": 0.767,
+     "recall_masked": 0.918,
+     "precision": 0.887
+    },
+    "EMAIL": {
+     "gold": 45,
+     "strict": 45,
+     "masked": 45,
+     "partial": 0,
+     "pred": 45,
+     "pred_ok": 45,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 30,
+     "strict": 30,
+     "masked": 30,
+     "partial": 0,
+     "pred": 30,
+     "pred_ok": 30,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 20,
+     "strict": 19,
+     "masked": 20,
+     "partial": 0,
+     "pred": 19,
+     "pred_ok": 19,
+     "recall_strict": 0.95,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 23,
+     "masked": 21,
+     "strict": 13,
+     "recall_masked": 0.913,
+     "recall_strict": 0.565
+    },
+    "oov": {
+     "gold": 33,
+     "masked": 26,
+     "strict": 19,
+     "recall_masked": 0.788,
+     "recall_strict": 0.576
+    }
+   },
+   "misses": [
+    {
+     "id": "de-023",
+     "type": "PERSON",
+     "value": "Emma",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-051",
+     "type": "PERSON",
+     "value": "Emma",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-052",
+     "type": "PERSON",
+     "value": "Laura",
+     "covered": "0/5",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "dx-005",
+     "type": "PERSON",
+     "value": "Ayşe Weber",
+     "covered": "0/9",
+     "tags": [
+      "person",
+      "full",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-017",
+     "type": "PERSON",
+     "value": "Sabine",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-018",
+     "type": "PERSON",
+     "value": "Chinedu",
+     "covered": "0/7",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-019",
+     "type": "PERSON",
+     "value": "Ülkü",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-027",
+     "type": "PERSON",
+     "value": "Laura",
+     "covered": "0/5",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": false
+    },
+    {
+     "id": "dx-044",
+     "type": "PERSON",
+     "value": "ülkü ngono",
+     "covered": "0/9",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-045",
+     "type": "PERSON",
+     "value": "anna hoffmann",
+     "covered": "0/12",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": false
+    },
+    {
+     "id": "dx-046",
+     "type": "PERSON",
+     "value": "ines müller",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-047",
+     "type": "PERSON",
+     "value": "svetlana ngono",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    }
+   ],
+   "false_positives": [
+    {
+     "id": "de-050",
+     "type": "PERSON",
+     "text": "Schick",
+     "tags": [
+      "person",
+      "first"
+     ]
+    },
+    {
+     "id": "de-051",
+     "type": "PERSON",
+     "text": "Schick",
+     "tags": [
+      "person",
+      "first"
+     ]
+    },
+    {
+     "id": "de-052",
+     "type": "PERSON",
+     "text": "Schick",
+     "tags": [
+      "person",
+      "first"
+     ]
+    },
+    {
+     "id": "de-053",
+     "type": "PERSON",
+     "text": "Schick",
+     "tags": [
+      "person",
+      "first"
+     ]
+    },
+    {
+     "id": "de-054",
+     "type": "PERSON",
+     "text": "Schick",
+     "tags": [
+      "person",
+      "first"
+     ]
+    },
+    {
+     "id": "de-070",
+     "type": "PERSON",
+     "text": "Leite",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-071",
+     "type": "PERSON",
+     "text": "Leite",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-072",
+     "type": "PERSON",
+     "text": "Leite",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-073",
+     "type": "PERSON",
+     "text": "Leite",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-074",
+     "type": "PERSON",
+     "text": "Leite",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-132",
+     "type": "PERSON",
+     "text": "Mein Key sk-X3shmalmGnHbLuMrWrrzDJlhSdyae70U",
+     "tags": [
+      "mixed"
+     ]
+    },
+    {
+     "id": "de-145",
+     "type": "PERSON",
+     "text": "frank",
+     "tags": [
+      "negative"
+     ]
+    },
+    {
+     "id": "dx-016",
+     "type": "PERSON",
+     "text": "Danke",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-018",
+     "type": "PERSON",
+     "text": "Danke",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-063",
+     "type": "PERSON",
+     "text": "frank",
+     "tags": [
+      "negative",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-066",
+     "type": "PERSON",
+     "text": "Schick",
+     "tags": [
+      "negative",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-067",
+     "type": "PERSON",
+     "text": "Leite",
+     "tags": [
+      "negative",
+      "ext"
+     ]
+    }
+   ]
+  },
+  {
+   "profile": "pairs",
+   "dropped_detectors": [],
+   "ms_per_sentence": 0.02,
+   "per_type": {
+    "PERSON": {
+     "gold": 146,
+     "strict": 82,
+     "masked": 82,
+     "partial": 0,
+     "pred": 82,
+     "pred_ok": 82,
+     "recall_strict": 0.562,
+     "recall_masked": 0.562,
+     "precision": 1.0
+    },
+    "EMAIL": {
+     "gold": 45,
+     "strict": 45,
+     "masked": 45,
+     "partial": 0,
+     "pred": 45,
+     "pred_ok": 45,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 30,
+     "strict": 30,
+     "masked": 30,
+     "partial": 0,
+     "pred": 30,
+     "pred_ok": 30,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 20,
+     "strict": 20,
+     "masked": 20,
+     "partial": 0,
+     "pred": 20,
+     "pred_ok": 20,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 23,
+     "masked": 14,
+     "strict": 14,
+     "recall_masked": 0.609,
+     "recall_strict": 0.609
+    },
+    "oov": {
+     "gold": 33,
+     "masked": 5,
+     "strict": 5,
+     "recall_masked": 0.152,
+     "recall_strict": 0.152
+    }
+   },
+   "misses": [
+    {
+     "id": "de-008",
+     "type": "PERSON",
+     "value": "Ayşe Wagner",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-020",
+     "type": "PERSON",
+     "value": "Lea",
+     "covered": "0/3",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-021",
+     "type": "PERSON",
+     "value": "Anna",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-022",
+     "type": "PERSON",
+     "value": "Moritz",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-023",
+     "type": "PERSON",
+     "value": "Emma",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-024",
+     "type": "PERSON",
+     "value": "Jürgen",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-028",
+     "type": "PERSON",
+     "value": "Ines Fischer",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-030",
+     "type": "PERSON",
+     "value": "ines wagner",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "lower"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-031",
+     "type": "PERSON",
+     "value": "björn yılmaz",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "lower"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-033",
+     "type": "PERSON",
+     "value": "sabine schröder",
+     "covered": "0/14",
+     "tags": [
+      "person",
+      "lower"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-034",
+     "type": "PERSON",
+     "value": "ayşe schneider",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "lower"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-038",
+     "type": "PERSON",
+     "value": "Ülkü Müller",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-050",
+     "type": "PERSON",
+     "value": "Karl-Heinz",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-050",
+     "type": "PERSON",
+     "value": "Ines",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-051",
+     "type": "PERSON",
+     "value": "Emma",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-051",
+     "type": "PERSON",
+     "value": "Lea",
+     "covered": "0/3",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-052",
+     "type": "PERSON",
+     "value": "Laura",
+     "covered": "0/5",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-052",
+     "type": "PERSON",
+     "value": "Jonas",
+     "covered": "0/5",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-053",
+     "type": "PERSON",
+     "value": "Björn",
+     "covered": "0/5",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-053",
+     "type": "PERSON",
+     "value": "Mehmet",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-054",
+     "type": "PERSON",
+     "value": "Paul",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-054",
+     "type": "PERSON",
+     "value": "Jürgen",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-055",
+     "type": "PERSON",
+     "value": "Svetlana Lange",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-056",
+     "type": "PERSON",
+     "value": "Lukas Yılmaz",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-057",
+     "type": "PERSON",
+     "value": "Ülkü Schmidt",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-058",
+     "type": "PERSON",
+     "value": "Svetlana Braun",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-126",
+     "type": "PERSON",
+     "value": "Svetlana Wagner",
+     "covered": "0/14",
+     "tags": [
+      "mixed"
+     ],
+     "oov": null
+    },
+    {
+     "id": "dx-000",
+     "type": "PERSON",
+     "value": "ülkü schmidt",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-001",
+     "type": "PERSON",
+     "value": "ayşe fischer",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-002",
+     "type": "PERSON",
+     "value": "ayşe kaltenegger",
+     "covered": "0/15",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-003",
+     "type": "PERSON",
+     "value": "svetlana mustermann",
+     "covered": "0/18",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-005",
+     "type": "PERSON",
+     "value": "Ayşe Weber",
+     "covered": "0/9",
+     "tags": [
+      "person",
+      "full",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-006",
+     "type": "PERSON",
+     "value": "Ines Becker",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "full",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-011",
+     "type": "PERSON",
+     "value": "Nkechi Krüger",
+     "covered": "0/12",
+     "tags": [
+      "person",
+      "full",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-012",
+     "type": "PERSON",
+     "value": "Katharina",
+     "covered": "0/9",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": false
+    },
+    {
+     "id": "dx-013",
+     "type": "PERSON",
+     "value": "Ülkü",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-014",
+     "type": "PERSON",
+     "value": "Michael",
+     "covered": "0/7",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": false
+    },
+    {
+     "id": "dx-015",
+     "type": "PERSON",
+     "value": "Ülkü",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-016",
+     "type": "PERSON",
+     "value": "Ines",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-017",
+     "type": "PERSON",
+     "value": "Sabine",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-018",
+     "type": "PERSON",
+     "value": "Chinedu",
+     "covered": "0/7",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-019",
+     "type": "PERSON",
+     "value": "Ülkü",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-020",
+     "type": "PERSON",
+     "value": "Thomas",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": false
+    },
+    {
+     "id": "dx-021",
+     "type": "PERSON",
+     "value": "Michael",
+     "covered": "0/7",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": false
+    },
+    {
+     "id": "dx-022",
+     "type": "PERSON",
+     "value": "Michael",
+     "covered": "0/7",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": false
+    },
+    {
+     "id": "dx-023",
+     "type": "PERSON",
+     "value": "Mehmet",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": false
+    },
+    {
+     "id": "dx-024",
+     "type": "PERSON",
+     "value": "Sophie",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": false
+    },
+    {
+     "id": "dx-025",
+     "type": "PERSON",
+     "value": "Chinedu",
+     "covered": "0/7",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-026",
+     "type": "PERSON",
+     "value": "Frank",
+     "covered": "0/5",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": false
+    },
+    {
+     "id": "dx-027",
+     "type": "PERSON",
+     "value": "Laura",
+     "covered": "0/5",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": false
+    },
+    {
+     "id": "dx-032",
+     "type": "PERSON",
+     "value": "Ülkü Hoffmann",
+     "covered": "0/12",
+     "tags": [
+      "person",
+      "full",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-033",
+     "type": "PERSON",
+     "value": "Ülkü Fischer",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "full",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-034",
+     "type": "PERSON",
+     "value": "Ines Krüger",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "full",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-035",
+     "type": "PERSON",
+     "value": "Svetlana Krüger",
+     "covered": "0/14",
+     "tags": [
+      "person",
+      "full",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-036",
+     "type": "PERSON",
+     "value": "Svetlana Weber",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "full",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-038",
+     "type": "PERSON",
+     "value": "Svetlana Holtkamp",
+     "covered": "0/16",
+     "tags": [
+      "person",
+      "full",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-039",
+     "type": "PERSON",
+     "value": "Sabine Hoffmann",
+     "covered": "0/14",
+     "tags": [
+      "person",
+      "full",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-040",
+     "type": "PERSON",
+     "value": "Ülkü Hoffmann",
+     "covered": "0/12",
+     "tags": [
+      "person",
+      "full",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-043",
+     "type": "PERSON",
+     "value": "Sabine Hoffmann",
+     "covered": "0/14",
+     "tags": [
+      "person",
+      "full",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-044",
+     "type": "PERSON",
+     "value": "ülkü ngono",
+     "covered": "0/9",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-046",
+     "type": "PERSON",
+     "value": "ines müller",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-047",
+     "type": "PERSON",
+     "value": "svetlana ngono",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-052",
+     "type": "PERSON",
+     "value": "anna bierstedt",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-055",
+     "type": "PERSON",
+     "value": "ines holtkamp",
+     "covered": "0/12",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    }
+   ],
+   "false_positives": []
+  },
+  {
+   "profile": "context",
+   "dropped_detectors": [],
+   "ms_per_sentence": 0.04,
+   "per_type": {
+    "PERSON": {
+     "gold": 146,
+     "strict": 66,
+     "masked": 66,
+     "partial": 0,
+     "pred": 66,
+     "pred_ok": 66,
+     "recall_strict": 0.452,
+     "recall_masked": 0.452,
+     "precision": 1.0
+    },
+    "EMAIL": {
+     "gold": 45,
+     "strict": 45,
+     "masked": 45,
+     "partial": 0,
+     "pred": 45,
+     "pred_ok": 45,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 30,
+     "strict": 30,
+     "masked": 30,
+     "partial": 0,
+     "pred": 30,
+     "pred_ok": 30,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 20,
+     "strict": 20,
+     "masked": 20,
+     "partial": 0,
+     "pred": 20,
+     "pred_ok": 20,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 23,
+     "masked": 20,
+     "strict": 20,
+     "recall_masked": 0.87,
+     "recall_strict": 0.87
+    },
+    "oov": {
+     "gold": 33,
+     "masked": 21,
+     "strict": 21,
+     "recall_masked": 0.636,
+     "recall_strict": 0.636
+    }
+   },
+   "misses": [
+    {
+     "id": "de-000",
+     "type": "PERSON",
+     "value": "Lea Zimmermann",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-001",
+     "type": "PERSON",
+     "value": "Marie Fischer",
+     "covered": "0/12",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-002",
+     "type": "PERSON",
+     "value": "Anna Schneider",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-003",
+     "type": "PERSON",
+     "value": "Giulia Hoffmann",
+     "covered": "0/14",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-004",
+     "type": "PERSON",
+     "value": "Björn Werner",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-005",
+     "type": "PERSON",
+     "value": "Max Müller",
+     "covered": "0/9",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-006",
+     "type": "PERSON",
+     "value": "Katharina Richter",
+     "covered": "0/16",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-007",
+     "type": "PERSON",
+     "value": "Lea Hoffmann",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-008",
+     "type": "PERSON",
+     "value": "Ayşe Wagner",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-009",
+     "type": "PERSON",
+     "value": "Tim Krüger",
+     "covered": "0/9",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-020",
+     "type": "PERSON",
+     "value": "Lea",
+     "covered": "0/3",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-021",
+     "type": "PERSON",
+     "value": "Anna",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-022",
+     "type": "PERSON",
+     "value": "Moritz",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-023",
+     "type": "PERSON",
+     "value": "Emma",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-024",
+     "type": "PERSON",
+     "value": "Jürgen",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-030",
+     "type": "PERSON",
+     "value": "ines wagner",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "lower"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-031",
+     "type": "PERSON",
+     "value": "björn yılmaz",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "lower"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-032",
+     "type": "PERSON",
+     "value": "frank neumann",
+     "covered": "0/12",
+     "tags": [
+      "person",
+      "lower"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-033",
+     "type": "PERSON",
+     "value": "sabine schröder",
+     "covered": "0/14",
+     "tags": [
+      "person",
+      "lower"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-034",
+     "type": "PERSON",
+     "value": "ayşe schneider",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "lower"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-035",
+     "type": "PERSON",
+     "value": "Paul Schröder",
+     "covered": "0/12",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-035",
+     "type": "PERSON",
+     "value": "Mehmet Schulz",
+     "covered": "0/12",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-036",
+     "type": "PERSON",
+     "value": "Paul Schwarz",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-036",
+     "type": "PERSON",
+     "value": "Lena Schmidt",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-037",
+     "type": "PERSON",
+     "value": "Emma Kowalski",
+     "covered": "0/12",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-037",
+     "type": "PERSON",
+     "value": "Tim Schneider",
+     "covered": "0/12",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-038",
+     "type": "PERSON",
+     "value": "Jürgen Lange",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-038",
+     "type": "PERSON",
+     "value": "Ülkü Müller",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-039",
+     "type": "PERSON",
+     "value": "Lukas Schwarz",
+     "covered": "0/12",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-039",
+     "type": "PERSON",
+     "value": "Giulia Großmann",
+     "covered": "0/14",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-045",
+     "type": "PERSON",
+     "value": "Katharina Schröder",
+     "covered": "0/17",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-046",
+     "type": "PERSON",
+     "value": "Mehmet Zimmermann",
+     "covered": "0/16",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-047",
+     "type": "PERSON",
+     "value": "Jürgen Hartmann",
+     "covered": "0/14",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-048",
+     "type": "PERSON",
+     "value": "Jürgen Braun",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-049",
+     "type": "PERSON",
+     "value": "Sophie Wagner",
+     "covered": "0/12",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-050",
+     "type": "PERSON",
+     "value": "Karl-Heinz",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-050",
+     "type": "PERSON",
+     "value": "Ines",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-051",
+     "type": "PERSON",
+     "value": "Emma",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-051",
+     "type": "PERSON",
+     "value": "Lea",
+     "covered": "0/3",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-052",
+     "type": "PERSON",
+     "value": "Laura",
+     "covered": "0/5",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-052",
+     "type": "PERSON",
+     "value": "Jonas",
+     "covered": "0/5",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-053",
+     "type": "PERSON",
+     "value": "Björn",
+     "covered": "0/5",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-053",
+     "type": "PERSON",
+     "value": "Mehmet",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-054",
+     "type": "PERSON",
+     "value": "Paul",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-054",
+     "type": "PERSON",
+     "value": "Jürgen",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-055",
+     "type": "PERSON",
+     "value": "Svetlana Lange",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-055",
+     "type": "PERSON",
+     "value": "Laura Werner",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-056",
+     "type": "PERSON",
+     "value": "Lukas Yılmaz",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-056",
+     "type": "PERSON",
+     "value": "Anna Nguyen",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-057",
+     "type": "PERSON",
+     "value": "Ülkü Schmidt",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-057",
+     "type": "PERSON",
+     "value": "Giulia Neumann",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-058",
+     "type": "PERSON",
+     "value": "Jan-Hendrik Krause",
+     "covered": "0/17",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-058",
+     "type": "PERSON",
+     "value": "Svetlana Braun",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-059",
+     "type": "PERSON",
+     "value": "Karl-Heinz Großmann",
+     "covered": "0/18",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-059",
+     "type": "PERSON",
+     "value": "Max Schmidt",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-125",
+     "type": "PERSON",
+     "value": "Jan-Hendrik Wagner",
+     "covered": "0/17",
+     "tags": [
+      "mixed"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-126",
+     "type": "PERSON",
+     "value": "Svetlana Wagner",
+     "covered": "0/14",
+     "tags": [
+      "mixed"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-127",
+     "type": "PERSON",
+     "value": "Dimitrios Werner",
+     "covered": "0/15",
+     "tags": [
+      "mixed"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-128",
+     "type": "PERSON",
+     "value": "Paul Meyer",
+     "covered": "0/9",
+     "tags": [
+      "mixed"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-129",
+     "type": "PERSON",
+     "value": "Moritz Großmann",
+     "covered": "0/14",
+     "tags": [
+      "mixed"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-130",
+     "type": "PERSON",
+     "value": "Hannah Schwarz",
+     "covered": "0/13",
+     "tags": [
+      "mixed"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-131",
+     "type": "PERSON",
+     "value": "Anna Schneider",
+     "covered": "0/13",
+     "tags": [
+      "mixed"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-132",
+     "type": "PERSON",
+     "value": "Marie Koch",
+     "covered": "0/9",
+     "tags": [
+      "mixed"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-133",
+     "type": "PERSON",
+     "value": "Giulia Wagner",
+     "covered": "0/12",
+     "tags": [
+      "mixed"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-134",
+     "type": "PERSON",
+     "value": "Karl-Heinz Koch",
+     "covered": "0/14",
+     "tags": [
+      "mixed"
+     ],
+     "oov": null
+    },
+    {
+     "id": "dx-013",
+     "type": "PERSON",
+     "value": "Ülkü",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-015",
+     "type": "PERSON",
+     "value": "Ülkü",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-016",
+     "type": "PERSON",
+     "value": "Ines",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-017",
+     "type": "PERSON",
+     "value": "Sabine",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-018",
+     "type": "PERSON",
+     "value": "Chinedu",
+     "covered": "0/7",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-019",
+     "type": "PERSON",
+     "value": "Ülkü",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-025",
+     "type": "PERSON",
+     "value": "Chinedu",
+     "covered": "0/7",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-044",
+     "type": "PERSON",
+     "value": "ülkü ngono",
+     "covered": "0/9",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-045",
+     "type": "PERSON",
+     "value": "anna hoffmann",
+     "covered": "0/12",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": false
+    },
+    {
+     "id": "dx-046",
+     "type": "PERSON",
+     "value": "ines müller",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-047",
+     "type": "PERSON",
+     "value": "svetlana ngono",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-052",
+     "type": "PERSON",
+     "value": "anna bierstedt",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-053",
+     "type": "PERSON",
+     "value": "erika hoffmann",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": false
+    },
+    {
+     "id": "dx-054",
+     "type": "PERSON",
+     "value": "katharina schneider",
+     "covered": "0/18",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": false
+    },
+    {
+     "id": "dx-055",
+     "type": "PERSON",
+     "value": "ines holtkamp",
+     "covered": "0/12",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    }
+   ],
+   "false_positives": []
+  },
+  {
+   "profile": "gazetteer",
+   "dropped_detectors": [],
+   "ms_per_sentence": 0.04,
+   "per_type": {
+    "PERSON": {
+     "gold": 146,
+     "strict": 108,
+     "masked": 108,
+     "partial": 0,
+     "pred": 108,
+     "pred_ok": 108,
+     "recall_strict": 0.74,
+     "recall_masked": 0.74,
+     "precision": 1.0
+    },
+    "EMAIL": {
+     "gold": 45,
+     "strict": 45,
+     "masked": 45,
+     "partial": 0,
+     "pred": 45,
+     "pred_ok": 45,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 30,
+     "strict": 30,
+     "masked": 30,
+     "partial": 0,
+     "pred": 30,
+     "pred_ok": 30,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 20,
+     "strict": 20,
+     "masked": 20,
+     "partial": 0,
+     "pred": 20,
+     "pred_ok": 20,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 23,
+     "masked": 23,
+     "strict": 23,
+     "recall_masked": 1.0,
+     "recall_strict": 1.0
+    },
+    "oov": {
+     "gold": 33,
+     "masked": 21,
+     "strict": 21,
+     "recall_masked": 0.636,
+     "recall_strict": 0.636
+    }
+   },
+   "misses": [
+    {
+     "id": "de-008",
+     "type": "PERSON",
+     "value": "Ayşe Wagner",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-020",
+     "type": "PERSON",
+     "value": "Lea",
+     "covered": "0/3",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-021",
+     "type": "PERSON",
+     "value": "Anna",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-022",
+     "type": "PERSON",
+     "value": "Moritz",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-023",
+     "type": "PERSON",
+     "value": "Emma",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-024",
+     "type": "PERSON",
+     "value": "Jürgen",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-030",
+     "type": "PERSON",
+     "value": "ines wagner",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "lower"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-031",
+     "type": "PERSON",
+     "value": "björn yılmaz",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "lower"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-033",
+     "type": "PERSON",
+     "value": "sabine schröder",
+     "covered": "0/14",
+     "tags": [
+      "person",
+      "lower"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-034",
+     "type": "PERSON",
+     "value": "ayşe schneider",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "lower"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-038",
+     "type": "PERSON",
+     "value": "Ülkü Müller",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-050",
+     "type": "PERSON",
+     "value": "Karl-Heinz",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-050",
+     "type": "PERSON",
+     "value": "Ines",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-051",
+     "type": "PERSON",
+     "value": "Emma",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-051",
+     "type": "PERSON",
+     "value": "Lea",
+     "covered": "0/3",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-052",
+     "type": "PERSON",
+     "value": "Laura",
+     "covered": "0/5",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-052",
+     "type": "PERSON",
+     "value": "Jonas",
+     "covered": "0/5",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-053",
+     "type": "PERSON",
+     "value": "Björn",
+     "covered": "0/5",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-053",
+     "type": "PERSON",
+     "value": "Mehmet",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-054",
+     "type": "PERSON",
+     "value": "Paul",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-054",
+     "type": "PERSON",
+     "value": "Jürgen",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-055",
+     "type": "PERSON",
+     "value": "Svetlana Lange",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-056",
+     "type": "PERSON",
+     "value": "Lukas Yılmaz",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-057",
+     "type": "PERSON",
+     "value": "Ülkü Schmidt",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-058",
+     "type": "PERSON",
+     "value": "Svetlana Braun",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-126",
+     "type": "PERSON",
+     "value": "Svetlana Wagner",
+     "covered": "0/14",
+     "tags": [
+      "mixed"
+     ],
+     "oov": null
+    },
+    {
+     "id": "dx-013",
+     "type": "PERSON",
+     "value": "Ülkü",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-015",
+     "type": "PERSON",
+     "value": "Ülkü",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-016",
+     "type": "PERSON",
+     "value": "Ines",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-017",
+     "type": "PERSON",
+     "value": "Sabine",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-018",
+     "type": "PERSON",
+     "value": "Chinedu",
+     "covered": "0/7",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-019",
+     "type": "PERSON",
+     "value": "Ülkü",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-025",
+     "type": "PERSON",
+     "value": "Chinedu",
+     "covered": "0/7",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-044",
+     "type": "PERSON",
+     "value": "ülkü ngono",
+     "covered": "0/9",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-046",
+     "type": "PERSON",
+     "value": "ines müller",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-047",
+     "type": "PERSON",
+     "value": "svetlana ngono",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-052",
+     "type": "PERSON",
+     "value": "anna bierstedt",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-055",
+     "type": "PERSON",
+     "value": "ines holtkamp",
+     "covered": "0/12",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    }
+   ],
+   "false_positives": []
+  },
+  {
+   "profile": "gaz-xx",
+   "dropped_detectors": [],
+   "ms_per_sentence": 1.44,
+   "per_type": {
+    "PERSON": {
+     "gold": 146,
+     "strict": 117,
+     "masked": 132,
+     "partial": 0,
+     "pred": 150,
+     "pred_ok": 132,
+     "recall_strict": 0.801,
+     "recall_masked": 0.904,
+     "precision": 0.88
+    },
+    "EMAIL": {
+     "gold": 45,
+     "strict": 45,
+     "masked": 45,
+     "partial": 0,
+     "pred": 45,
+     "pred_ok": 45,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 30,
+     "strict": 30,
+     "masked": 30,
+     "partial": 0,
+     "pred": 30,
+     "pred_ok": 30,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 20,
+     "strict": 20,
+     "masked": 20,
+     "partial": 0,
+     "pred": 20,
+     "pred_ok": 20,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 23,
+     "masked": 23,
+     "strict": 16,
+     "recall_masked": 1.0,
+     "recall_strict": 0.696
+    },
+    "oov": {
+     "gold": 33,
+     "masked": 23,
+     "strict": 20,
+     "recall_masked": 0.697,
+     "recall_strict": 0.606
+    }
+   },
+   "misses": [
+    {
+     "id": "de-034",
+     "type": "PERSON",
+     "value": "ayşe schneider",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "lower"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-038",
+     "type": "PERSON",
+     "value": "Ülkü Müller",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "full"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-053",
+     "type": "PERSON",
+     "value": "Björn",
+     "covered": "0/5",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-054",
+     "type": "PERSON",
+     "value": "Jürgen",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "dx-013",
+     "type": "PERSON",
+     "value": "Ülkü",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-015",
+     "type": "PERSON",
+     "value": "Ülkü",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-016",
+     "type": "PERSON",
+     "value": "Ines",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-018",
+     "type": "PERSON",
+     "value": "Chinedu",
+     "covered": "0/7",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-019",
+     "type": "PERSON",
+     "value": "Ülkü",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-044",
+     "type": "PERSON",
+     "value": "ülkü ngono",
+     "covered": "0/9",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-046",
+     "type": "PERSON",
+     "value": "ines müller",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-047",
+     "type": "PERSON",
+     "value": "svetlana ngono",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-052",
+     "type": "PERSON",
+     "value": "anna bierstedt",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-055",
+     "type": "PERSON",
+     "value": "ines holtkamp",
+     "covered": "0/12",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    }
+   ],
+   "false_positives": [
+    {
+     "id": "de-019",
+     "type": "PERSON",
+     "text": "Herr Dr",
+     "tags": [
+      "person",
+      "title_full"
+     ]
+    },
+    {
+     "id": "de-040",
+     "type": "PERSON",
+     "text": "Wer",
+     "tags": [
+      "person",
+      "title_last"
+     ]
+    },
+    {
+     "id": "de-041",
+     "type": "PERSON",
+     "text": "Wer",
+     "tags": [
+      "person",
+      "title_last"
+     ]
+    },
+    {
+     "id": "de-042",
+     "type": "PERSON",
+     "text": "Wer",
+     "tags": [
+      "person",
+      "title_last"
+     ]
+    },
+    {
+     "id": "de-042",
+     "type": "PERSON",
+     "text": "Herr Dr",
+     "tags": [
+      "person",
+      "title_last"
+     ]
+    },
+    {
+     "id": "de-043",
+     "type": "PERSON",
+     "text": "Wer",
+     "tags": [
+      "person",
+      "title_last"
+     ]
+    },
+    {
+     "id": "de-044",
+     "type": "PERSON",
+     "text": "Wer",
+     "tags": [
+      "person",
+      "title_last"
+     ]
+    },
+    {
+     "id": "de-060",
+     "type": "PERSON",
+     "text": "Meine Adresse",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-061",
+     "type": "PERSON",
+     "text": "Meine Adresse",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-062",
+     "type": "PERSON",
+     "text": "Meine Adresse",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-063",
+     "type": "PERSON",
+     "text": "Meine Adresse",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-064",
+     "type": "PERSON",
+     "text": "Meine Adresse",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-144",
+     "type": "PERSON",
+     "text": "Max",
+     "tags": [
+      "negative"
+     ]
+    },
+    {
+     "id": "dx-017",
+     "type": "PERSON",
+     "text": "Danke",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-058",
+     "type": "PERSON",
+     "text": "Liebe Kolleginnen",
+     "tags": [
+      "negative",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-059",
+     "type": "PERSON",
+     "text": "Mein Name",
+     "tags": [
+      "negative",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-062",
+     "type": "PERSON",
+     "text": "Max",
+     "tags": [
+      "negative",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-068",
+     "type": "PERSON",
+     "text": "Meine Adresse",
+     "tags": [
+      "negative",
+      "ext"
+     ]
+    }
+   ]
+  },
+  {
+   "profile": "gaz-md",
+   "dropped_detectors": [],
+   "ms_per_sentence": 2.94,
+   "per_type": {
+    "PERSON": {
+     "gold": 146,
+     "strict": 120,
+     "masked": 135,
+     "partial": 2,
+     "pred": 154,
+     "pred_ok": 137,
+     "recall_strict": 0.822,
+     "recall_masked": 0.925,
+     "precision": 0.89
+    },
+    "EMAIL": {
+     "gold": 45,
+     "strict": 45,
+     "masked": 45,
+     "partial": 0,
+     "pred": 45,
+     "pred_ok": 45,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 30,
+     "strict": 30,
+     "masked": 30,
+     "partial": 0,
+     "pred": 30,
+     "pred_ok": 30,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 20,
+     "strict": 20,
+     "masked": 20,
+     "partial": 0,
+     "pred": 20,
+     "pred_ok": 20,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 23,
+     "masked": 23,
+     "strict": 16,
+     "recall_masked": 1.0,
+     "recall_strict": 0.696
+    },
+    "oov": {
+     "gold": 33,
+     "masked": 26,
+     "strict": 21,
+     "recall_masked": 0.788,
+     "recall_strict": 0.636
+    }
+   },
+   "misses": [
+    {
+     "id": "de-023",
+     "type": "PERSON",
+     "value": "Emma",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-030",
+     "type": "PERSON",
+     "value": "ines wagner",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "lower"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-034",
+     "type": "PERSON",
+     "value": "ayşe schneider",
+     "covered": "9/13",
+     "tags": [
+      "person",
+      "lower"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-051",
+     "type": "PERSON",
+     "value": "Emma",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "dx-017",
+     "type": "PERSON",
+     "value": "Sabine",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-018",
+     "type": "PERSON",
+     "value": "Chinedu",
+     "covered": "0/7",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-019",
+     "type": "PERSON",
+     "value": "Ülkü",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-044",
+     "type": "PERSON",
+     "value": "ülkü ngono",
+     "covered": "5/9",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-046",
+     "type": "PERSON",
+     "value": "ines müller",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-047",
+     "type": "PERSON",
+     "value": "svetlana ngono",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-055",
+     "type": "PERSON",
+     "value": "ines holtkamp",
+     "covered": "0/12",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    }
+   ],
+   "false_positives": [
+    {
+     "id": "de-050",
+     "type": "PERSON",
+     "text": "Schick",
+     "tags": [
+      "person",
+      "first"
+     ]
+    },
+    {
+     "id": "de-051",
+     "type": "PERSON",
+     "text": "Schick",
+     "tags": [
+      "person",
+      "first"
+     ]
+    },
+    {
+     "id": "de-052",
+     "type": "PERSON",
+     "text": "Schick",
+     "tags": [
+      "person",
+      "first"
+     ]
+    },
+    {
+     "id": "de-053",
+     "type": "PERSON",
+     "text": "Schick",
+     "tags": [
+      "person",
+      "first"
+     ]
+    },
+    {
+     "id": "de-054",
+     "type": "PERSON",
+     "text": "Schick",
+     "tags": [
+      "person",
+      "first"
+     ]
+    },
+    {
+     "id": "de-070",
+     "type": "PERSON",
+     "text": "Leite",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-071",
+     "type": "PERSON",
+     "text": "Leite",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-072",
+     "type": "PERSON",
+     "text": "Leite",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-073",
+     "type": "PERSON",
+     "text": "Leite",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-074",
+     "type": "PERSON",
+     "text": "Leite",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-145",
+     "type": "PERSON",
+     "text": "frank",
+     "tags": [
+      "negative"
+     ]
+    },
+    {
+     "id": "dx-016",
+     "type": "PERSON",
+     "text": "Danke",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-059",
+     "type": "PERSON",
+     "text": "Mein Name",
+     "tags": [
+      "negative",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-062",
+     "type": "PERSON",
+     "text": "Bitte Max",
+     "tags": [
+      "negative",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-063",
+     "type": "PERSON",
+     "text": "frank",
+     "tags": [
+      "negative",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-066",
+     "type": "PERSON",
+     "text": "Schick",
+     "tags": [
+      "negative",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-067",
+     "type": "PERSON",
+     "text": "Leite",
+     "tags": [
+      "negative",
+      "ext"
+     ]
+    }
+   ]
+  },
+  {
+   "profile": "gaz-lg",
+   "dropped_detectors": [],
+   "ms_per_sentence": 2.9,
+   "per_type": {
+    "PERSON": {
+     "gold": 146,
+     "strict": 115,
+     "masked": 137,
+     "partial": 0,
+     "pred": 154,
+     "pred_ok": 137,
+     "recall_strict": 0.788,
+     "recall_masked": 0.938,
+     "precision": 0.89
+    },
+    "EMAIL": {
+     "gold": 45,
+     "strict": 45,
+     "masked": 45,
+     "partial": 0,
+     "pred": 45,
+     "pred_ok": 45,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 30,
+     "strict": 30,
+     "masked": 30,
+     "partial": 0,
+     "pred": 30,
+     "pred_ok": 30,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 20,
+     "strict": 19,
+     "masked": 20,
+     "partial": 0,
+     "pred": 19,
+     "pred_ok": 19,
+     "recall_strict": 0.95,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 23,
+     "masked": 23,
+     "strict": 15,
+     "recall_masked": 1.0,
+     "recall_strict": 0.652
+    },
+    "oov": {
+     "gold": 33,
+     "masked": 27,
+     "strict": 20,
+     "recall_masked": 0.818,
+     "recall_strict": 0.606
+    }
+   },
+   "misses": [
+    {
+     "id": "de-023",
+     "type": "PERSON",
+     "value": "Emma",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-051",
+     "type": "PERSON",
+     "value": "Emma",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "de-052",
+     "type": "PERSON",
+     "value": "Laura",
+     "covered": "0/5",
+     "tags": [
+      "person",
+      "first"
+     ],
+     "oov": null
+    },
+    {
+     "id": "dx-017",
+     "type": "PERSON",
+     "value": "Sabine",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-018",
+     "type": "PERSON",
+     "value": "Chinedu",
+     "covered": "0/7",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-019",
+     "type": "PERSON",
+     "value": "Ülkü",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-044",
+     "type": "PERSON",
+     "value": "ülkü ngono",
+     "covered": "0/9",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-046",
+     "type": "PERSON",
+     "value": "ines müller",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    },
+    {
+     "id": "dx-047",
+     "type": "PERSON",
+     "value": "svetlana ngono",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "lower",
+      "ext"
+     ],
+     "oov": true
+    }
+   ],
+   "false_positives": [
+    {
+     "id": "de-050",
+     "type": "PERSON",
+     "text": "Schick",
+     "tags": [
+      "person",
+      "first"
+     ]
+    },
+    {
+     "id": "de-051",
+     "type": "PERSON",
+     "text": "Schick",
+     "tags": [
+      "person",
+      "first"
+     ]
+    },
+    {
+     "id": "de-052",
+     "type": "PERSON",
+     "text": "Schick",
+     "tags": [
+      "person",
+      "first"
+     ]
+    },
+    {
+     "id": "de-053",
+     "type": "PERSON",
+     "text": "Schick",
+     "tags": [
+      "person",
+      "first"
+     ]
+    },
+    {
+     "id": "de-054",
+     "type": "PERSON",
+     "text": "Schick",
+     "tags": [
+      "person",
+      "first"
+     ]
+    },
+    {
+     "id": "de-070",
+     "type": "PERSON",
+     "text": "Leite",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-071",
+     "type": "PERSON",
+     "text": "Leite",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-072",
+     "type": "PERSON",
+     "text": "Leite",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-073",
+     "type": "PERSON",
+     "text": "Leite",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-074",
+     "type": "PERSON",
+     "text": "Leite",
+     "tags": [
+      "email"
+     ]
+    },
+    {
+     "id": "de-132",
+     "type": "PERSON",
+     "text": "Mein Key sk-X3shmalmGnHbLuMrWrrzDJlhSdyae70U",
+     "tags": [
+      "mixed"
+     ]
+    },
+    {
+     "id": "de-145",
+     "type": "PERSON",
+     "text": "frank",
+     "tags": [
+      "negative"
+     ]
+    },
+    {
+     "id": "dx-016",
+     "type": "PERSON",
+     "text": "Danke",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-018",
+     "type": "PERSON",
+     "text": "Danke",
+     "tags": [
+      "person",
+      "first",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-063",
+     "type": "PERSON",
+     "text": "frank",
+     "tags": [
+      "negative",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-066",
+     "type": "PERSON",
+     "text": "Schick",
+     "tags": [
+      "negative",
+      "ext"
+     ]
+    },
+    {
+     "id": "dx-067",
+     "type": "PERSON",
+     "text": "Leite",
+     "tags": [
+      "negative",
+      "ext"
+     ]
+    }
+   ]
+  }
+ ]
+}
