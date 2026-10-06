@@ -1,0 +1,534 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><title>AISM als Referenz für souveräne KI-Infrastruktur</title><style>
+@page { size: A4; margin: 18mm 18mm 20mm 18mm; }
+:root { --c:#0b3b5c; --a:#1d7a8c; --l:#e8f1f4; --g:#5b6770; }
+body { font-family: 'IBM Plex Sans','Inter','DejaVu Sans',sans-serif; font-size: 9.6pt; line-height: 1.47; color:#1d2328; }
+h1 { font-size: 27pt; color: var(--c); line-height:1.15; margin: 0 0 8mm; }
+h2 { font-size: 15pt; color: var(--c); border-bottom: 2px solid var(--a); padding-bottom: 2pt; margin-top: 18pt; page-break-after: avoid; }
+h3 { font-size: 11.5pt; color: var(--a); margin-top: 12pt; page-break-after: avoid; }
+p, li { text-align: justify; hyphens: auto; }
+table { width:100%; border-collapse: collapse; margin: 8pt 0 10pt; font-size: 8.7pt; page-break-inside: auto; }
+tr { page-break-inside: avoid; }
+th { background: var(--c); color:#fff; text-align:left; padding: 3.5pt 5pt; font-weight:600; }
+td { padding: 3pt 5pt; border-bottom: 1px solid #d5dde1; vertical-align: top; text-align:left; hyphens:auto; }
+tr:nth-child(even) td { background: #f5f8fa; }
+code { font-family: 'DejaVu Sans Mono', monospace; font-size: 8.6pt; background:#eef2f4; padding: 0 2pt; border-radius:2px; }
+blockquote { margin: 10pt 0; padding: 6pt 10pt; background: var(--l); border-left: 4px solid var(--a); color:#27343c; font-size:9.5pt; }
+blockquote p { margin: 2pt 0; }
+a { color: var(--a); text-decoration: none; word-break: break-all; }
+.cover { height: 247mm; display:flex; flex-direction:column; justify-content:flex-start; padding-top: 30mm; box-sizing:border-box; page-break-after: always; position:relative; }
+.cover::before { content:""; position:absolute; top:0; left:0; width:38mm; height:5px; background: var(--a); }
+.kicker { text-transform: uppercase; letter-spacing: 3pt; color: var(--a); font-weight:700; font-size: 10pt; margin-bottom: 4mm; }
+.cover table { font-size: 9.5pt; margin-top: 10mm; }
+.cover table thead { display:none; }
+.cover td { background: none !important; border-bottom: 1px solid #d5dde1; }
+.cover td:first-child { width: 38mm; color: var(--g); font-weight:600; }
+.toc { margin-top: 10mm; border-top: 1px solid #d5dde1; padding-top: 5mm; }
+.toch { text-transform: uppercase; letter-spacing: 2pt; color: var(--a); font-weight:700; font-size: 9pt; margin-bottom: 2mm; }
+.toc ol { list-style:none; columns: 2; column-gap: 10mm; margin:0; padding-left: 0; font-size: 9.5pt; }
+.toc li { padding: 1.5pt 0; break-inside: avoid; text-align:left; }
+.toc a { color: #1d2328; word-break: normal; }
+figure.pipe { margin: 12pt 0 14pt; page-break-inside: avoid; }
+.row { display:flex; gap:4pt; }
+.st { flex:1; background: var(--l); border:1px solid #c5d8df; border-radius:4px; padding:5pt 3pt; text-align:center; font-size:8pt; position:relative; }
+.st b { display:block; color: var(--c); font-size: 11pt; }
+.st.gw { background: var(--c); color:#fff; border-color: var(--c); }
+.st.gw b { color:#fff; }
+.tri { display:flex; align-items:center; gap:4pt; margin-top: 9pt; }
+.tri > div { flex:1; text-align:center; font-size:8.5pt; border:1px solid #c5d8df; border-radius:4px; padding:6pt 3pt; }
+.tri b { display:block; color: var(--c); font-size: 10pt; }
+.tri small { color: var(--g); }
+.tri .plus { flex:0 0 12pt; border:none; font-size: 16pt; color: var(--a); font-weight:700; padding:0; }
+.tri .res { background: var(--a); color:#fff; border-color: var(--a); }
+.tri .res b { color:#fff; }
+figcaption { font-size: 8.5pt; color: var(--g); text-align:center; margin-top: 6pt; font-style: italic; }
+ol li a, #quellen ~ ol li { font-size: 9pt; }
+</style></head>
+<body><section class="cover"><div class="kicker">Positionierungspapier</div><h1 id="aism-als-referenz-fur-souverane-ki-infrastruktur">AISM als Referenz für souveräne KI-Infrastruktur</h1>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Autor</td>
+<td>Markus Oehring</td>
+</tr>
+<tr>
+<td>Version</td>
+<td>1.1 (Entwurf zur Diskussion)</td>
+</tr>
+<tr>
+<td>Datum</td>
+<td>05.10.2026</td>
+</tr>
+<tr>
+<td>Bezug</td>
+<td><code>README.md</code> (AISM Reference Stack), <code>AISM-Spezifikation.md</code> (Entwurf 0.2), <code>policy/AISM-Policy-Format.md</code>, <code>conformance/AISM-Konformitaet.md</code></td>
+</tr>
+<tr>
+<td>Status der Bausteine</td>
+<td>Referenzarchitektur und Compose-Profil beschrieben; Policy-Format mit JSON Schema festgelegt; Konformitäts-Testsuite 0.2.0 ausführbar; Governance-Gateway und Orchestrator als Prototypen, im Docker-Konformitäts-Stack mit Mocks statt echter Modelle getestet (alle 37 automatisierten Tests bestanden, Stufe K3 erreicht; Prototyp, keine Produktionsfreigabe)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Hinweis:</strong> „AISM“ ist ein Arbeitstitel; die Referenzimplementierung heißt „AISM Reference Stack“. AISM ist ein unabhängiges Projekt und steht in keiner Verbindung zu anderen Produkten ähnlichen Namens oder Zwecks (siehe Abschnitt 3.1). Dieses Papier beschreibt eine Position und einen Plan, kein fertiges Produkt. Es enthält keine Rechtsberatung. Aussagen zu Gesetzen geben den recherchierten Stand vom Oktober 2026 wieder und ersetzen keine Prüfung im Einzelfall.</p>
+</blockquote>
+<div class="toc"><div class="toch">Inhalt</div><ol><li><a href="#kurzfassung">Kurzfassung</a></li><li><a href="#1-ausgangslage-warum-ki-infrastruktur-heute-schwer-zu-verantworten-ist">1. Ausgangslage: Warum KI-Infrastruktur heute schwer zu verantworten ist</a></li><li><a href="#2-these-referenzmodell-referenzimplementierung-konformitatstests-uberprufbare-souveranitat">2. These: Referenzmodell + Referenzimplementierung + Konformitätstests = überprüfbare Souveränität</a></li><li><a href="#3-was-aism-von-bestehenden-ansatzen-unterscheidet">3. Was AISM von bestehenden Ansätzen unterscheidet</a></li><li><a href="#4-zielgruppen">4. Zielgruppen</a></li><li><a href="#5-regulatorische-relevanz">5. Regulatorische Relevanz</a></li><li><a href="#6-nutzen-nach-stakeholdern">6. Nutzen nach Stakeholdern</a></li><li><a href="#7-open-source-und-community-modell">7. Open Source und Community-Modell</a></li><li><a href="#8-roadmap">8. Roadmap</a></li><li><a href="#9-risiken-und-grenzen">9. Risiken und Grenzen</a></li><li><a href="#10-aufruf-zur-mitwirkung">10. Aufruf zur Mitwirkung</a></li><li><a href="#quellen">Quellen</a></li></ol></div></section>
+
+
+<h2 id="kurzfassung">Kurzfassung</h2>
+<p>Organisationen, die generative KI mit sensiblen Daten einsetzen wollen, stehen vor einer unbequemen Wahl: Entweder sie nutzen Cloud-APIs, deren Datenflüsse sie nur vertraglich, aber nicht technisch kontrollieren, oder sie bauen aus einzelnen Open-Source-Projekten eine eigene Plattform zusammen, deren Sicherheitseigenschaften niemand systematisch geprüft hat. Beides lässt eine zentrale Frage offen: <strong>Wie weist man nach, wohin Daten in einem KI-System fließen und wer darüber entschieden hat?</strong></p>
+<p>AISM beantwortet diese Frage mit drei Bausteinen, die zusammen mehr leisten als jeder für sich:</p>
+<ol>
+<li><strong>AISM</strong>, ein offenes Referenzmodell, das eine KI-Anfrage als Pipeline aus sieben Stufen (S1–S7) beschreibt und die Stellen festlegt, an denen Policy durchgesetzt und protokolliert wird.</li>
+<li><strong>AISM Reference Stack</strong>, eine quelloffene Referenzimplementierung (Apache 2.0): ein Governance-Gateway und ein Orchestrator als Prototypen sowie eine Compose-Konfiguration, die etablierte Open-Source-Komponenten in die Pipeline einordnet. Sie zeigt, dass sich das Modell mit vorhandenen Bausteinen umsetzen und testen lässt.</li>
+<li><strong>Eine Konformitäts-Testsuite</strong> mit drei Stufen (K1 Basic, K2 Governed, K3 Sovereign/Auditable), die prüft, ob eine konkrete Installation die Anforderungen des Modells tatsächlich erfüllt.</li>
+</ol>
+<p>Die Kernthese: <strong>Souveränität entsteht nicht durch Feature-Listen, sondern durch Überprüfbarkeit.</strong> Ein Stack ist dann souverän betreibbar, wenn seine Datenflüsse spezifiziert, seine Kontrollpunkte implementiert und beides durch reproduzierbare Tests belegt ist. AISM will dafür die offene Referenz werden: für Betreiber, für Datenschutzbeauftragte und für Anbieter, die eigene Implementierungen gegen denselben Maßstab prüfen lassen wollen.</p>
+<h2 id="1-ausgangslage-warum-ki-infrastruktur-heute-schwer-zu-verantworten-ist">1. Ausgangslage: Warum KI-Infrastruktur heute schwer zu verantworten ist</h2>
+<h3 id="11-fragmentierte-werkzeuge">1.1 Fragmentierte Werkzeuge</h3>
+<p>Ein produktiver KI-Arbeitsplatz besteht aus deutlich mehr als einem Sprachmodell: Inferenzserver, Chat-Oberfläche, Embedding-Modell, Vektordatenbank, Websuche, Workflow-Automatisierung, Identitätsanbindung und Monitoring. Jede dieser Komponenten ist für sich ausgereift, doch sie wurden unabhängig voneinander entwickelt. Konfigurationsformate, Netzwerkannahmen, GPU-Anforderungen und Release-Zyklen unterscheiden sich. Die Verbindung zwischen ihnen entsteht in der Praxis durch individuell geschriebene Umgebungsvariablen, Portfreigaben und API-Brücken. Diese Klebeschicht ist selten dokumentiert, bricht bei Updates und ist genau der Ort, an dem sicherheitsrelevante Entscheidungen fallen, etwa ob eine Chat-Oberfläche das Modell direkt oder über eine Kontrollinstanz anspricht.</p>
+<h3 id="12-datensouveranitat">1.2 Datensouveränität</h3>
+<p>Für Kanzleien, Steuerberatungen, Arztpraxen, Kliniken, Behörden und viele mittelständische Unternehmen ist nicht die Frage, <em>ob</em> KI nützlich ist, sondern <em>unter welchen Bedingungen</em> sie mit Mandanten-, Patienten-, Bürger- oder Konstruktionsdaten arbeiten darf. Wer Berufsgeheimnisse wahren muss (z. B. nach § 203 StGB), personenbezogene Daten nach der DSGVO verarbeitet oder Betriebsgeheimnisse schützt, braucht eine belastbare Antwort darauf, wo Daten verarbeitet, gespeichert und protokolliert werden.</p>
+<h3 id="13-abhangigkeit-von-cloud-apis">1.3 Abhängigkeit von Cloud-APIs</h3>
+<p>Cloud-Modelle sind leistungsfähig und oft der schnellste Einstieg. Sie verlagern aber Kontrolle: über Verfügbarkeit, Preisentwicklung, Modellversionen, Aufbewahrung von Eingaben und den Rechtsraum der Verarbeitung. Das ist kein Argument gegen Cloud-Nutzung an sich, wohl aber gegen eine <em>unkontrollierte</em> Nutzung, bei der jede Anwendung eigenständig externe Endpunkte aufruft und niemand einen Gesamtüberblick über die Datenabflüsse hat.</p>
+<h3 id="14-fehlende-nachvollziehbare-datenflusse">1.4 Fehlende nachvollziehbare Datenflüsse</h3>
+<p>Die grundlegende Lücke ist weder die Modellqualität noch die Hardware, sondern die fehlende Nachvollziehbarkeit. Viele Installationen können nicht verlässlich beantworten:</p>
+<ul>
+<li>Welche Komponente hat welche Daten gesehen, und in welcher Form (Klartext oder maskiert)?</li>
+<li>Welche Anfrage hat das Deployment verlassen, wohin, und auf Grundlage welcher Regel?</li>
+<li>Welches Werkzeug hat ein Modell aufgerufen, mit welchen Parametern, und wer hat das erlaubt?</li>
+<li>Lässt sich das alles nachträglich prüfen, ohne dass das Protokoll selbst zum Datenschutzrisiko wird?</li>
+</ul>
+<p>Solange diese Fragen nur durch Dokumentation und Vertrauen beantwortet werden, bleibt jede Zusicherung von „Datenschutz“ oder „Souveränität“ eine Behauptung.</p>
+<h2 id="2-these-referenzmodell-referenzimplementierung-konformitatstests-uberprufbare-souveranitat">2. These: Referenzmodell + Referenzimplementierung + Konformitätstests = überprüfbare Souveränität</h2>
+<p>Souveränität im Sinne dieses Papiers bedeutet: <strong>Eine Organisation kann selbst bestimmen, belegen und prüfen lassen, wo ihre Daten in einem KI-System verarbeitet werden und welche Regeln dabei gelten.</strong> Das erfordert drei Dinge, die sich gegenseitig absichern.</p>
+<table>
+<thead>
+<tr>
+<th>Baustein</th>
+<th>Funktion</th>
+<th>Was er allein nicht leistet</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Referenzmodell (AISM)</strong></td>
+<td>Gemeinsame Sprache und normative Anforderungen (MUSS/SOLLTE/KANN nach RFC 2119): Stufen, Schnittstellen, Policy-Durchsetzungspunkte, Audit</td>
+<td>Ein Modell beweist nicht, dass eine Installation es einhält.</td>
+</tr>
+<tr>
+<td><strong>Referenzimplementierung (AISM Reference Stack)</strong></td>
+<td>Zeigt, dass das Modell mit etablierten Open-Source-Komponenten umsetzbar ist, und liefert eine prüfbare Ausgangskonfiguration (signierte Beispiel-Policy, gepinnte Images, Host-Firewall)</td>
+<td>Eine Implementierung kann vom Modell abweichen, z. B. durch Konfiguration.</td>
+</tr>
+<tr>
+<td><strong>Konformitätstests</strong></td>
+<td>Prüfen eine konkrete Installation automatisiert und reproduzierbar gegen die Anforderungen; erzeugen einen prüffähigen Nachweis</td>
+<td>Tests sind nur so gut wie die Spezifikation, gegen die sie prüfen.</td>
+</tr>
+</tbody>
+</table>
+<p>Erst die Kombination schließt den Kreis: Das Modell definiert <em>was</em> gelten soll, die Implementierung zeigt <em>wie</em>, und die Tests belegen, <em>dass</em> es in einer bestimmten Installation gilt. Damit verschiebt sich die Diskussion von „Unterstützt das Produkt Datenschutz?“ hin zu „Besteht diese Installation Testfall M-04 (Cloud-Routing standardmäßig deaktiviert) und M-12 (fail-closed bei Ausfall der PII-Erkennung)?“. Diese Frage kann ein IT-Betrieb beantworten, ein Datenschutzbeauftragter nachvollziehen und ein Auditor prüfen.</p>
+<figure class="pipe"><div class="row"><div class="st"><b>S1</b><span>UI &amp; Session</span></div><div class="st gw"><b>S2</b><span>Governance-Gateway</span></div><div class="st"><b>S3</b><span>Orchestrierung</span></div><div class="st"><b>S4</b><span>Retrieval</span></div><div class="st"><b>S5</b><span>Grounding</span></div><div class="st"><b>S6</b><span>Inferenz</span></div><div class="st"><b>S7</b><span>Compute</span></div></div>
+<div class="tri"><div><b>AISM</b>Referenzmodell<br><small>Was gelten soll</small></div><div class="plus">+</div>
+<div><b>AISM Reference Stack</b>Referenzimplementierung<br><small>Wie es umgesetzt wird</small></div><div class="plus">+</div>
+<div><b>Konformitätstests</b>K1 · K2 · K3<br><small>Dass es gilt</small></div><div class="plus">=</div>
+<div class="res"><b>Überprüfbare</b>Souveränität</div></div>
+<figcaption>Abb. 1: AISM-Request-Pipeline (S2 als zentraler Kontrollpunkt) und das Zusammenspiel der drei Bausteine</figcaption></figure>
+
+<h3 id="21-das-referenzmodell-im-uberblick">2.1 Das Referenzmodell im Überblick</h3>
+<p>AISM beschreibt den Weg einer Anfrage in sieben Stufen. Die Nummerierung folgt der Request-Richtung, sodass das Governance-Gateway (S2) sichtbar <strong>vor</strong> jedem Modell-, Index- oder Netzwerkzugriff liegt.</p>
+<table>
+<thead>
+<tr>
+<th>Stufe</th>
+<th>Name</th>
+<th>Kernaufgabe</th>
+<th>Referenzkomponenten im AISM Reference Stack</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S1</td>
+<td>UI &amp; Session</td>
+<td>Benutzerinteraktion, Authentifizierung (z. B. OIDC), Streaming-Darstellung</td>
+<td>Open WebUI</td>
+</tr>
+<tr>
+<td>S2</td>
+<td>Governance-Gateway</td>
+<td>AuthZ, PII-Maskierung, Policy-Entscheidung, Routing lokal/Cloud, Egress-Kontrolle, Audit</td>
+<td>AISM-Governance-Gateway (Prototyp)</td>
+</tr>
+<tr>
+<td>S3</td>
+<td>Orchestrierung &amp; Agenten</td>
+<td>Kontextanreicherung, Tool-Calls über validierendes Gateway</td>
+<td>AISM-Orchestrator (Prototyp), n8n, optional MCP</td>
+</tr>
+<tr>
+<td>S4</td>
+<td>Retrieval (RAG)</td>
+<td>Embeddings (separater Endpunkt), Vektorsuche mit Zugriffsfiltern</td>
+<td>Embedding-Server, Qdrant</td>
+</tr>
+<tr>
+<td>S5</td>
+<td>Grounding</td>
+<td>Websuche mit maskierter Anfrage, als Egress behandelt</td>
+<td>SearXNG, Perplexica</td>
+</tr>
+<tr>
+<td>S6</td>
+<td>Inferenz</td>
+<td>Token-Generierung über OpenAI-kompatible API mit SSE</td>
+<td>llama.cpp (Alternativen: vLLM, Ollama)</td>
+</tr>
+<tr>
+<td>S7</td>
+<td>Compute</td>
+<td>Gerätezuordnung an Container, keine Netzwerkschicht</td>
+<td>Docker, NVIDIA Container Toolkit/CDI, ROCm</td>
+</tr>
+</tbody>
+</table>
+<p>Quer dazu liegen Telemetrie und Dashboard, die alle Stufen beobachten, ohne am Request-Pfad teilzunehmen und ohne Prompt-Inhalte zu erfassen. Die Spezifikation legt zehn Policy-Durchsetzungspunkte (PEP-1 bis PEP-10) fest, etwa die Maskierung von Prompts vor jeder Weitergabe, die Allowlist- und Schemaprüfung jedes Tool-Calls und die erneute Prüfung am Egress. Der Grundsatz lautet: <strong>Daten verlassen das Deployment nur über das Governance-Gateway und nur unter Policy.</strong> AISM behauptet ausdrücklich <em>nicht</em>, dass grundsätzlich keine Daten das Deployment verlassen; es macht jeden Abfluss entscheidbar und protokolliert.</p>
+<h3 id="22-policy-as-code">2.2 Policy-as-Code</h3>
+<p>Regeln, die heute in Konfigurationsdateien oder Köpfen stecken, sollen künftig als versionierter, testbarer Code vorliegen: Welche Rolle darf welches Modell, welche Dokumentensammlung, welches Werkzeug nutzen? Darf eine Datenklasse in die Cloud geroutet werden? Policy-as-Code bringt drei Vorteile: Änderungen sind über Versionskontrolle nachvollziehbar (wer hat wann welche Regel geändert), Regeln lassen sich vor dem Ausrollen automatisiert testen, und Audit-Einträge können auf eine eindeutige Regelversion verweisen. Für die erste Version ist entschieden: AISM verwendet ein <strong>eigenes, deklaratives YAML-Format</strong> mit JSON Schema (<code>policy/AISM-Policy-Format.md</code>, <code>policy.schema.json</code>), das das Gateway beim Start validiert; ohne gültige Policy leitet es nichts weiter. Eine Abbildung auf eine etablierte Policy-Engine wie Open Policy Agent/Rego bleibt als optionale Erweiterung möglich, ist aber nicht Voraussetzung. Weiterentwicklungen des Formats sollen im offenen Spezifikationsprozess entschieden werden.</p>
+<h3 id="23-konformitatsstufen">2.3 Konformitätsstufen</h3>
+<p>Die Testsuite (<code>conformance/AISM-Konformitaet.md</code>, Testsuite 0.2.0) gliedert Anforderungen in drei aufeinander aufbauende Stufen K1–K3. Eine Installation erreicht eine Stufe nur, wenn alle MUSS-Tests dieser und der darunterliegenden Stufen <strong>bestanden</strong> sind; übersprungene MUSS-Tests (fehlende Voraussetzung) gelten als nicht erreicht. Fehlgeschlagene SOLLTE-Tests verhindern eine Stufe nicht, werden aber im Bericht ausgewiesen.</p>
+<table>
+<thead>
+<tr>
+<th>Stufe</th>
+<th>Leitfrage</th>
+<th>Erforderliche AISM-Kriterien (Spez. §9) und Prüfschwerpunkte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>K1 Basic</strong></td>
+<td>Ist das Gateway erzwungen und die Schnittstelle interoperabel?</td>
+<td>M-01 (kein Direktzugriff von S1 auf S6, kein Bypass aus dem Client-Netz), M-06 (OpenAI-kompatible API inkl. SSE), M-13 (kein <code>privileged</code>-Container) sowie Authentifizierung am Gateway (Spez. §6.2 Schritt 1); Health-Endpunkt</td>
+</tr>
+<tr>
+<td><strong>K2 Governed</strong></td>
+<td>Setzt das Gateway die Policy nachweisbar durch?</td>
+<td>K1 und zusätzlich M-02 (PII-Maskierung vor Weitergabe), M-04 (Cloud-Routing standardmäßig aus), M-05 (Audit ohne Klartext-PII), M-07 und M-08 (Tool-Calls, Allowlist und Schemaprüfung), M-09 (RAG-Anfragen nur nach Maskierung über separaten Embedding-Endpunkt), M-11 (abschaltbare Web-Suche), M-12 (fail-closed), M-15 (gültige Policy geladen, Version und Digest in jedem Audit-Eintrag)</td>
+</tr>
+<tr>
+<td><strong>K3 Sovereign/Auditable</strong></td>
+<td>Kann die Organisation den Betrieb unabhängig belegen und prüfen lassen?</td>
+<td>K2 und zusätzlich, in K3 als Pflicht: S-02 (manipulationserkennbares Audit, Hash-Kette), S-07 (Images per Digest gepinnt, Modell-Prüfsummen), S-10 (Trace-IDs Ende-zu-Ende), S-11 (signierte Policy-Versionen), S-13 (Nachweis je Cloud-Egress)</td>
+</tr>
+</tbody>
+</table>
+<p>Wichtig: Die Stufen beschreiben <strong>technische Eigenschaften einer Installation</strong>, nicht die Rechtskonformität einer Organisation. Ein K3-Bericht ist ein Beleg, den Datenschutz, Informationssicherheit und Revision verwenden können, aber kein Zertifikat im Sinne eines Gesetzes.</p>
+<p><strong>Stand 05.10.2026:</strong> Ein Lauf im Docker-Konformitäts-Stack gegen die Prototypen von Gateway und Orchestrator (mit Mocks statt echter Modelle, Test-IdP und Test-Signaturschlüssel) bestand alle 37 automatisierten Tests von K1 bis K3. Dazu gehören die signierte Policy samt Ablehnung manipulierter Fassungen, per Digest gepinnte Images und ein Cloud-Fallback-Szenario mit Egress-Nachweis. Nicht abgedeckt sind die Prüfsummen der Modelldateien, Open WebUI und echte Modelle auf GPU. Der Lauf zeigt die Prüfbarkeit des Ansatzes; er ist kein Nachweis für eine produktive Installation.</p>
+<h2 id="3-was-aism-von-bestehenden-ansatzen-unterscheidet">3. Was AISM von bestehenden Ansätzen unterscheidet</h2>
+<p>Der Markt für lokale und private KI wächst, und es gibt gute Lösungen. AISM positioniert sich nicht gegen einzelne Produkte, sondern gegenüber <strong>Kategorien</strong> von Ansätzen:</p>
+<table>
+<thead>
+<tr>
+<th>Kategorie</th>
+<th>Typische Stärke</th>
+<th>Typische Lücke aus Sicht überprüfbarer Souveränität</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cloud-KI-Dienste</strong> (API oder SaaS)</td>
+<td>Höchste Modellleistung, kein eigener Betrieb</td>
+<td>Datenfluss wird vertraglich zugesichert, aber nicht im eigenen Haus technisch durchgesetzt oder geprüft</td>
+</tr>
+<tr>
+<td><strong>All-in-one-Desktop- oder Server-Pakete</strong> für lokale KI</td>
+<td>Sehr einfacher Einstieg, gute Oberfläche</td>
+<td>Governance ist meist eine Funktion der jeweiligen Anwendung; ein anwendungsübergreifender Kontrollpunkt und ein offener Prüfmaßstab fehlen häufig</td>
+</tr>
+<tr>
+<td><strong>Selbst zusammengestellte Open-Source-Stacks</strong></td>
+<td>Maximale Flexibilität, keine Lizenzkosten</td>
+<td>Die Integration ist individuell, Sicherheitseigenschaften hängen von Einzelpersonen ab und sind kaum vergleichbar</td>
+</tr>
+<tr>
+<td><strong>Proprietäre Enterprise-KI-Plattformen</strong></td>
+<td>Integrierter Support, Funktionsumfang</td>
+<td>Prüfkriterien sind meist herstellerdefiniert; Wechsel einzelner Komponenten ist eingeschränkt</td>
+</tr>
+</tbody>
+</table>
+<p>Die Unterscheidungsmerkmale von AISM sind daher strukturell:</p>
+<ul>
+<li><strong>Spezifikation vor Produkt.</strong> AISM ist ein offenes Modell mit normativen Anforderungen. Der AISM Reference Stack ist <em>eine</em> Implementierung davon, nicht die einzige mögliche. Andere Anbieter können konforme Implementierungen bauen.</li>
+<li><strong>Ein zentraler Kontrollpunkt statt verteilter Einstellungen.</strong> Maskierung, Policy, Routing und Audit liegen im Governance-Gateway (S2) und gelten für alle Clients gleichermaßen: Chat-Oberfläche, Agenten, Workflows und Suchkomponenten.</li>
+<li><strong>Ausführungshoheit außerhalb des Modells.</strong> Ein Modell kann Tool-Aufrufe nur <em>vorschlagen</em>. Ausgeführt wird erst nach Allowlist- und Schemaprüfung; Ergebnisse werden maskiert und protokolliert.</li>
+<li><strong>Lokal zuerst, nicht ausschließlich lokal.</strong> Hybridbetrieb ist vorgesehen, aber jeder Cloud-Aufruf ist eine explizite, protokollierte Policy-Entscheidung, die standardmäßig deaktiviert ist.</li>
+<li><strong>Austauschbare Komponenten über Standardschnittstellen.</strong> OpenAI-kompatible API, SSE, JSON-RPC/MCP, Qdrant REST/gRPC: Komponenten lassen sich wechseln, solange die Schnittstellenverträge eingehalten werden. Die Testsuite prüft genau das.</li>
+<li><strong>Nachweis statt Versprechen.</strong> Konformitätsstufen machen Eigenschaften messbar und vergleichbar, auch über Implementierungen hinweg.</li>
+<li><strong>Ehrliche Grenzen im Modell selbst.</strong> Die Spezifikation benennt offene Punkte (z. B. Fehlerraten der Namenserkennung) und enthält bewusst keine Leistungsversprechen.</li>
+</ul>
+<h3 id="31-verwandte-projekte">3.1 Verwandte Projekte</h3>
+<p>Mehrere quelloffene Projekte bündeln lokale Inferenz, Chat, Retrieval und Automatisierung, mit unterschiedlichem Schwerpunkt, etwa einfache Installation oder eine einzelne Anwendung. Beispiele ohne Anspruch auf Vollständigkeit und ohne Wertung: <strong>Harbor</strong> (CLI- und Compose-Setup für lokale LLM-Werkzeuge), das <strong>n8n Self-hosted AI Starter Kit</strong> (n8n, Ollama und Qdrant per Docker Compose), <strong>LocalAI</strong> (OpenAI-kompatibler lokaler Inferenzserver), <strong>AnythingLLM</strong> (Anwendung für die Arbeit mit Dokumenten) und <strong>Osmantic ODS</strong> (Osmantic Deployment System, ein quelloffenes Deployment-System für lokale und hybride KI-Dienste).</p>
+<p>AISM ist von all diesen Projekten <strong>unabhängig</strong>: Es besteht keine Verbindung, Partnerschaft oder Empfehlung, und es werden weder Code noch Texte übernommen. AISM ist kein Deployment-Werkzeug, sondern ein Referenzmodell mit Prüfmaßstab. Grundsätzlich ließe sich jeder dieser Stacks gegen die Konformitätsstufen prüfen. Produktnamen gehören den jeweiligen Rechteinhabern.</p>
+<h2 id="4-zielgruppen">4. Zielgruppen</h2>
+<p>AISM richtet sich an Organisationen, für die Vertraulichkeit und Nachvollziehbarkeit Voraussetzung für den KI-Einsatz sind.</p>
+<table>
+<thead>
+<tr>
+<th>Zielgruppe</th>
+<th>Typische Anforderungen</th>
+<th>Beitrag von AISM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Steuerberatungen und Kanzleien</strong></td>
+<td>Berufsgeheimnis, Mandantendaten, Akten- und Fristenarbeit</td>
+<td>Lokale Inferenz als Standard, Cloud nur nach Freigabe; Retrieval mit Zugriffsfiltern je Mandat; protokollierte Werkzeugnutzung</td>
+</tr>
+<tr>
+<td><strong>Öffentliche Verwaltung</strong></td>
+<td>Datenhoheit, Vergaberecht, Nachvollziehbarkeit von Verwaltungshandeln, Informationssicherheit</td>
+<td>Offene Spezifikation und Apache-2.0-Lizenz unterstützen herstellerunabhängige Ausschreibungen; Konformitätsstufen als prüfbare Anforderung</td>
+</tr>
+<tr>
+<td><strong>Gesundheitswesen</strong></td>
+<td>Besonders schutzwürdige Gesundheitsdaten (Art. 9 DSGVO), Schweigepflicht, hohe Verfügbarkeitsanforderungen</td>
+<td>Air-Gap-fähiger Betrieb, Egress vollständig abschaltbar, Audit ohne Klartextdaten</td>
+</tr>
+<tr>
+<td><strong>Mittelstand</strong></td>
+<td>Schutz von Know-how und Konstruktionsdaten, begrenzte IT-Ressourcen, planbare Kosten</td>
+<td>Vorgeprüfte Referenzkonfiguration statt Eigenintegration, Betrieb auf vorhandener Hardware; Konformitätsbericht als Nachweis gegenüber Kunden und Prüfern; Cloud-Nutzung begrenzt und auswertbar</td>
+</tr>
+<tr>
+<td><strong>Forschung und Hochschulen</strong></td>
+<td>Reproduzierbarkeit, Forschungsdaten, Drittmittelauflagen, Offenheit</td>
+<td>Gepinnte Versionen, dokumentierte Pipeline, offene Spezifikation als Basis für eigene Experimente und Lehre</td>
+</tr>
+</tbody>
+</table>
+<h2 id="5-regulatorische-relevanz">5. Regulatorische Relevanz</h2>
+<p>Dieser Abschnitt ordnet ein, <strong>wo</strong> AISM bei regulatorischen Anforderungen technisch unterstützen kann. Er trifft keine Aussage darüber, dass ein Einsatz rechtskonform ist. Diese Bewertung hängt vom konkreten Verarbeitungszweck, den Daten, der Organisation und dem Einsatzkontext ab und bleibt Aufgabe der Verantwortlichen und ihrer Beratung.</p>
+<h3 id="51-dsgvo">5.1 DSGVO</h3>
+<table>
+<thead>
+<tr>
+<th>Anforderung</th>
+<th>Wie AISM technisch unterstützt</th>
+<th>Grenze</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Datenminimierung</strong> (Art. 5 Abs. 1 lit. c)</td>
+<td>PII-Maskierung vor jeder Weitergabe an Modelle, Indizes und externe Ziele (PEP-2, PEP-8); Audit mit Zählern statt Klartext; Telemetrie ohne Prompt-Inhalte</td>
+<td>Maskierung erkennt nicht jedes personenbezogene Datum; Fehlerraten müssen gemessen werden</td>
+</tr>
+<tr>
+<td><strong>Datenschutz durch Technikgestaltung und datenschutzfreundliche Voreinstellungen</strong> (Art. 25)</td>
+<td>Cloud-Routing standardmäßig aus (M-04), fail-closed bei Ausfall der Erkennung (M-12), Kontrollpunkt im Request-Pfad statt nachträglicher Kontrolle</td>
+<td>Voreinstellungen müssen im Betrieb beibehalten werden; K2/K3-Tests machen Abweichungen sichtbar</td>
+</tr>
+<tr>
+<td><strong>Verzeichnis von Verarbeitungstätigkeiten</strong> (Art. 30)</td>
+<td>Das AISM-Stufenmodell beschreibt Datenkategorien, Empfänger (lokal/Cloud/Websuche) und Kontrollpunkte strukturiert; daraus lassen sich Einträge ableiten</td>
+<td>Das Verzeichnis selbst bleibt organisatorische Pflicht des Verantwortlichen</td>
+</tr>
+<tr>
+<td><strong>Sicherheit der Verarbeitung / TOM</strong> (Art. 32)</td>
+<td>Zugriffskontrolle (OIDC, Policies), Pseudonymisierung durch Platzhalter, Egress-Kontrolle, manipulationserkennbares Audit, Härtung (keine <code>privileged</code>-Container, gepinnte Images)</td>
+<td>TOM umfassen auch organisatorische Maßnahmen, Schulung, Notfallkonzepte und physische Sicherheit</td>
+</tr>
+</tbody>
+</table>
+<p>Zwei Präzisierungen sind wichtig. Erstens ist die Maskierung mit reversiblen Platzhaltern im Sinne der DSGVO eine <strong>Pseudonymisierung</strong> (Art. 4 Nr. 5), keine Anonymisierung: Maskierte Daten bleiben grundsätzlich personenbezogen. Zweitens ersetzt AISM weder eine Datenschutz-Folgenabschätzung (Art. 35), wo sie erforderlich ist, noch Verträge zur Auftragsverarbeitung (Art. 28) oder die Prüfung von Drittlandübermittlungen (Art. 44 ff.), wenn Cloud-Routing aktiviert wird. Es liefert aber die technische Dokumentation und die Belege, die solche Prüfungen erleichtern.</p>
+<h3 id="52-eu-ai-act">5.2 EU AI Act</h3>
+<p>Der AI Act (Verordnung (EU) 2024/1689) gilt gestaffelt. Durch den „Digital Omnibus on AI“ (Verordnung (EU) 2026/1744, in Kraft seit 27.07.2026) wurden die Fristen für Hochrisiko-KI-Systeme verschoben. Stand Oktober 2026 gilt nach Angaben der EU-Kommission:</p>
+<table>
+<thead>
+<tr>
+<th>Datum</th>
+<th>Anwendungsbeginn (Auszug)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>02.02.2025</td>
+<td>Verbotene Praktiken, KI-Kompetenz (Art. 4; durch den Omnibus inzwischen vereinfacht)</td>
+</tr>
+<tr>
+<td>02.08.2025</td>
+<td>Regeln für KI-Modelle mit allgemeinem Verwendungszweck (GPAI), Governance-Strukturen</td>
+</tr>
+<tr>
+<td>02.08.2026</td>
+<td>Großteil der Verordnung, insbesondere Transparenzpflichten (Art. 50); Beginn der Durchsetzung</td>
+</tr>
+<tr>
+<td>02.12.2026</td>
+<td>Neue Verbote (u. a. nicht einvernehmliche intime Deepfakes); Übergangsfrist für Art. 50 Abs. 2 bei vor dem 02.08.2026 in Verkehr gebrachten Systemen</td>
+</tr>
+<tr>
+<td>02.12.2027</td>
+<td>Pflichten für Hochrisiko-KI-Systeme nach Anhang III (zuvor 02.08.2026)</td>
+</tr>
+<tr>
+<td>02.08.2028</td>
+<td>Pflichten für Hochrisiko-KI in Produkten nach Anhang I (zuvor 02.08.2027)</td>
+</tr>
+</tbody>
+</table>
+<p>Ob ein konkreter Einsatz eines AISM-konformen Stacks überhaupt unter die Hochrisiko-Regeln fällt, hängt vom <strong>Verwendungszweck</strong> ab, nicht von der Technik. Ein interner Rechercheassistent ist anders einzuordnen als ein System, das etwa im Personalbereich Entscheidungen über Bewerbungen vorbereitet (Anhang III). AISM <strong>unterstützt</strong> dabei, typische technische Anforderungen umzusetzen und nachzuweisen:</p>
+<ul>
+<li><strong>Protokollierung und Rückverfolgbarkeit:</strong> Für Hochrisiko-Systeme verlangt Art. 12 die technische Möglichkeit automatischer Ereignisprotokolle; Betreiber („Deployer“) müssen unter ihrer Kontrolle stehende Protokolle nach Art. 26 Abs. 6 mindestens sechs Monate aufbewahren, soweit nichts anderes bestimmt ist. Das AISM-Audit-Konzept (jede Policy-Entscheidung, jeder Tool-Call, jedes Egress-Ereignis, manipulationserkennbar gespeichert) unterstützt bei der Umsetzung solcher Pflichten. Es ersetzt nicht die Pflichten des Anbieters eines Hochrisiko-Systems.</li>
+<li><strong>Transparenz:</strong> Art. 50 verpflichtet u. a. dazu, Personen darüber zu informieren, dass sie mit einem KI-System interagieren, und bestimmte synthetische Inhalte zu kennzeichnen. Da S1 und S2 jede Ausgabe durchlaufen, bietet die Architektur einen definierten Ort für Hinweise und Kennzeichnungen. Ob und wie eine Pflicht im Einzelfall greift, ist rechtlich zu prüfen.</li>
+<li><strong>Menschliche Aufsicht und Kontrolle von Aktionen:</strong> Die Bestätigungspflicht für schreibende Tools (S-03) und die begrenzte Zahl von Tool-Runden (S-09) unterstützen beim Entwurf von Aufsichtsmaßnahmen.</li>
+</ul>
+<p>AISM erfüllt den AI Act nicht „automatisch“, und eine Konformitätsstufe ist keine Konformitätsbewertung im Sinne der Verordnung.</p>
+<h3 id="53-nis2-bsi-it-grundschutz-und-c5-einordnung">5.3 NIS2, BSI IT-Grundschutz und C5 (Einordnung)</h3>
+<p>Diese Rahmenwerke werden hier nur als <strong>Bezugspunkte</strong> genannt; eine Zuordnung von AISM-Kriterien zu deren Anforderungen ist Teil der Roadmap und noch nicht erfolgt.</p>
+<ul>
+<li><strong>NIS2:</strong> In Deutschland ist das NIS-2-Umsetzungsgesetz am 06.12.2025 in Kraft getreten (BGBl. 2025 I Nr. 301). Betroffene Einrichtungen müssen Risikomanagementmaßnahmen umsetzen. Eine KI-Plattform ist dann ein Teil der zu schützenden IT; Härtung, Protokollierung und kontrollierter Egress können in solche Maßnahmen einfließen.</li>
+<li><strong>BSI IT-Grundschutz:</strong> Das BSI entwickelt den IT-Grundschutz zu „Grundschutz++“ mit maschinenlesbaren Anforderungen weiter; die Methodik soll nach BSI-Planung auf der it-sa 2026 veröffentlicht werden. Maschinenlesbare Anforderungen passen gut zum Ansatz maschinenprüfbarer Konformitätstests; eine Abbildung ist eine mögliche spätere Erweiterung.</li>
+<li><strong>BSI C5:</strong> Der Kriterienkatalog für Cloud-Dienste liegt seit 2026 als C5:2026 vor, erstmals auch maschinenlesbar. C5 adressiert Cloud-Anbieter und ist für lokal betriebene Installationen nicht unmittelbar einschlägig, kann aber für Betreiber relevant sein, die einen AISM-konformen Stack als Dienst für Dritte anbieten oder Cloud-Routing zu externen Anbietern prüfen.</li>
+</ul>
+<h2 id="6-nutzen-nach-stakeholdern">6. Nutzen nach Stakeholdern</h2>
+<table>
+<thead>
+<tr>
+<th>Stakeholder</th>
+<th>Zentrale Frage</th>
+<th>Nutzen durch AISM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Geschäftsführung</strong></td>
+<td>„Können wir KI einsetzen, ohne unkalkulierbare Risiken einzugehen?“</td>
+<td>Klare Entscheidungsgrundlage: definierte Konformitätsstufe als Zielvorgabe; Cloud-Nutzung als bewusste, protokollierte Entscheidung statt Schatten-IT; geringere Abhängigkeit von einzelnen Anbietern durch offene Lizenz und austauschbare Komponenten</td>
+</tr>
+<tr>
+<td><strong>IT-Betrieb</strong></td>
+<td>„Wie betreiben wir das stabil und sicher?“</td>
+<td>Gepinnte und reproduzierbar gebaute Images, signierte Policy mit Rückfall auf die letzte gültige Fassung; Fehlersuche entlang der Stufen („Fehler ab S3“) mit Trace-IDs; automatisierte Tests nach Updates zeigen, ob Sicherheitseigenschaften erhalten geblieben sind</td>
+</tr>
+<tr>
+<td><strong>Datenschutzbeauftragte</strong></td>
+<td>„Wohin fließen die Daten, und wie belege ich das?“</td>
+<td>Dokumentiertes Datenflussmodell mit benannten Kontrollpunkten; Audit ohne Klartext-PII; Prüfbericht als Beleg für Datenschutz-Folgenabschätzung, Verarbeitungsverzeichnis und TOM-Dokumentation</td>
+</tr>
+<tr>
+<td><strong>Entwickler</strong></td>
+<td>„Wie baue ich Anwendungen, ohne Governance jedes Mal neu zu erfinden?“</td>
+<td>Eine OpenAI-kompatible Schnittstelle für alle Modelle; Policy, Maskierung und Audit kommen vom Gateway; Tools über n8n oder MCP mit klaren Verträgen; Testsuite als Regressionsnetz in CI</td>
+</tr>
+</tbody>
+</table>
+<h2 id="7-open-source-und-community-modell">7. Open Source und Community-Modell</h2>
+<h3 id="71-lizenz">7.1 Lizenz</h3>
+<p>AISM (Spezifikation, Policy-Format, Testsuite und AISM Reference Stack) wird unter der <strong>Apache License 2.0</strong> veröffentlicht. Die Lizenz erlaubt kommerzielle Nutzung, Veränderung und Weitergabe, enthält eine ausdrückliche Patentlizenz der Beitragenden und ist in Unternehmen und Verwaltung gut etabliert. Gebündelte Komponenten behalten ihre eigenen Lizenzen; diese sind vor einer Weitergabe von Images zu prüfen.</p>
+<p>Für die AISM-Spezifikation und die Testsuite wird ebenfalls eine offene Lizenz angestrebt, damit Dritte eigene Implementierungen bauen und prüfen können, ohne Erlaubnis einholen zu müssen.</p>
+<h3 id="72-governance-der-spezifikation">7.2 Governance der Spezifikation</h3>
+<p>Ein Referenzmodell ist nur dann glaubwürdig, wenn es nicht im alleinigen Interesse einer einzelnen Implementierung weiterentwickelt wird. Vorgeschlagen werden:</p>
+<ul>
+<li><strong>Trennung von Spezifikation und Implementierung:</strong> eigenes Repository, eigene Versionierung (semantisch, mit Änderungsprotokoll) und klar gekennzeichnete normative Texte.</li>
+<li><strong>Offener Änderungsprozess:</strong> Änderungsvorschläge als öffentliche Requests for Comments mit Kommentierungsfrist; Entscheidungen werden begründet dokumentiert.</li>
+<li><strong>Technischer Lenkungskreis:</strong> mittelfristig mit Vertretern aus Anwendern (z. B. regulierte Branchen, Verwaltung), Implementierern und Wissenschaft, damit keine Einzelpartei dominiert.</li>
+<li><strong>Mehrere Implementierungen als Ziel:</strong> Eine Anforderung gilt erst als ausgereift, wenn sie in mehr als einer Implementierung umgesetzt und getestet ist.</li>
+<li><strong>Langfristige Perspektive:</strong> Eine Überführung in eine neutrale Trägerstruktur (z. B. Stiftung oder etablierte Open-Source-Foundation) wird geprüft, sobald die Community dafür groß genug ist.</li>
+</ul>
+<h3 id="73-zertifizierungsidee">7.3 Zertifizierungsidee</h3>
+<p>Die Testsuite ermöglicht zunächst <strong>Selbstbewertung</strong>: Betreiber führen sie aus und erhalten einen maschinenlesbaren Bericht. Darauf aufbauend ist ein mehrstufiges Modell denkbar:</p>
+<ol>
+<li><strong>Selbsterklärung</strong> mit veröffentlichtem Testbericht (Version der Spezifikation, der Testsuite und der getesteten Installation).</li>
+<li><strong>Unabhängige Prüfung</strong> durch Dritte, die die Testsuite in der Zielumgebung ausführen und die organisatorischen Nachweise sichten.</li>
+<li><strong>Kennzeichnung</strong>, z. B. „AISM K2 Governed (Spec 1.0)“, mit Gültigkeitsdauer und Bezug auf eine konkrete Version.</li>
+</ol>
+<p>Eine Zertifizierung würde ausschließlich technische Eigenschaften gegenüber der AISM-Spezifikation bestätigen. Sie wäre weder eine gesetzliche Zertifizierung noch ein Ersatz für Prüfungen nach DSGVO, AI Act, NIS2 oder BSI-Standards. Ob und durch wen eine Prüfung angeboten wird, soll im offenen Spezifikationsprozess entschieden werden.</p>
+<h2 id="8-roadmap">8. Roadmap</h2>
+<p>Die Roadmap beschreibt Phasen und Ergebnisse, keine festen Termine. Die Reihenfolge ergibt sich aus Abhängigkeiten: Ohne Gateway keine Governance-Tests, ohne Tests keine Zertifizierung.</p>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Schwerpunkt</th>
+<th>Ergebnisse</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0 – Fundament</strong> (erledigt)</td>
+<td>Architektur und Modell</td>
+<td>README und Referenz-Compose; AISM-Spezifikation Entwurf 0.2; Policy-Format mit JSON Schema; dieses Positionierungspapier</td>
+</tr>
+<tr>
+<td><strong>1 – Governance-Kern</strong> (Prototyp vorhanden)</td>
+<td>Gateway als Kontrollpunkt</td>
+<td>Erledigt als Prototyp: Governance-Gateway (OpenAI-kompatibles Passthrough mit SSE, PII-Maskierung mit reversiblen Platzhaltern, YAML-Policy mit Schema- und Semantikprüfung, JSONL-Audit mit Hash-Kette), Orchestrator-Stub, Compose-Profil mit Gateway-Pflicht für die UI und Referenz-Host-Firewall. Erledigt: OIDC-Anbindung für Gruppenrollen (gegen Test-IdP). Offen: Härtung, <code>aism</code>-CLI</td>
+</tr>
+<tr>
+<td><strong>2 – Prüfbarkeit</strong> (begonnen)</td>
+<td>Testsuite und Policy-as-Code</td>
+<td>Erledigt: Testsuite für K1–K3 mit maschinenlesbarem Bericht und Badge; Policy-Sprache entschieden (eigenes Schema, OPA-Abbildung optional). Erledigt: Lauf im Docker-Konformitäts-Stack; erste Messung der PII-Erkennung auf synthetischen deutschen Daten. Offen: Lauf in CI; Messung mit realitätsnahen Daten und Englisch; AISM-Spezifikation 1.0 nach öffentlicher Kommentierung</td>
+</tr>
+<tr>
+<td><strong>3 – Souveränität &amp; Audit</strong></td>
+<td>K3 und Betriebsnachweise</td>
+<td>Hash-verkettetes Audit (im Prototyp vorhanden), WORM-Ziel, Air-Gap-Profil, signierte Policies mit Prüfung im Gateway, per Digest gepinnte Artefakte und automatisierte K3-Szenarien (im Prototyp erledigt); Schlüsselrotation, Modell-Prüfsummen; Leitfaden für Datenschutzbeauftragte (Ableitung von Verarbeitungsverzeichnis und TOM aus dem Modell)</td>
+</tr>
+<tr>
+<td><strong>4 – Ökosystem</strong></td>
+<td>Breite und Neutralität</td>
+<td>Zweite unabhängige Implementierung bzw. Komponentenprofile (vLLM, Milvus, LibreChat); Abbildung auf NIS2/Grundschutz++ als Orientierungshilfe; Pilot der unabhängigen Prüfung; Entscheidung über neutrale Trägerschaft</td>
+</tr>
+</tbody>
+</table>
+<h2 id="9-risiken-und-grenzen">9. Risiken und Grenzen</h2>
+<p>Ein Positionierungspapier, das Überprüfbarkeit fordert, muss seine eigenen Schwächen offenlegen.</p>
+<ul>
+<li><strong>PII-Erkennung ist fehleranfällig.</strong> Insbesondere Namenserkennung in deutschen Texten erzeugt sowohl Fehlalarme als auch übersehene Daten. Maskierung reduziert Risiken, beseitigt sie aber nicht. Fehlerraten werden gemessen und veröffentlicht, nicht behauptet.</li>
+<li><strong>Lokale Modelle sind nicht für jede Aufgabe gleichwertig.</strong> Je nach Hardware und Modellgröße können Qualität und Geschwindigkeit hinter großen Cloud-Modellen zurückbleiben. Hybridrouting mildert das, verschiebt aber die Abwägung zur Policy.</li>
+<li><strong>Konformität ist eine Momentaufnahme.</strong> Ein bestandener Test belegt den Zustand zum Prüfzeitpunkt. Konfigurationsänderungen, Updates oder Eingriffe am Gateway vorbei können ihn entwerten. Regelmäßige, automatisierte Wiederholung ist daher Teil des Konzepts.</li>
+<li><strong>Spezifikation in frühem Stadium.</strong> AISM liegt als Entwurf 0.2 vor. Gateway und Orchestrator existieren nur als Prototypen; die Testsuite lief bisher nur lokal gegen einen Mock statt gegen echte Modelle und nicht im Docker-Referenzstack. Offen sind u. a. die Übernahme von Gruppen aus der Chat-Oberfläche (das von Open WebUI weitergeleitete Token enthält keine Gruppen), gemessene Fehlerraten der PII-Erkennung, Policy-Signaturen und die native Inferenz auf Apple Silicon.</li>
+<li><strong>Abhängigkeit von Upstream-Projekten.</strong> Der AISM Reference Stack integriert Komponenten mit eigenen Release-Zyklen und API-Änderungen (z. B. versionsabhängige Such-APIs). Das erfordert Pflege und Kompatibilitätstests.</li>
+<li><strong>Prompt-Injection und Agentenrisiken.</strong> Inhalte aus Dokumenten, Websuche und Tool-Ergebnissen können Modelle manipulieren. AISM begrenzt die Auswirkungen (keine Tool-Ausführung ohne Prüfung, Kennzeichnung als nicht vertrauenswürdige Daten), kann das Problem aber nicht grundsätzlich lösen.</li>
+<li><strong>Organisatorische Pflichten bleiben.</strong> Technik kann Rollenkonzepte, Schulung, Löschfristen, Verträge und rechtliche Bewertung nicht ersetzen.</li>
+<li><strong>Glaubwürdigkeit und Neutralität.</strong> Solange die Spezifikation im Wesentlichen von einem Initiator getragen wird, besteht das Risiko, als Produktmarketing wahrgenommen zu werden. Die Governance-Vorschläge in Abschnitt 7 adressieren das, wirken aber erst mit wachsender Beteiligung.</li>
+<li><strong>Betriebsaufwand.</strong> Eigene KI-Infrastruktur braucht Hardware, Know-how und Verantwortlichkeit im Haus. Für sehr kleine Organisationen kann ein betreuter Betrieb durch Dienstleister sinnvoller sein; auch dafür bietet die Testsuite einen gemeinsamen Maßstab.</li>
+</ul>
+<h2 id="10-aufruf-zur-mitwirkung">10. Aufruf zur Mitwirkung</h2>
+<p>AISM soll eine Referenz werden, die nicht einer Organisation gehört, sondern von denen getragen wird, die sie brauchen. Dafür suche ich Mitstreiter:</p>
+<ul>
+<li><strong>Anwender aus regulierten Branchen</strong> (Kanzleien, Steuerberatungen, Verwaltung, Gesundheitswesen, Mittelstand, Forschung): Bringen Sie Ihre Anforderungen ein, testen Sie frühe Versionen in nicht produktiven Umgebungen und sagen Sie uns, welche Nachweise Ihre Prüfer tatsächlich verlangen.</li>
+<li><strong>Datenschutz- und Informationssicherheitsfachleute:</strong> Kommentieren Sie die Spezifikation, insbesondere die Policy-Durchsetzungspunkte, das Audit-Konzept und die Abgrenzung zu rechtlichen Anforderungen.</li>
+<li><strong>Entwickler und Integratoren:</strong> Beteiligen Sie sich am Governance-Proxy, an PII-Detektoren für deutsche Texte, an Testfällen der Konformitätssuite oder an Profilen für alternative Komponenten.</li>
+<li><strong>Hochschulen und Forschungseinrichtungen:</strong> Unterstützen Sie die Messmethodik (PII-Erkennung, Leistungsmessung) und unabhängige Evaluationen.</li>
+<li><strong>Anbieter und Dienstleister:</strong> Bauen Sie eigene AISM-konforme Implementierungen oder Betriebsangebote und helfen Sie, die Spezifikation an der Praxis zu schärfen.</li>
+</ul>
+<p>Der nächste konkrete Schritt ist die öffentliche Kommentierung der AISM-Spezifikation und die gemeinsame Schärfung der Testfälle für K1 und K2. Wer mitwirken möchte, kann sich direkt an mich wenden.</p>
+<p><strong>Markus Oehring</strong></p>
+<h2 id="quellen">Quellen</h2>
+<p>Alle Quellen abgerufen bzw. geprüft am 05.10.2026.</p>
+<ol>
+<li>Verordnung (EU) 2024/1689 (KI-Verordnung, AI Act), EUR-Lex: <a href="https://eur-lex.europa.eu/eli/reg/2024/1689/oj">https://eur-lex.europa.eu/eli/reg/2024/1689/oj</a></li>
+<li>Verordnung (EU) 2026/1744 (Digital Omnibus on AI), EUR-Lex: <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=celex%3A32026R1744">https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=celex%3A32026R1744</a></li>
+<li>Europäische Kommission, „AI Omnibus enters into force“ (27.07.2026): <a href="https://digital-strategy.ec.europa.eu/en/news/ai-omnibus-enters-force">https://digital-strategy.ec.europa.eu/en/news/ai-omnibus-enters-force</a></li>
+<li>AI Act Service Desk der Europäischen Kommission, „Timeline for the Implementation of the EU AI Act“: <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act">https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act</a></li>
+<li>Art. 26 AI Act (Pflichten der Betreiber von Hochrisiko-KI-Systemen), konsolidierte Lesefassung (inoffiziell): <a href="https://artificialintelligenceact.eu/article/26/">https://artificialintelligenceact.eu/article/26/</a></li>
+<li>Verordnung (EU) 2016/679 (DSGVO), EUR-Lex: <a href="https://eur-lex.europa.eu/eli/reg/2016/679/oj">https://eur-lex.europa.eu/eli/reg/2016/679/oj</a></li>
+<li>NIS-2-Umsetzungsgesetz, BGBl. 2025 I Nr. 301 vom 05.12.2025: <a href="https://www.recht.bund.de/bgbl/1/2025/301/VO.html">https://www.recht.bund.de/bgbl/1/2025/301/VO.html</a></li>
+<li>BSI, Pressemitteilung „Sicheres Cloud-Computing: BSI veröffentlicht C5:2026“ (07.04.2026): <a href="https://www.bsi.bund.de/DE/Service-Navi/Presse/Pressemitteilungen/Presse2026/260407_C5_Cloud_Computing.html">https://www.bsi.bund.de/DE/Service-Navi/Presse/Pressemitteilungen/Presse2026/260407_C5_Cloud_Computing.html</a></li>
+<li>BSI, Grundschutz++: <a href="https://www.bsi.bund.de/DE/Themen/Unternehmen-und-Organisationen/Standards-und-Zertifizierung/Grundschutz-in-der-Informationssicherheit/Grundschutz-Plus-Plus/grundschutz-plus-plus_node.html">https://www.bsi.bund.de/DE/Themen/Unternehmen-und-Organisationen/Standards-und-Zertifizierung/Grundschutz-in-der-Informationssicherheit/Grundschutz-Plus-Plus/grundschutz-plus-plus_node.html</a></li>
+<li>Apache License, Version 2.0: <a href="https://www.apache.org/licenses/LICENSE-2.0">https://www.apache.org/licenses/LICENSE-2.0</a></li>
+<li>RFC 2119, „Key words for use in RFCs to Indicate Requirement Levels“: <a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a></li>
+<li>Interne Dokumente: <code>README.md</code> (AISM Reference Stack), <code>AISM-Spezifikation.md</code> (Entwurf 0.2), <code>policy/AISM-Policy-Format.md</code>, <code>conformance/AISM-Konformitaet.md</code> (Entwurf 0.2, Testsuite 0.2.0), Stand jeweils 05.10.2026</li>
+</ol>
+<p><em>Hinweis zur Benennung:</em> Konformitätsstufen heißen <strong>K1–K3</strong> (K1 Basic, K2 Governed, K3 Sovereign/Auditable), Pipeline-Stufen des Referenzmodells <strong>S1–S7</strong>, die Komponentengruppen eines früheren README-Entwurfs <strong>L1–L7</strong>. Die Kriterien der Spezifikation tragen die Präfixe <strong>M-</strong> (MUSS), <strong>S-</strong> (SOLLTE) und <strong>O-</strong> (KANN, O-01 bis O-03); Testfälle der Suite heißen <code>AISM-K&lt;Stufe&gt;-&lt;Nr.&gt;</code> (z. B. <code>AISM-K2-03</code>).</p></body></html>

@@ -1,0 +1,75 @@
+# Compose override for AISM conformance runs (EXAMPLE).
+# Replaces the orchestrator's upstreams (S6 inference, S4 embeddings, n8n tool gateway)
+# with the capture mock, so the suite can observe what leaves S2/S3, and mounts the test policy.
+#
+#   conformance/tests/prepare_signed_policy.sh          # signed test policy + runtime test key
+#   docker compose -f docker-compose.yml -f conformance/tests/compose.conformance.yml up -d --build \
+#       governance-proxy orchestrator aism-mock
+#
+# The mock has no authentication. Never use this override in production.
+# Note: inside Docker both mock ports listen on all interfaces of the container; the split into
+# API port (18081) and capture port (18080) only documents intent. The capture port is published
+# on 127.0.0.1 for the test runner.
+
+services:
+  aism-mock:
+    image: python:3.12-slim@sha256:02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d
+    command: ["python3", "/mock/mock_upstream.py", "--host", "0.0.0.0", "--port", "18081",
+              "--capture-host", "0.0.0.0", "--capture-port", "18080"]
+    volumes:
+      - ./conformance/tests/mock_upstream.py:/mock/mock_upstream.py:ro
+    networks: [backend, frontend]
+    ports:
+      - "127.0.0.1:18080:18080"   # test runner reads /_captured from here
+
+  governance-proxy:
+    volumes:   # signed copy + test trust anchor from conformance/tests/prepare_signed_policy.sh
+      - ${AISM_POLICY_DIR:-./conformance/tests/run/policy}:/etc/aism/policy:ro
+      - ${AISM_TRUST_DIR:-./conformance/tests/run/trust}:/etc/aism/trust:ro
+
+  orchestrator:
+    environment:
+      INFERENCE_LOCAL_URL: http://aism-mock:18081/v1
+      EMBEDDINGS_URL: http://aism-mock:18081/v1
+      TOOL_GATEWAY_URL: http://aism-mock:18081
+      SEARXNG_URL: http://aism-mock:18081        # mock /search stands in for SearXNG
+    volumes:
+      - ${AISM_POLICY_DIR:-./conformance/tests/run/policy}:/etc/aism/policy:ro
+    depends_on: !override
+      aism-mock:
+        condition: service_started
+      qdrant:
+        condition: service_started
+
+  # Test IdP for OIDC (AISM-K2-21). Mints tokens for anyone – test double only.
+  mock-idp:
+    build:
+      context: .
+      dockerfile: conformance/tests/Dockerfile
+    image: ghcr.io/marksen23/aism-test-tools:dev
+    command: ["python3", "/repo/conformance/tests/mock_idp.py", "--host", "0.0.0.0", "--port", "18090",
+              "--issuer", "http://mock-idp:18090/realms/aism"]
+    volumes:
+      - ./conformance/tests:/repo/conformance/tests:ro
+    networks: [backend, frontend]
+
+  # Test runner on the client network (frontend): docker compose ... run --rm aism-runner
+  aism-runner:
+    image: ghcr.io/marksen23/aism-test-tools:dev
+    profiles: [runner]
+    networks: [frontend]
+    entrypoint: ["sh", "/repo/conformance/tests/run_in_docker.sh"]
+    environment:
+      AISM_BASE_URL: http://governance-proxy:8000
+      AISM_MOCK_URL: http://aism-mock:18080
+      AISM_API_KEY: ${AISM_UI_CLIENT_KEY}
+      AISM_FORWARD_JWT_SECRET: ${AISM_FORWARD_JWT_SECRET}
+      AISM_IDP_URL: http://mock-idp:18090/realms/aism
+      AISM_AUDIT_LOG: /audit/audit.jsonl
+      AISM_POLICY_FILE: /repo/conformance/tests/run/policy/policy.yaml
+      AISM_ALLOWED_SIGNERS: /repo/conformance/tests/run/trust/allowed_signers
+      AISM_POLICY_FAULT_INJECTION: ${AISM_POLICY_FAULT_INJECTION:-1}
+      AISM_REPORT: ${AISM_REPORT:-/repo/conformance/tests/aism-report.json}
+    volumes:
+      - ./:/repo            # rw: report output and K3-08 fault injection on run/policy/policy.yaml
+      - audit:/audit:ro

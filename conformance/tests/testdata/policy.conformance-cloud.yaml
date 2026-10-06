@@ -1,0 +1,264 @@
+# AISM Governance Policy – TEST-POLICY für Konformitätsläufe gegen den Capture-Mock.
+# Abgeleitet aus policy/policy.example.yaml. Abweichungen (nur für Tests):
+#   - lokaler Provider bietet das Mock-Modell "aism-mock-model" an
+#   - ticket_status_lookup ohne Agent-Bindung (Testclient sendet keinen X-AISM-Agent)
+#   - Variante "cloud" (policy.conformance-cloud.yaml): cloudEnabled=true, Cloud-Provider = TLS-Capture-Mock (K3-04)
+# Nicht produktiv verwenden.
+#
+# (ursprünglicher Kopf:) AISM Governance Policy – BEISPIEL
+# Alle Werte (Rollen, Provider, Endpunkte, Fristen, Modelle) sind Beispiele und
+# müssen an das eigene Deployment angepasst werden. Validierung:
+#   python3 -m jsonschema / check-jsonschema --schemafile policy.schema.json policy.example.yaml
+# Format-Spezifikation: AISM-Policy-Format.md
+
+apiVersion: aism/v1alpha1
+kind: GovernancePolicy
+
+metadata:
+  name: aism-conformance-test-cloud
+  version: 1.0.0-test
+  # revision wird von der CI auf den Git-Commit-SHA gesetzt
+  owner: it-security@example.com
+  description: Beispiel-Policy für ein Deployment des AISM Reference Stack (lokal zuerst).
+  effectiveFrom: "2026-10-05T00:00:00+02:00"
+  changeRef: "PR #1 (Beispiel)"
+  # signature: nur für Konformitätsstufe K3 erforderlich
+  #   method: git-tag-ssh
+  #   ref: policy/v1.0.0
+
+spec:
+
+  # ── Bewertungs-Grundsätze (PEP-3) ────────────────────────────────
+  defaults:
+    decision: deny          # nicht änderbar (Schema: const)
+    route: local            # nicht änderbar
+    failMode: closed        # nicht änderbar
+    maxToolRounds: 5
+    maxRequestBytes: 1048576
+
+  # ── Identitäten und Rollen (PEP-1) ───────────────────────────────
+  subjects:
+    identitySources:
+      - id: open-webui-client
+        type: api-key                      # Client-Schlüssel von Open WebUI (OPENAI_API_KEY)
+        secretRef: env:AISM_UI_CLIENT_KEY
+        client: open-webui
+      - id: openwebui
+        type: forwarded-jwt-hs256          # Open WebUI >= v0.9.6: ENABLE_FORWARD_USER_INFO_HEADERS + FORWARD_USER_INFO_HEADER_JWT_SECRET
+        header: X-OpenWebUI-User-Jwt       # Claims: sub, email, name, role, iss, iat, exp (keine groups)
+        secretRef: env:AISM_FORWARD_JWT_SECRET
+        issuer: open-webui
+        client: open-webui
+      - id: corporate-idp
+        type: oidc-bearer
+        issuer: http://mock-idp:18090/realms/aism       # TEST: conformance/tests/mock_idp.py (compose.conformance.yml)
+        audience: aism-gateway
+        jwksUri: http://mock-idp:18090/realms/aism/jwks
+    roles:
+      - id: it-ops
+        description: IT-Betrieb (Gruppen-Claim; nur über OIDC-Token – Open WebUI überträgt keine Gruppen)
+        match: { claim: groups, anyOf: ["it-ops"] }
+      - id: staff
+        description: Alle angemeldeten Open-WebUI-Benutzer (Claim role aus dem weitergeleiteten JWT)
+        match: { claim: role, anyOf: ["user", "admin"] }
+    agents:
+      - id: ops-assistant
+        description: Assistent für Ticket-Auskünfte
+
+  # ── PII-Detektoren (PEP-2, PEP-8) ────────────────────────────────
+  piiDetectors:
+    - id: email
+      entity: EMAIL
+      type: regex
+      patterns:
+        - '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'
+      masking: { strategy: placeholder, placeholderFormat: "<EMAIL_{n}>", reversible: true, demaskFor: [it-ops, staff] }
+
+    - id: person-name
+      entity: PERSON
+      type: ner
+      ner:
+        model: "spacy:xx_ent_wiki_sm"   # Beispiel (Prototyp-Gateway); Erkennungsqualität nicht gemessen
+        labels: ["PER"]
+        minScore: 0.80                  # Beispielschwelle, nicht kalibriert; spaCy-Kleinmodelle liefern keinen Score (Prototyp ignoriert den Wert)
+        languages: [de, en]
+      masking: { strategy: placeholder, placeholderFormat: "<PERSON_{n}>", reversible: true, demaskFor: [it-ops, staff] }
+
+    - id: person-title
+      entity: PERSON
+      type: regex
+      # Anrede/Titel + Name: maskiert nur den Namen (benannte Gruppe "pii"); ergänzt NER, das Namen nach
+      # "Herr"/"Frau" häufig verfehlt (Messung: conformance/pii-eval/README.md)
+      patterns:
+        - '\b(?:Herrn?|Frau|Hr\.|Fr\.)\s+(?:(?:Dr|Prof)\.\s+)*(?P<pii>[A-ZÄÖÜÇŞİ][^\W\d_]+(?:-[A-ZÄÖÜ][^\W\d_]+)?(?:\s+[A-ZÄÖÜÇŞİ][^\W\d_]+(?:-[A-ZÄÖÜ][^\W\d_]+)?)?)'
+        - '\b(?:Dr|Prof)\.\s+(?P<pii>[A-ZÄÖÜÇŞİ][^\W\d_]+(?:-[A-ZÄÖÜ][^\W\d_]+)?(?:\s+[A-ZÄÖÜÇŞİ][^\W\d_]+)?)'
+      masking: { strategy: placeholder, placeholderFormat: "<PERSON_{n}>", reversible: true, demaskFor: [it-ops, staff] }
+
+    - id: api-key
+      entity: SECRET
+      type: regex
+      patterns:
+        - '\bsk-[A-Za-z0-9_-]{20,}\b'
+        - '\bAKIA[0-9A-Z]{16}\b'
+        - '\bgh[pousr]_[A-Za-z0-9]{36,}\b'
+        - '-----BEGIN [A-Z ]*PRIVATE KEY-----'
+      # Secrets werden nie demaskiert
+      masking: { strategy: placeholder, placeholderFormat: "<SECRET_{n}>", reversible: false }
+      applyTo: [prompt, tool_result, rag_ingest, web_query, response]
+
+    - id: iban
+      entity: IBAN
+      type: checksum
+      patterns: ['\b[A-Z]{2}[0-9]{2}(?: ?[A-Z0-9]){11,30}\b']
+      checksum: iban-mod97
+      masking: { strategy: placeholder, placeholderFormat: "<IBAN_{n}>", reversible: true, demaskFor: [it-ops] }
+
+  # ── Datenklassen (Grundlage für PEP-4/5/6/7) ─────────────────────
+  dataClasses:
+    - id: public
+      rank: 0
+      assignWhen: { always: true }
+    - id: internal
+      rank: 1
+      assignWhen: { roles: [staff, it-ops] }
+    - id: confidential
+      rank: 2
+      assignWhen: { detectedEntities: [PERSON, EMAIL, IBAN], collections: [it-docs] }
+    - id: restricted
+      rank: 3
+      assignWhen: { detectedEntities: [SECRET] }
+
+  # ── Routing und Cloud-Fallback (PEP-4, PEP-9) ────────────────────
+  routing:
+    cloudEnabled: true       # NUR für das K3-04-Szenario
+    providers:
+      - id: local-llama
+        type: local
+        endpoint: http://llama-server:8080/v1
+        models: ["aism-mock-model"]
+      - id: cloud-example
+        type: cloud
+        endpoint: https://mock-cloud:8443/v1               # TLS-Capture-Mock (Test-CA), compose.cloud-fallback.yml
+        models: ["example-large-model"]
+        credentialRef: env:AISM_CLOUD_API_KEY
+        notes: Vertrags-/AV-Prüfung durch Betreiber erforderlich (nicht Teil der Policy)
+    rules:
+      - id: restricted-local-only
+        priority: 900
+        description: Anfragen mit erkannten Secrets nur lokal; nie Cloud
+        when: { dataClasses: [restricted] }
+        route: { mode: local-only, localProviders: [local-llama] }
+      - id: confidential-local-only
+        priority: 800
+        when: { dataClasses: [confidential] }
+        route: { mode: local-only, localProviders: [local-llama] }
+      - id: internal-fallback-it-ops
+        priority: 500
+        description: Nur wirksam, wenn cloudEnabled=true
+        when: { dataClasses: [public, internal], roles: [it-ops] }
+        route:
+          mode: local-with-cloud-fallback
+          localProviders: [local-llama]
+          cloudProviders: [cloud-example]
+          fallbackOn: [local_unavailable, context_too_large]
+      - id: baseline-local
+        priority: 100
+        when: { roles: [staff, it-ops] }
+        route: { mode: local-only, localProviders: [local-llama] }
+
+  # ── Tools (PEP-7, PEP-8) ─────────────────────────────────────────
+  tools:
+    requireConfirmationForWrite: true
+    definitions:
+      - id: ticket_status_lookup
+        description: Liest den Status eines Tickets (nur lesend).
+        gateway: n8n-webhook
+        target: /webhook/ticket-status-lookup
+        access: read
+        parameterized: true
+        argumentsSchema:
+          type: object
+          properties:
+            ticket_id: { type: string, pattern: "^INC-[0-9]{4}-[0-9]{4}$" }
+          required: [ticket_id]
+          additionalProperties: false
+        allow:
+          roles: [it-ops]
+          maxDataClassRank: 2
+        rateLimit: { requests: 30, per: 1m, scope: subject }
+        timeout: 10s
+        maskResult: true
+
+      - id: ticket_add_comment
+        description: Kommentar an Ticket anhängen (schreibend, Bestätigung erforderlich).
+        gateway: n8n-webhook
+        target: /webhook/ticket-add-comment
+        access: write
+        parameterized: true
+        argumentsSchema:
+          type: object
+          properties:
+            ticket_id: { type: string, pattern: "^INC-[0-9]{4}-[0-9]{4}$" }
+            comment: { type: string, maxLength: 2000 }
+          required: [ticket_id, comment]
+          additionalProperties: false
+        allow:
+          roles: [it-ops]
+          agents: [ops-assistant]
+          maxDataClassRank: 1
+        rateLimit: { requests: 5, per: 1h, scope: subject }
+        requireConfirmation: true
+        maskResult: true
+
+  # ── RAG (PEP-5) ──────────────────────────────────────────────────
+  rag:
+    requireMaskedQuery: true     # nicht änderbar (Schema: const)
+    maskOnIngest: true
+    embeddingModel: nomic-embed-text
+    maxChunks: 5
+    collections:
+      - id: it-docs
+        dataClass: confidential
+        allow: { roles: [it-ops] }
+        filter: { payloadKey: access_group, valuesFrom: roles }
+      - id: handbook
+        dataClass: internal
+        allow: { roles: [staff, it-ops] }
+        filter: { payloadKey: access_group, valuesFrom: roles }
+
+  # ── Web-Suche (PEP-6) ────────────────────────────────────────────
+  webSearch:
+    enabled: true
+    allow: { roles: [it-ops], maxDataClassRank: 1 }
+    stripPlaceholders: true
+    maxResults: 5
+
+  # ── Audit (AUD) ──────────────────────────────────────────────────
+  audit:
+    sink: { type: file-jsonl, path: /audit/audit.jsonl }
+    events:
+      - policy.loaded
+      - policy.load_failed
+      - request.accepted
+      - request.denied
+      - pii.masked
+      - route.decided
+      - egress.cloud
+      - egress.websearch
+      - rag.query
+      - tool.call.allowed
+      - tool.call.denied
+      - tool.result
+      - tool.call.pending
+      - tool.call.confirmed
+      - tool.call.rejected
+      - stream.completed
+      - stream.aborted
+    plaintextPII: false          # nicht änderbar (Schema: const)
+    storePayloadHash: true
+    retention:
+      days: 180                  # Beispielwert; maßgeblich ist die interne Vorgabe
+      basis: "Interne Aufbewahrungsrichtlinie (Verweis einzutragen)"
+    integrity: { hashChain: true, algorithm: sha256 }
+    decisionLog: { enabled: true, includeRuleTrace: true }
+    traceContext: w3c-traceparent

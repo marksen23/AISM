@@ -1,0 +1,16 @@
+# Example systemd unit: re-apply the DOCKER-USER rules whenever Docker (re)starts.
+# Install: sudo cp docker-user.sh /usr/local/sbin/aism-docker-user.sh
+#          sudo cp aism-egress-firewall.service /etc/systemd/system/ && sudo systemctl enable --now aism-egress-firewall
+[Unit]
+Description=AISM host firewall: no internet egress from the frontend network
+After=docker.service
+PartOf=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/aism-docker-user.sh apply
+ExecStop=/usr/local/sbin/aism-docker-user.sh remove
+
+[Install]
+WantedBy=docker.service

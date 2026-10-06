@@ -1,0 +1,5 @@
+pytest>=8
+httpx>=0.27
+PyYAML>=6
+jsonschema>=4.18
+cryptography>=42   # AISM-K3-01 signature verification (reference verifier)

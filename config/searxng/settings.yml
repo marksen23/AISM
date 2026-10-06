@@ -1,0 +1,12 @@
+# Minimal SearXNG settings for the AISM Reference Stack (S5). The orchestrator uses the JSON API: /search?q=...&format=json
+use_default_settings: true
+server:
+  # overridden by the environment variable SEARXNG_SECRET (docker-compose.yml: AISM_SEARXNG_SECRET)
+  secret_key: "set-via-SEARXNG_SECRET"
+  limiter: false                     # only reachable from the internal backend network
+  image_proxy: false
+search:
+  formats: [html, json]
+  safe_search: 1
+outgoing:
+  request_timeout: 5.0

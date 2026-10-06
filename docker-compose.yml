@@ -1,0 +1,245 @@
+# AISM Reference Stack (NVIDIA GPU host), aligned with AISM-Spezifikation.md (S1–S7)
+# - No top-level `version:` key (obsolete in Compose v2+).
+# - Images are pinned by tag AND @sha256 digest (multi-arch index digest, resolved 2026-10-05 via the
+#   registry API: tools/resolve_digests.py; cross-checked with `docker buildx imagetools inspect`).
+#   The tags are examples of tested versions, not recommendations; re-resolve when updating.
+# - Before first start: cp policy/policy.example.yaml policy/policy.yaml && edit; create .env with the secrets below.
+
+name: aism
+
+# Fixed bridge names so the host firewall can match them (deploy/firewall/).
+networks:
+  frontend:            # S1 <-> S2: UI and admin access (published ports live here)
+    driver_opts:       # outbound internet from this bridge is dropped by deploy/firewall/
+      com.docker.network.bridge.name: aism-frontend
+  backend:
+    internal: true     # S2–S6: no direct internet access, no published ports
+    driver_opts:
+      com.docker.network.bridge.name: aism-backend
+  egress:              # only S2 (cloud fallback) and S5 (web search) may reach the internet
+    driver_opts:
+      com.docker.network.bridge.name: aism-egress
+
+volumes:
+  open-webui:
+  qdrant:
+  n8n:
+  audit:
+
+services:
+
+  # ── S1 UI & Session (README component group: Interface & Chat) ──
+  open-webui:
+    # v0.11.4: all variables below verified in backend/open_webui/{config,env}.py at this tag.
+    # The JWT forwarding variables (FORWARD_USER_INFO_HEADER_JWT_SECRET) do not exist in v0.6.30;
+    # they first appear in v0.9.6.
+    image: ghcr.io/open-webui/open-webui:v0.11.4@sha256:9591b13f13843c7721c2b8eaf7382846c81b3ffe126526d1888d1fed50c6a33f
+    restart: unless-stopped
+    networks: [frontend]
+    ports:
+      - "3000:8080"
+    environment:
+      # Only backend: the governance gateway (S2). No direct model access.
+      OPENAI_API_BASE_URL: http://governance-proxy:8000/v1
+      OPENAI_API_KEY: ${AISM_UI_CLIENT_KEY:?set AISM_UI_CLIENT_KEY in .env}
+      ENABLE_OLLAMA_API: "false"
+      ENABLE_DIRECT_CONNECTIONS: "false"        # users cannot add their own model endpoints
+      # Built-in RAG / web search off: retrieval and search run in S3 after masking
+      ENABLE_WEB_SEARCH: "false"
+      USER_PERMISSIONS_FEATURES_WEB_SEARCH: "false"
+      ENABLE_SEARCH_QUERY_GENERATION: "false"
+      ENABLE_RETRIEVAL_QUERY_GENERATION: "false"
+      USER_PERMISSIONS_CHAT_FILE_UPLOAD: "false"
+      BYPASS_EMBEDDING_AND_RETRIEVAL: "true"
+      # Environment values win over settings persisted in the Open WebUI database
+      ENABLE_PERSISTENT_CONFIG: "false"
+      # No model downloads from the internet (the frontend network has no egress, deploy/firewall/)
+      OFFLINE_MODE: "true"
+      # Forward user identity to S2 as one signed HS256 JWT (header X-OpenWebUI-User-Jwt) instead
+      # of plaintext X-OpenWebUI-User-* headers. Claims: sub, email, name, role, iss, iat, exp –
+      # no groups (see AISM-Spezifikation.md §10).
+      ENABLE_FORWARD_USER_INFO_HEADERS: "true"
+      FORWARD_USER_INFO_HEADER_JWT_SECRET: ${AISM_FORWARD_JWT_SECRET:?set AISM_FORWARD_JWT_SECRET in .env}
+    volumes:
+      - open-webui:/app/backend/data
+    depends_on:
+      - governance-proxy
+
+  # ── S2 Governance gateway (README: Privacy & Governance) ─────────
+  governance-proxy:
+    build:                       # prototype in ./gateway (see gateway/README.md)
+      context: .
+      dockerfile: gateway/Dockerfile
+    image: ghcr.io/marksen23/aism-gateway:0.1.0-dev   # local build tag; base image pinned by digest in the Dockerfile.
+                                            # Release: push and pin by digest, see README "Reproduzierbare Builds"
+    restart: unless-stopped
+    networks:
+      frontend: {}
+      backend: {}
+      egress:
+        gw_priority: 1           # default route via the egress bridge (frontend egress is dropped)
+    ports:
+      - "127.0.0.1:8000:8000"     # OpenAI-compatible API for local API clients / conformance tests
+    environment:
+      POLICY_PATH: /etc/aism/policy/policy.yaml
+      # K3-01/K3-08: only policies with a valid SSHSIG signature by a key in allowed_signers are loaded
+      POLICY_REQUIRE_SIGNATURE: ${AISM_POLICY_REQUIRE_SIGNATURE:-true}
+      POLICY_ALLOWED_SIGNERS: /etc/aism/trust/allowed_signers
+      LISTEN_PUBLIC: 0.0.0.0:8000         # /v1/*, /health, /aism/v1/policy
+      LISTEN_INTERNAL: 0.0.0.0:8001       # /internal/* for S3 only (mask, egress); token-protected
+      UPSTREAM_ORCHESTRATOR: http://orchestrator:9000/v1
+      INTERNAL_TOKEN: ${AISM_INTERNAL_TOKEN:?set AISM_INTERNAL_TOKEN in .env}
+      AISM_FORWARD_JWT_SECRET: ${AISM_FORWARD_JWT_SECRET}
+      AISM_UI_CLIENT_KEY: ${AISM_UI_CLIENT_KEY}
+      AISM_CLOUD_API_KEY: ${AISM_CLOUD_API_KEY:-}   # only used if policy routing.cloudEnabled=true
+      AUDIT_LOG_PATH: /audit/audit.jsonl
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+    volumes:
+      # directory mount (not a single-file mount): atomic replacements of policy.yaml / policy.yaml.sig
+      # are visible to the hot reload
+      - ./policy:/etc/aism/policy:ro
+      - ./config/policy-trust:/etc/aism/trust:ro   # trust anchor, separate from the policy repo
+      - audit:/audit
+    depends_on:
+      - orchestrator
+
+  # ── S3 Orchestration & agents (README: Workflows & Agents) ───────
+  orchestrator:
+    build:                       # minimal stub in ./orchestrator (see orchestrator/README.md)
+      context: .
+      dockerfile: orchestrator/Dockerfile
+    image: ghcr.io/marksen23/aism-orchestrator:0.1.0-dev   # local build tag
+    restart: unless-stopped
+    networks: [backend]
+    environment:
+      POLICY_PATH: /etc/aism/policy/policy.yaml   # S3 uses only the policy digest announced by S2 (verified there)
+      INFERENCE_LOCAL_URL: http://llama-server:8080/v1
+      EMBEDDINGS_URL: http://llama-embed:8080/v1
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_API_KEY: ${AISM_QDRANT_API_KEY:?set AISM_QDRANT_API_KEY in .env}
+      SEARXNG_URL: http://searxng:8080
+      TOOL_GATEWAY_URL: http://n8n:5678
+      N8N_WEBHOOK_TOKEN: ${AISM_N8N_WEBHOOK_TOKEN:?set AISM_N8N_WEBHOOK_TOKEN in .env}
+      GATEWAY_INTERNAL_URL: http://governance-proxy:8001
+      INTERNAL_TOKEN: ${AISM_INTERNAL_TOKEN}
+    volumes:
+      - ./policy:/etc/aism/policy:ro
+    depends_on:
+      llama-server:
+        condition: service_healthy
+      llama-embed:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+
+  # ── S6 Inference: chat model (README: Inference) ─────────────────
+  llama-server:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda-b11382@sha256:ef08b5a98b1170f2b62177be0a4027c88a84043c55afbf190dd18b9e7cdcfebf   # build b11382 (= server-cuda on 2026-10-05)
+    restart: unless-stopped
+    networks: [backend]            # internal only, no published ports
+    volumes:
+      - ./models:/models:ro
+    command: >
+      -m /models/qwen2.5-7b-instruct-q4_k_m.gguf
+      --host 0.0.0.0 --port 8080
+      -ngl 99
+      -c 8192
+      --jinja
+      --metrics
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 120s
+
+  # ── S4 Retrieval: embedding endpoint (separate from Qdrant) ──────
+  llama-embed:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda-b11382@sha256:ef08b5a98b1170f2b62177be0a4027c88a84043c55afbf190dd18b9e7cdcfebf
+    restart: unless-stopped
+    networks: [backend]
+    volumes:
+      - ./models:/models:ro
+    command: >
+      -m /models/nomic-embed-text-v1.5.Q8_0.gguf
+      --host 0.0.0.0 --port 8080
+      --embedding
+      -ngl 99
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  # ── S4 Retrieval: vector store ───────────────────────────────────
+  qdrant:
+    image: qdrant/qdrant:v1.15.4@sha256:6ac4807063bbecddca0250bfbcff52acf18c22263b904d12919349e6d0a408f1
+    restart: unless-stopped
+    networks: [backend]
+    environment:
+      QDRANT__SERVICE__API_KEY: ${AISM_QDRANT_API_KEY}
+    volumes:
+      - qdrant:/qdrant/storage
+
+  # ── S3 Tool gateway ──────────────────────────────────────────────
+  n8n:
+    image: n8nio/n8n:1.110.1@sha256:6c0c7650150a3fb0fd30d13160a87b5227963c36c9297b5bda618bcadfcee932
+    restart: unless-stopped
+    # frontend only for the editor UI (bound to localhost). Note: `frontend` is not an
+    # internal network (needed for published ports), so restrict container egress on the
+    # host firewall (DOCKER-USER chain) unless policy allows external tool targets.
+    networks: [backend, frontend]
+    ports:
+      - "127.0.0.1:5678:5678"
+    environment:
+      N8N_HOST: localhost
+      N8N_PORT: "5678"
+      GENERIC_TIMEZONE: Europe/Berlin
+    volumes:
+      - n8n:/home/node/.n8n
+
+  # ── S5 Grounding: web search (egress under policy) ───────────────
+  searxng:
+    image: searxng/searxng:2026.10.4-d48c4b555@sha256:76b0bf285aca014c7191fc4d9234c4bfb358624ac33d8883833d496c059ec072   # (previous tag 2025.9.20-5cbd2b6 did not exist)
+    restart: unless-stopped
+    networks:
+      backend: {}
+      egress:
+        gw_priority: 1
+    volumes:
+      - ./config/searxng:/etc/searxng   # settings.yml must enable the `json` output format
+    environment:
+      SEARXNG_BASE_URL: http://searxng:8080/
+      SEARXNG_SECRET: ${AISM_SEARXNG_SECRET:?set AISM_SEARXNG_SECRET in .env}
+
+  # Optional: Perplexica as an additional search UI. Its LLM provider MUST point at
+  # http://governance-proxy:8000/v1. Enable with: docker compose --profile perplexica up -d
+  perplexica:
+    image: itzcrazykns1337/perplexica:v1.11.0@sha256:9f371a89e6d9b34e3431f2418d4aad472f96db03d647926cb572380e6ebe09cd
+    profiles: [perplexica]
+    restart: unless-stopped
+    networks: [frontend, backend]
+    ports:
+      - "3001:3000"
+    environment:
+      SEARXNG_API_URL: http://searxng:8080
+    volumes:
+      - ./config/perplexica:/home/perplexica/config
+    depends_on:
+      - searxng
+      - governance-proxy

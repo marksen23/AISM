@@ -1,0 +1,52 @@
+flowchart TB
+    U([User]) <--> UI
+
+    subgraph S1["S1 UI & Session"]
+        UI["Open WebUI<br/>built-in RAG / web search disabled"]
+    end
+
+    subgraph S2["S2 Governance gateway"]
+        GOV["Governance proxy :8000<br/>AuthN · PII masking · policy · route decision"]
+        POL[/"policy.yaml (Git-reviewed)"/]
+        AUDIT[("Audit log<br/>no plaintext PII")]
+        EGR["Egress control :8001<br/>cloud only if policy allows"]
+    end
+
+    CLOUD["Cloud API (external, optional)"]
+
+    subgraph S3["S3 Orchestration & agents"]
+        ORCH["Orchestrator<br/>enrichment · inference calls<br/>tool-call validation (allowlist + schema)"]
+        N8N["n8n tool gateway<br/>executes validated calls only"]
+    end
+
+    subgraph S4["S4 Retrieval (RAG)"]
+        EMB["Embedding server /v1/embeddings"]
+        QD[("Qdrant · access filter")]
+    end
+
+    subgraph S5["S5 Grounding"]
+        SRCH["SearXNG format=json"]
+    end
+
+    subgraph S6["S6 Inference"]
+        LOCAL["llama-server<br/>/v1/chat/completions · SSE"]
+    end
+
+    DASH["Telemetry & dashboard<br/>Docker socket · DCGM/NVML · rocm-smi"]
+
+    subgraph S7["S7 Compute (device mapping)"]
+        HW["Docker · NVIDIA Container Toolkit / CDI · CUDA · ROCm · CPU"]
+    end
+
+    UI <-->|"1 request / 9 SSE stream"| GOV
+    POL -.-> GOV
+    GOV -.-> AUDIT
+    GOV <-->|"2 masked request + route / 6 tool result masking / 8 SSE"| ORCH
+    ORCH <-->|"3a masked query / top-k"| EMB
+    EMB --> QD
+    ORCH <-->|"3b masked query, if allowed"| SRCH
+    ORCH <-->|"4 prompt + context + tools / tool_calls, tokens"| LOCAL
+    ORCH <-->|"5 validated call / result"| N8N
+    ORCH -.->|"4' cloud route"| EGR
+    EGR -.->|"masked, audited"| CLOUD
+    DASH -.-o|observes| HW

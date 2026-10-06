@@ -1,0 +1,6 @@
+# Direct dependencies; the image installs requirements.lock (pip-compile --generate-hashes, see gateway/requirements.txt)
+fastapi==0.142.2
+uvicorn[standard]==0.54.0
+httpx==0.28.1
+PyYAML==6.0.3
+jsonschema==4.26.0

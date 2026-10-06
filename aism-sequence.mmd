@@ -1,0 +1,33 @@
+sequenceDiagram
+    actor U as Benutzer
+    participant S1 as S1 UI & Session
+    participant S2 as S2 Governance-Gateway
+    participant S3 as S3 Orchestrierung
+    participant S4 as S4 Retrieval (Embed + Qdrant)
+    participant S5 as S5 Grounding (SearXNG)
+    participant S6 as S6 Inferenz (llama-server)
+    participant T as n8n Tool-Gateway
+
+    U->>S1: Prompt eingeben (HTTPS)
+    S1->>S2: POST /v1/chat/completions (Bearer JWT, stream=true)
+    S2->>S2: AuthN, PII-Maskierung, Policy, Routing=local, Audit
+    S2->>S3: maskierter Request + Request-Kontext
+    par Kontextanbieter parallel
+        S3->>S4: POST /v1/embeddings, dann /points/query (Filter)
+        S4-->>S3: Top-k-Chunks
+    and
+        S3->>S5: GET /search?format=json (maskiert, nur falls erlaubt)
+        S5-->>S3: Suchergebnisse
+    end
+    S3->>S6: POST /v1/chat/completions (messages + Kontext + tools)
+    S6-->>S3: finish_reason=tool_calls (ticket_status_lookup)
+    S3->>S3: Allowlist + JSON-Schema-Prüfung
+    S3->>T: POST /webhook/ticket-status-lookup
+    T-->>S3: Ergebnis (parametrisierte Leseabfrage)
+    S3->>S2: Tool-Ergebnis zur Maskierung + Audit
+    S2-->>S3: maskiertes Ergebnis
+    S3->>S6: Folge-Request mit role=tool, stream=true
+    S6-->>S3: SSE chat.completion.chunk ... [DONE]
+    S3-->>S2: SSE-Stream
+    S2-->>S1: SSE-Stream (Platzhalter ggf. demaskiert, Audit)
+    S1-->>U: inkrementelle Anzeige

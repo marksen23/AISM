@@ -1,0 +1,43 @@
+# probe.sh, 2026-10-05 09:15 CEST, project renamed to AISM; Variant A (docker-user.sh, iptables-nft + ip6tables) active, stack with test/compose.ipv6.yml
+fw-probe-frontend          -> 10.99.0.2:8080           : blocked TimeoutError
+fw-probe-frontend          -> fd00:beef::2:8080        : blocked TimeoutError
+fw-probe-frontend          -> 1.1.1.1:443              : blocked TimeoutError
+aism-aism-mock-1           -> 10.99.0.2:8080           : blocked TimeoutError
+aism-aism-mock-1           -> fd00:beef::2:8080        : blocked TimeoutError
+aism-aism-mock-1           -> 1.1.1.1:443              : blocked TimeoutError
+fw-probe-frontend          -> governance-proxy:8000    : open
+aism-governance-proxy-1    -> 10.99.0.2:8080           : open
+aism-governance-proxy-1    -> fd00:beef::2:8080        : open
+aism-governance-proxy-1    -> 1.1.1.1:443              : open
+aism-orchestrator-1        -> 10.99.0.2:8080           : blocked OSError
+aism-orchestrator-1        -> 1.1.1.1:443              : blocked OSError
+
+# baseline (no AISM rules)
+fw-probe-frontend          -> 10.99.0.2:8080           : open
+fw-probe-frontend          -> fd00:beef::2:8080        : open
+fw-probe-frontend          -> 1.1.1.1:443              : open
+aism-aism-mock-1           -> 10.99.0.2:8080           : open
+aism-aism-mock-1           -> fd00:beef::2:8080        : open
+aism-aism-mock-1           -> 1.1.1.1:443              : open
+fw-probe-frontend          -> governance-proxy:8000    : open
+aism-governance-proxy-1    -> 10.99.0.2:8080           : open
+aism-governance-proxy-1    -> fd00:beef::2:8080        : open
+aism-governance-proxy-1    -> 1.1.1.1:443              : open
+aism-orchestrator-1        -> 10.99.0.2:8080           : blocked OSError
+aism-orchestrator-1        -> 1.1.1.1:443              : blocked OSError
+
+# Variant B (aism-egress.nft) active
+fw-probe-frontend          -> 10.99.0.2:8080           : blocked TimeoutError
+fw-probe-frontend          -> fd00:beef::2:8080        : blocked TimeoutError
+fw-probe-frontend          -> 1.1.1.1:443              : blocked TimeoutError
+aism-aism-mock-1           -> 10.99.0.2:8080           : blocked TimeoutError
+aism-aism-mock-1           -> fd00:beef::2:8080        : blocked TimeoutError
+aism-aism-mock-1           -> 1.1.1.1:443              : blocked TimeoutError
+fw-probe-frontend          -> governance-proxy:8000    : open
+aism-governance-proxy-1    -> 10.99.0.2:8080           : open
+aism-governance-proxy-1    -> fd00:beef::2:8080        : open
+aism-governance-proxy-1    -> 1.1.1.1:443              : open
+aism-orchestrator-1        -> 10.99.0.2:8080           : blocked OSError
+aism-orchestrator-1        -> 1.1.1.1:443              : blocked OSError
+		iifname "aism-frontend" counter packets 18 bytes 1200 drop comment "AISM: no internet egress from frontend"
+		iifname "aism-backend" oifname != "aism-backend" counter packets 0 bytes 0 drop comment "AISM: backend stays internal"

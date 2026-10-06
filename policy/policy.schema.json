@@ -1,0 +1,493 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:aism:schema:policy:v1alpha1",
+  "title": "AISM Governance Policy (S2) – v1alpha1",
+  "description": "Policy-as-Code für das AISM-Governance-Gateway (S2). Die $id-URL ist ein Platzhalter. Siehe AISM-Policy-Format.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "properties": {
+    "apiVersion": { "const": "aism/v1alpha1" },
+    "kind": { "const": "GovernancePolicy" },
+    "metadata": { "$ref": "#/$defs/metadata" },
+    "spec": { "$ref": "#/$defs/spec" }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,62}$" },
+    "idList": { "type": "array", "items": { "$ref": "#/$defs/id" }, "uniqueItems": true },
+    "duration": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*(s|m|h|d)$",
+      "description": "Dauer, z. B. 30s, 1m, 24h, 180d"
+    },
+
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "owner"],
+      "properties": {
+        "name": { "$ref": "#/$defs/id" },
+        "version": {
+          "type": "string",
+          "description": "Semantic Versioning 2.0.0",
+          "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(-[0-9A-Za-z.-]+)?$"
+        },
+        "revision": { "type": "string", "pattern": "^[0-9a-f]{7,64}$", "description": "Git-Commit-SHA (CI) oder Inhalts-Revision (sha256, gesetzt von tools/aism-policy-sign.py); Pflicht bei signierten Policies" },
+        "owner": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "effectiveFrom": { "type": "string", "format": "date-time" },
+        "changeRef": { "type": "string", "description": "Verweis auf Merge-/Pull-Request" },
+        "signature": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["method", "ref"],
+          "description": "ssh-sig: abgesetzte SSHSIG-Signatur (Ed25519, Namespace aism-policy) über die Policy-Datei; vom Gateway geprüft. Andere Methoden werden nur deklariert und vom Referenz-Gateway nicht verifiziert.",
+          "properties": {
+            "method": { "enum": ["ssh-sig", "git-tag-gpg", "git-tag-ssh", "sigstore-cosign"] },
+            "ref": { "type": "string", "minLength": 1 },
+            "signer": { "type": "string" }
+          },
+          "if": { "properties": { "method": { "const": "ssh-sig" } } },
+          "then": {
+            "required": ["signer"],
+            "properties": { "ref": { "pattern": "^[A-Za-z0-9._-]+\\.sig$", "description": "Dateiname der Signatur im Verzeichnis der Policy" } }
+          }
+        }
+      }
+    },
+
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["defaults", "subjects", "piiDetectors", "dataClasses", "routing", "tools", "rag", "audit"],
+      "properties": {
+        "defaults": { "$ref": "#/$defs/defaults" },
+        "subjects": { "$ref": "#/$defs/subjects" },
+        "piiDetectors": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/piiDetector" } },
+        "dataClasses": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/dataClass" } },
+        "routing": { "$ref": "#/$defs/routing" },
+        "tools": { "$ref": "#/$defs/tools" },
+        "rag": { "$ref": "#/$defs/rag" },
+        "webSearch": { "$ref": "#/$defs/webSearch" },
+        "audit": { "$ref": "#/$defs/audit" }
+      }
+    },
+
+    "defaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision", "route", "failMode"],
+      "properties": {
+        "decision": { "const": "deny", "description": "Default deny ist nicht abschaltbar." },
+        "route": { "const": "local" },
+        "failMode": { "const": "closed" },
+        "maxToolRounds": { "type": "integer", "minimum": 0, "maximum": 20, "default": 5 },
+        "maxRequestBytes": { "type": "integer", "minimum": 1024 }
+      }
+    },
+
+    "subjects": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["roles"],
+      "properties": {
+        "identitySources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "type"],
+            "properties": {
+              "id": { "$ref": "#/$defs/id" },
+              "type": { "enum": ["oidc-bearer", "forwarded-jwt-hs256", "api-key"] },
+              "issuer": { "type": "string" },
+              "audience": { "type": "string" },
+              "jwksUri": { "type": "string" },
+              "header": { "type": "string" },
+              "secretRef": { "$ref": "#/$defs/secretRef" },
+              "client": { "$ref": "#/$defs/id" }
+            }
+          }
+        },
+        "roles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "match"],
+            "properties": {
+              "id": { "$ref": "#/$defs/id" },
+              "description": { "type": "string" },
+              "match": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["claim", "anyOf"],
+                "properties": {
+                  "claim": { "type": "string" },
+                  "anyOf": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+                }
+              }
+            }
+          }
+        },
+        "agents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id"],
+            "properties": {
+              "id": { "$ref": "#/$defs/id" },
+              "description": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "secretRef": {
+      "type": "string",
+      "pattern": "^(env|file):[A-Za-z0-9_./-]+$",
+      "description": "Verweis auf ein Secret; Klartext-Secrets sind in der Policy unzulässig."
+    },
+
+    "masking": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy"],
+      "properties": {
+        "strategy": { "enum": ["placeholder", "redact", "hash"] },
+        "placeholderFormat": { "type": "string", "pattern": "^<[A-Z_]+_\\{n\\}>$", "description": "z. B. <EMAIL_{n}>" },
+        "reversible": { "type": "boolean", "default": false },
+        "demaskFor": { "$ref": "#/$defs/idList", "description": "Rollen, für die im Rückweg demaskiert wird (PEP-10)" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "strategy": { "const": "placeholder" } } },
+          "then": { "required": ["placeholderFormat"] }
+        },
+        {
+          "if": { "properties": { "strategy": { "enum": ["redact", "hash"] } } },
+          "then": { "properties": { "reversible": { "const": false } } }
+        }
+      ]
+    },
+
+    "piiDetector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "entity", "type", "masking"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "entity": { "type": "string", "pattern": "^[A-Z][A-Z_]*$" },
+        "type": { "enum": ["regex", "ner", "checksum"] },
+        "patterns": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+        "ner": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["model", "labels", "minScore"],
+          "properties": {
+            "model": { "type": "string" },
+            "labels": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+            "minScore": { "type": "number", "minimum": 0, "maximum": 1 },
+            "languages": { "type": "array", "items": { "type": "string", "pattern": "^[a-z]{2}$" } }
+          }
+        },
+        "checksum": { "enum": ["iban-mod97", "luhn"] },
+        "applyTo": {
+          "type": "array",
+          "items": { "enum": ["prompt", "tool_result", "rag_ingest", "web_query", "response"] },
+          "uniqueItems": true,
+          "default": ["prompt", "tool_result", "rag_ingest", "web_query"]
+        },
+        "masking": { "$ref": "#/$defs/masking" }
+      },
+      "allOf": [
+        { "if": { "properties": { "type": { "const": "regex" } } }, "then": { "required": ["patterns"] } },
+        { "if": { "properties": { "type": { "const": "ner" } } }, "then": { "required": ["ner"] } },
+        { "if": { "properties": { "type": { "const": "checksum" } } }, "then": { "required": ["patterns", "checksum"] } }
+      ]
+    },
+
+    "dataClass": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "rank"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "rank": { "type": "integer", "minimum": 0, "description": "Höher = schutzbedürftiger. Die höchste zutreffende Klasse gilt." },
+        "description": { "type": "string" },
+        "assignWhen": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "detectedEntities": { "type": "array", "items": { "type": "string" } },
+            "collections": { "$ref": "#/$defs/idList" },
+            "roles": { "$ref": "#/$defs/idList" },
+            "always": { "type": "boolean" }
+          }
+        }
+      }
+    },
+
+    "routing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cloudEnabled", "providers", "rules"],
+      "properties": {
+        "cloudEnabled": { "type": "boolean", "description": "Globaler Schalter; false = kein Cloud-Egress, unabhängig von Regeln" },
+        "providers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "type", "endpoint", "models"],
+            "properties": {
+              "id": { "$ref": "#/$defs/id" },
+              "type": { "enum": ["local", "cloud"] },
+              "endpoint": { "type": "string", "pattern": "^https?://" },
+              "models": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+              "credentialRef": { "$ref": "#/$defs/secretRef" },
+              "notes": { "type": "string" }
+            },
+            "allOf": [
+              {
+                "if": { "properties": { "type": { "const": "cloud" } } },
+                "then": { "required": ["credentialRef"], "properties": { "endpoint": { "pattern": "^https://" } } }
+              }
+            ]
+          }
+        },
+        "rules": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "priority", "when", "route"],
+            "properties": {
+              "id": { "$ref": "#/$defs/id" },
+              "priority": { "type": "integer", "minimum": 0, "maximum": 1000 },
+              "description": { "type": "string" },
+              "when": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "dataClasses": { "$ref": "#/$defs/idList" },
+                  "roles": { "$ref": "#/$defs/idList" },
+                  "agents": { "$ref": "#/$defs/idList" },
+                  "models": { "type": "array", "items": { "type": "string" } }
+                }
+              },
+              "route": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["mode"],
+                "properties": {
+                  "mode": { "enum": ["local-only", "local-with-cloud-fallback", "deny"] },
+                  "localProviders": { "$ref": "#/$defs/idList" },
+                  "cloudProviders": { "$ref": "#/$defs/idList", "description": "Provider-Allowlist für den Fallback" },
+                  "fallbackOn": {
+                    "type": "array",
+                    "items": { "enum": ["local_unavailable", "local_overloaded", "context_too_large", "model_not_available_locally"] },
+                    "uniqueItems": true
+                  }
+                },
+                "allOf": [
+                  {
+                    "if": { "properties": { "mode": { "const": "local-with-cloud-fallback" } } },
+                    "then": { "required": ["cloudProviders", "fallbackOn"] }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "tools": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["definitions"],
+      "properties": {
+        "requireConfirmationForWrite": { "type": "boolean", "default": true },
+        "definitions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "gateway", "target", "access", "argumentsSchema", "allow"],
+            "properties": {
+              "id": { "type": "string", "pattern": "^[a-zA-Z0-9_-]{1,64}$", "description": "Muss dem Funktionsnamen im tools-Array entsprechen" },
+              "description": { "type": "string" },
+              "gateway": { "enum": ["n8n-webhook", "mcp"] },
+              "target": { "type": "string", "minLength": 1, "description": "n8n-Webhook-Pfad oder MCP-Server-ID" },
+              "access": { "enum": ["read", "write"] },
+              "parameterized": { "type": "boolean", "const": true, "default": true, "description": "Argumente werden gebunden, nie in Code/SQL interpoliert" },
+              "argumentsSchema": {
+                "type": "object",
+                "required": ["type", "additionalProperties"],
+                "properties": {
+                  "type": { "const": "object" },
+                  "additionalProperties": { "const": false }
+                }
+              },
+              "allow": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["roles"],
+                "properties": {
+                  "roles": { "$ref": "#/$defs/idList" },
+                  "agents": { "$ref": "#/$defs/idList" },
+                  "maxDataClassRank": { "type": "integer", "minimum": 0 }
+                }
+              },
+              "rateLimit": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["requests", "per", "scope"],
+                "properties": {
+                  "requests": { "type": "integer", "minimum": 1 },
+                  "per": { "$ref": "#/$defs/duration" },
+                  "scope": { "enum": ["subject", "agent", "global"] }
+                }
+              },
+              "timeout": { "$ref": "#/$defs/duration" },
+              "requireConfirmation": { "type": "boolean" },
+              "maskResult": { "type": "boolean", "const": true, "default": true }
+            },
+            "allOf": [
+              {
+                "if": { "properties": { "access": { "const": "write" } } },
+                "then": { "required": ["requireConfirmation", "rateLimit"] }
+              }
+            ]
+          }
+        }
+      }
+    },
+
+    "rag": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requireMaskedQuery", "embeddingModel", "collections"],
+      "properties": {
+        "requireMaskedQuery": { "const": true },
+        "maskOnIngest": { "type": "boolean", "default": true },
+        "embeddingModel": { "type": "string" },
+        "maxChunks": { "type": "integer", "minimum": 1, "maximum": 50, "default": 5 },
+        "collections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "allow", "filter"],
+            "properties": {
+              "id": { "type": "string", "pattern": "^[a-zA-Z0-9_-]{1,255}$" },
+              "dataClass": { "$ref": "#/$defs/id" },
+              "allow": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["roles"],
+                "properties": { "roles": { "$ref": "#/$defs/idList" } }
+              },
+              "filter": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["payloadKey", "valuesFrom"],
+                "properties": {
+                  "payloadKey": { "type": "string" },
+                  "valuesFrom": { "enum": ["roles", "claim"] },
+                  "claim": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "webSearch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "allow": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "roles": { "$ref": "#/$defs/idList" },
+            "maxDataClassRank": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "stripPlaceholders": { "type": "boolean", "default": true },
+        "maxResults": { "type": "integer", "minimum": 1, "maximum": 50 }
+      }
+    },
+
+    "audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sink", "events", "plaintextPII", "retention", "decisionLog"],
+      "properties": {
+        "sink": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type"],
+          "properties": {
+            "type": { "enum": ["file-jsonl", "syslog", "otlp-logs"] },
+            "path": { "type": "string" },
+            "endpoint": { "type": "string" }
+          }
+        },
+        "events": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "request.accepted", "request.denied", "pii.masked", "route.decided",
+              "egress.cloud", "egress.websearch", "rag.query", "tool.call.allowed",
+              "tool.call.denied", "tool.result", "stream.completed", "stream.aborted",
+              "policy.loaded", "policy.load_failed",
+              "tool.call.pending", "tool.call.confirmed", "tool.call.rejected"
+            ]
+          }
+        },
+        "plaintextPII": { "const": false },
+        "storePayloadHash": { "type": "boolean", "default": true },
+        "retention": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["days"],
+          "properties": {
+            "days": { "type": "integer", "minimum": 1 },
+            "basis": { "type": "string", "description": "Verweis auf interne Aufbewahrungsvorgabe; rechtliche Fristen sind nicht Teil dieses Formats" }
+          }
+        },
+        "integrity": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "hashChain": { "type": "boolean" },
+            "algorithm": { "enum": ["sha256", "sha512"] }
+          }
+        },
+        "decisionLog": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled"],
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "includeRuleTrace": { "type": "boolean", "default": true }
+          }
+        },
+        "traceContext": { "enum": ["w3c-traceparent", "none"], "default": "w3c-traceparent" }
+      }
+    }
+  }
+}

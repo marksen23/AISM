@@ -1,0 +1,38 @@
+#!/usr/sbin/nft -f
+# AISM reference host firewall (nftables) – EXAMPLE, review before use.
+#
+# Goal: containers on the `frontend` network (Open WebUI, n8n editor, Perplexica) get NO
+# outbound internet access. Only the `egress` network (governance-proxy for policy-checked
+# cloud egress, SearXNG for web search) may open connections to the outside.
+#
+# Requires the fixed bridge names from docker-compose.yml:
+#   frontend -> aism-frontend, backend -> aism-backend, egress -> aism-egress
+#
+# Uses its own table, so Docker's rules (iptables-nft or native nftables) are not touched.
+# A drop in any base chain is final, therefore this chain works independently of Docker's
+# ACCEPT rules. Load:   sudo nft -f aism-egress.nft
+# Remove:               sudo nft delete table inet aism_egress
+# Do NOT put `flush ruleset` in front of it – that would delete Docker's rules.
+
+table inet aism_egress
+delete table inet aism_egress
+
+table inet aism_egress {
+	chain forward {
+		type filter hook forward priority filter - 10; policy accept;
+
+		# Replies (e.g. to inbound connections on published ports) and established flows
+		ct state established,related accept
+
+		# frontend: traffic inside the bridge (UI <-> gateway) is allowed, everything else is dropped
+		iifname "aism-frontend" oifname "aism-frontend" accept
+		iifname "aism-frontend" counter drop comment "AISM: no internet egress from frontend"
+
+		# backend is `internal: true` in compose; this rule only adds defence in depth
+		iifname "aism-backend" oifname != "aism-backend" counter drop comment "AISM: backend stays internal"
+
+		# egress: allowed. Optional hardening – allow only HTTPS/HTTP and drop the rest:
+		# iifname "aism-egress" oifname != "aism-egress" tcp dport { 80, 443 } accept
+		# iifname "aism-egress" oifname != "aism-egress" counter drop
+	}
+}

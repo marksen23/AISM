@@ -1,0 +1,73 @@
+{"id": "ho-000", "text": "Gestern hat Marie Nguyen das Notebook abgeholt.", "entities": [{"start": 12, "end": 24, "type": "PERSON", "value": "Marie Nguyen"}], "tags": ["person", "full"]}
+{"id": "ho-001", "text": "Gestern hat Anna Nguyen das Notebook abgeholt.", "entities": [{"start": 12, "end": 23, "type": "PERSON", "value": "Anna Nguyen"}], "tags": ["person", "full"]}
+{"id": "ho-002", "text": "Gestern hat Peter Yılmaz das Notebook abgeholt.", "entities": [{"start": 12, "end": 24, "type": "PERSON", "value": "Peter Yılmaz"}], "tags": ["person", "full"]}
+{"id": "ho-003", "text": "Gestern hat Anna Wolf das Notebook abgeholt.", "entities": [{"start": 12, "end": 21, "type": "PERSON", "value": "Anna Wolf"}], "tags": ["person", "full"]}
+{"id": "ho-004", "text": "Gestern hat Jürgen Nguyen das Notebook abgeholt.", "entities": [{"start": 12, "end": 25, "type": "PERSON", "value": "Jürgen Nguyen"}], "tags": ["person", "full"]}
+{"id": "ho-005", "text": "Termin mit Frau Werner am Donnerstag um 10 Uhr.", "entities": [{"start": 16, "end": 22, "type": "PERSON", "value": "Werner"}], "tags": ["person", "title_last"]}
+{"id": "ho-006", "text": "Termin mit Prof. Großmann am Donnerstag um 10 Uhr.", "entities": [{"start": 17, "end": 25, "type": "PERSON", "value": "Großmann"}], "tags": ["person", "title_last"]}
+{"id": "ho-007", "text": "Termin mit Prof. Wolf am Donnerstag um 10 Uhr.", "entities": [{"start": 17, "end": 21, "type": "PERSON", "value": "Wolf"}], "tags": ["person", "title_last"]}
+{"id": "ho-008", "text": "Termin mit Herr Schulz am Donnerstag um 10 Uhr.", "entities": [{"start": 16, "end": 22, "type": "PERSON", "value": "Schulz"}], "tags": ["person", "title_last"]}
+{"id": "ho-009", "text": "Termin mit Herr Fischer am Donnerstag um 10 Uhr.", "entities": [{"start": 16, "end": 23, "type": "PERSON", "value": "Fischer"}], "tags": ["person", "title_last"]}
+{"id": "ho-010", "text": "Ansprechpartnerin ist Frau Dr. Paul Fischer.", "entities": [{"start": 31, "end": 43, "type": "PERSON", "value": "Paul Fischer"}], "tags": ["person", "title_full"]}
+{"id": "ho-011", "text": "Ansprechpartnerin ist Frau Dr. Jonas Schulz.", "entities": [{"start": 31, "end": 43, "type": "PERSON", "value": "Jonas Schulz"}], "tags": ["person", "title_full"]}
+{"id": "ho-012", "text": "Ansprechpartnerin ist Herr Giulia Weber.", "entities": [{"start": 27, "end": 39, "type": "PERSON", "value": "Giulia Weber"}], "tags": ["person", "title_full"]}
+{"id": "ho-013", "text": "Ansprechpartnerin ist Frau Karl-Heinz Becker.", "entities": [{"start": 27, "end": 44, "type": "PERSON", "value": "Karl-Heinz Becker"}], "tags": ["person", "title_full"]}
+{"id": "ho-014", "text": "Ansprechpartnerin ist Herr Paul Becker.", "entities": [{"start": 27, "end": 38, "type": "PERSON", "value": "Paul Becker"}], "tags": ["person", "title_full"]}
+{"id": "ho-015", "text": "Moritz sagt, das WLAN im Besprechungsraum fällt ständig aus.", "entities": [{"start": 0, "end": 6, "type": "PERSON", "value": "Moritz"}], "tags": ["person", "first"]}
+{"id": "ho-016", "text": "Laura sagt, das WLAN im Besprechungsraum fällt ständig aus.", "entities": [{"start": 0, "end": 5, "type": "PERSON", "value": "Laura"}], "tags": ["person", "first"]}
+{"id": "ho-017", "text": "Svetlana sagt, das WLAN im Besprechungsraum fällt ständig aus.", "entities": [{"start": 0, "end": 8, "type": "PERSON", "value": "Svetlana"}], "tags": ["person", "first"]}
+{"id": "ho-018", "text": "Giulia sagt, das WLAN im Besprechungsraum fällt ständig aus.", "entities": [{"start": 0, "end": 6, "type": "PERSON", "value": "Giulia"}], "tags": ["person", "first"]}
+{"id": "ho-019", "text": "Sabine sagt, das WLAN im Besprechungsraum fällt ständig aus.", "entities": [{"start": 0, "end": 6, "type": "PERSON", "value": "Sabine"}], "tags": ["person", "first"]}
+{"id": "ho-020", "text": "Kollege Björn Koch braucht Admin-Rechte für das Testsystem.", "entities": [{"start": 8, "end": 18, "type": "PERSON", "value": "Björn Koch"}], "tags": ["person", "full"]}
+{"id": "ho-021", "text": "Kollege Ines Lange braucht Admin-Rechte für das Testsystem.", "entities": [{"start": 8, "end": 18, "type": "PERSON", "value": "Ines Lange"}], "tags": ["person", "full"]}
+{"id": "ho-022", "text": "Kollege Emma Becker braucht Admin-Rechte für das Testsystem.", "entities": [{"start": 8, "end": 19, "type": "PERSON", "value": "Emma Becker"}], "tags": ["person", "full"]}
+{"id": "ho-023", "text": "Kollege Lena Kowalski braucht Admin-Rechte für das Testsystem.", "entities": [{"start": 8, "end": 21, "type": "PERSON", "value": "Lena Kowalski"}], "tags": ["person", "full"]}
+{"id": "ho-024", "text": "Kollege Svetlana Krüger braucht Admin-Rechte für das Testsystem.", "entities": [{"start": 8, "end": 23, "type": "PERSON", "value": "Svetlana Krüger"}], "tags": ["person", "full"]}
+{"id": "ho-025", "text": "hey, kannst du anna nguyen freischalten?", "entities": [{"start": 15, "end": 26, "type": "PERSON", "value": "anna nguyen"}], "tags": ["person", "lower"]}
+{"id": "ho-026", "text": "hey, kannst du lea krause freischalten?", "entities": [{"start": 15, "end": 25, "type": "PERSON", "value": "lea krause"}], "tags": ["person", "lower"]}
+{"id": "ho-027", "text": "hey, kannst du peter kowalski freischalten?", "entities": [{"start": 15, "end": 29, "type": "PERSON", "value": "peter kowalski"}], "tags": ["person", "lower"]}
+{"id": "ho-028", "text": "hey, kannst du mehmet meyer freischalten?", "entities": [{"start": 15, "end": 27, "type": "PERSON", "value": "mehmet meyer"}], "tags": ["person", "lower"]}
+{"id": "ho-029", "text": "hey, kannst du lukas krüger freischalten?", "entities": [{"start": 15, "end": 27, "type": "PERSON", "value": "lukas krüger"}], "tags": ["person", "lower"]}
+{"id": "ho-030", "text": "Freigabe durch Emma Schulz, Vertretung Sabine Krüger.", "entities": [{"start": 15, "end": 26, "type": "PERSON", "value": "Emma Schulz"}, {"start": 39, "end": 52, "type": "PERSON", "value": "Sabine Krüger"}], "tags": ["person", "full"]}
+{"id": "ho-031", "text": "Freigabe durch Ülkü Wolf, Vertretung Felix Lange.", "entities": [{"start": 15, "end": 24, "type": "PERSON", "value": "Ülkü Wolf"}, {"start": 37, "end": 48, "type": "PERSON", "value": "Felix Lange"}], "tags": ["person", "full"]}
+{"id": "ho-032", "text": "Freigabe durch Peter Lange, Vertretung Jan-Hendrik Kowalski.", "entities": [{"start": 15, "end": 26, "type": "PERSON", "value": "Peter Lange"}, {"start": 39, "end": 59, "type": "PERSON", "value": "Jan-Hendrik Kowalski"}], "tags": ["person", "full"]}
+{"id": "ho-033", "text": "Freigabe durch Emma Fischer, Vertretung Sophie Großmann.", "entities": [{"start": 15, "end": 27, "type": "PERSON", "value": "Emma Fischer"}, {"start": 40, "end": 55, "type": "PERSON", "value": "Sophie Großmann"}], "tags": ["person", "full"]}
+{"id": "ho-034", "text": "Freigabe durch Ülkü Lange, Vertretung Björn Lehmann.", "entities": [{"start": 15, "end": 25, "type": "PERSON", "value": "Ülkü Lange"}, {"start": 38, "end": 51, "type": "PERSON", "value": "Björn Lehmann"}], "tags": ["person", "full"]}
+{"id": "ho-035", "text": "Danke Katharina!", "entities": [{"start": 6, "end": 15, "type": "PERSON", "value": "Katharina"}], "tags": ["person", "first"]}
+{"id": "ho-036", "text": "Danke Paul!", "entities": [{"start": 6, "end": 10, "type": "PERSON", "value": "Paul"}], "tags": ["person", "first"]}
+{"id": "ho-037", "text": "Danke Jürgen!", "entities": [{"start": 6, "end": 12, "type": "PERSON", "value": "Jürgen"}], "tags": ["person", "first"]}
+{"id": "ho-038", "text": "Danke Giulia!", "entities": [{"start": 6, "end": 12, "type": "PERSON", "value": "Giulia"}], "tags": ["person", "first"]}
+{"id": "ho-039", "text": "Danke Max!", "entities": [{"start": 6, "end": 9, "type": "PERSON", "value": "Max"}], "tags": ["person", "first"]}
+{"id": "ho-040", "text": "Bitte setze lea_braun@example.net auf die Verteilerliste.", "entities": [{"start": 12, "end": 33, "type": "EMAIL", "value": "lea_braun@example.net"}], "tags": ["other"]}
+{"id": "ho-041", "text": "Bitte setze l.hartmann@example.com auf die Verteilerliste.", "entities": [{"start": 12, "end": 34, "type": "EMAIL", "value": "l.hartmann@example.com"}], "tags": ["other"]}
+{"id": "ho-042", "text": "Bitte setze ue.schwarz@example.org auf die Verteilerliste.", "entities": [{"start": 12, "end": 34, "type": "EMAIL", "value": "ue.schwarz@example.org"}], "tags": ["other"]}
+{"id": "ho-043", "text": "Bitte setze ayse_lehmann@example.com auf die Verteilerliste.", "entities": [{"start": 12, "end": 36, "type": "EMAIL", "value": "ayse_lehmann@example.com"}], "tags": ["other"]}
+{"id": "ho-044", "text": "Bitte setze koch76@firma.example auf die Verteilerliste.", "entities": [{"start": 12, "end": 32, "type": "EMAIL", "value": "koch76@firma.example"}], "tags": ["other"]}
+{"id": "ho-045", "text": "Erstattung bitte an DE37901690723818996582, danke.", "entities": [{"start": 20, "end": 42, "type": "IBAN", "value": "DE37901690723818996582"}], "tags": ["other"]}
+{"id": "ho-046", "text": "Erstattung bitte an DE53273266148884919768, danke.", "entities": [{"start": 20, "end": 42, "type": "IBAN", "value": "DE53273266148884919768"}], "tags": ["other"]}
+{"id": "ho-047", "text": "Erstattung bitte an DE16 1776 7224 8521 4877 41, danke.", "entities": [{"start": 20, "end": 47, "type": "IBAN", "value": "DE16 1776 7224 8521 4877 41"}], "tags": ["other"]}
+{"id": "ho-048", "text": "Erstattung bitte an AT60 5152 4936 9845 1190, danke.", "entities": [{"start": 20, "end": 44, "type": "IBAN", "value": "AT60 5152 4936 9845 1190"}], "tags": ["other"]}
+{"id": "ho-049", "text": "Erstattung bitte an CH16 8823 6947 0126 3544 3, danke.", "entities": [{"start": 20, "end": 46, "type": "IBAN", "value": "CH16 8823 6947 0126 3544 3"}], "tags": ["other"]}
+{"id": "ho-050", "text": "Kontoverbindung: CH9126619697422803052 – Verwendungszweck Reisekosten", "entities": [{"start": 17, "end": 38, "type": "IBAN", "value": "CH9126619697422803052"}], "tags": ["other"]}
+{"id": "ho-051", "text": "Kontoverbindung: DE66084387238739648916 – Verwendungszweck Reisekosten", "entities": [{"start": 17, "end": 39, "type": "IBAN", "value": "DE66084387238739648916"}], "tags": ["other"]}
+{"id": "ho-052", "text": "Kontoverbindung: CH3514318565659198297 – Verwendungszweck Reisekosten", "entities": [{"start": 17, "end": 38, "type": "IBAN", "value": "CH3514318565659198297"}], "tags": ["other"]}
+{"id": "ho-053", "text": "Kontoverbindung: DE24216497548225481423 – Verwendungszweck Reisekosten", "entities": [{"start": 17, "end": 39, "type": "IBAN", "value": "DE24216497548225481423"}], "tags": ["other"]}
+{"id": "ho-054", "text": "Kontoverbindung: CH20 1562 2625 4547 4107 5 – Verwendungszweck Reisekosten", "entities": [{"start": 17, "end": 43, "type": "IBAN", "value": "CH20 1562 2625 4547 4107 5"}], "tags": ["other"]}
+{"id": "ho-055", "text": "Token: ghp_7bVKpQBmX8prQimEFBJSS3PzQuegoSg0JEjo", "entities": [{"start": 7, "end": 47, "type": "SECRET", "value": "ghp_7bVKpQBmX8prQimEFBJSS3PzQuegoSg0JEjo"}], "tags": ["other"]}
+{"id": "ho-056", "text": "Token: ghp_GlM1rn1P6PggNAwv9B20k6Iv3eQzdlqSHuZo", "entities": [{"start": 7, "end": 47, "type": "SECRET", "value": "ghp_GlM1rn1P6PggNAwv9B20k6Iv3eQzdlqSHuZo"}], "tags": ["other"]}
+{"id": "ho-057", "text": "Token: ghp_xqc2vK7bBWZ1wh3wmXvKeYu2D49PQ8kY9ceI", "entities": [{"start": 7, "end": 47, "type": "SECRET", "value": "ghp_xqc2vK7bBWZ1wh3wmXvKeYu2D49PQ8kY9ceI"}], "tags": ["other"]}
+{"id": "ho-058", "text": "Token: ghp_m0ORUy2GOmn3seBsKPpwTucHDmZaZqOOkjnj", "entities": [{"start": 7, "end": 47, "type": "SECRET", "value": "ghp_m0ORUy2GOmn3seBsKPpwTucHDmZaZqOOkjnj"}], "tags": ["other"]}
+{"id": "ho-059", "text": "Token: AKIAYJ712U36NXJ9XEBJ", "entities": [{"start": 7, "end": 27, "type": "SECRET", "value": "AKIAYJ712U36NXJ9XEBJ"}], "tags": ["other"]}
+{"id": "ho-060", "text": "Dimitrios Braun <anna_becker@example.com> hat die IBAN DE98133706985628463254 hinterlegt.", "entities": [{"start": 0, "end": 15, "type": "PERSON", "value": "Dimitrios Braun"}, {"start": 17, "end": 40, "type": "EMAIL", "value": "anna_becker@example.com"}, {"start": 55, "end": 77, "type": "IBAN", "value": "DE98133706985628463254"}], "tags": ["other"]}
+{"id": "ho-061", "text": "Frank Hoffmann <d.braun@example.com> hat die IBAN DE31 7085 2787 0256 7288 21 hinterlegt.", "entities": [{"start": 0, "end": 14, "type": "PERSON", "value": "Frank Hoffmann"}, {"start": 16, "end": 35, "type": "EMAIL", "value": "d.braun@example.com"}, {"start": 50, "end": 77, "type": "IBAN", "value": "DE31 7085 2787 0256 7288 21"}], "tags": ["other"]}
+{"id": "ho-062", "text": "Björn Öztürk <lena.nguyen@mail.example.com> hat die IBAN CH6002520120169963547 hinterlegt.", "entities": [{"start": 0, "end": 12, "type": "PERSON", "value": "Björn Öztürk"}, {"start": 14, "end": 42, "type": "EMAIL", "value": "lena.nguyen@mail.example.com"}, {"start": 57, "end": 78, "type": "IBAN", "value": "CH6002520120169963547"}], "tags": ["other"]}
+{"id": "ho-063", "text": "Peter Lange <paul_grossmann@example.com> hat die IBAN DE84 5362 3698 2194 4820 49 hinterlegt.", "entities": [{"start": 0, "end": 11, "type": "PERSON", "value": "Peter Lange"}, {"start": 13, "end": 39, "type": "EMAIL", "value": "paul_grossmann@example.com"}, {"start": 54, "end": 81, "type": "IBAN", "value": "DE84 5362 3698 2194 4820 49"}], "tags": ["other"]}
+{"id": "ho-064", "text": "Lena Richter <nguyen37@mail.example.com> hat die IBAN DE96170941807862474732 hinterlegt.", "entities": [{"start": 0, "end": 12, "type": "PERSON", "value": "Lena Richter"}, {"start": 14, "end": 39, "type": "EMAIL", "value": "nguyen37@mail.example.com"}, {"start": 54, "end": 76, "type": "IBAN", "value": "DE96170941807862474732"}], "tags": ["other"]}
+{"id": "ho-065", "text": "Der Kunde aus Stuttgart hat das Paket nicht erhalten.", "entities": [], "tags": ["negative"]}
+{"id": "ho-066", "text": "Bitte das Ticket an das Team Netzwerk geben.", "entities": [], "tags": ["negative"]}
+{"id": "ho-067", "text": "Morgen ist Wartung am Exchange-Server.", "entities": [], "tags": ["negative"]}
+{"id": "ho-068", "text": "Die Volkswagen AG nutzt eine andere Lösung.", "entities": [], "tags": ["negative"]}
+{"id": "ho-069", "text": "Am Hauptbahnhof Leipzig fällt der Aufzug aus.", "entities": [], "tags": ["negative"]}
+{"id": "ho-070", "text": "Sehr geehrte Damen und Herren, das System ist wieder online.", "entities": [], "tags": ["negative"]}
+{"id": "ho-071", "text": "Weiß jemand, ob Teams heute stört?", "entities": [], "tags": ["negative"]}
+{"id": "ho-072", "text": "Die Lizenz für Adobe Acrobat läuft im Mai aus.", "entities": [], "tags": ["negative"]}

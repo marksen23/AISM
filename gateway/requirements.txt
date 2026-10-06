@@ -1,0 +1,13 @@
+# Direct dependencies. The image installs requirements.lock (all transitive deps, with hashes):
+#   pip-compile --generate-hashes --allow-unsafe --strip-extras --no-header -o gateway/requirements.lock gateway/requirements.txt
+# Versions used for the local prototype run (2026-10-05); update deliberately.
+fastapi==0.142.2
+uvicorn[standard]==0.54.0
+httpx==0.28.1
+PyYAML==6.0.3
+jsonschema==4.26.0
+PyJWT==2.15.1
+cryptography==50.0.2       # Ed25519 policy signatures (policysig.py), RS/ES/EdDSA for OIDC JWTs
+spacy==3.8.16
+# Example NER model for the person-name detector (quality for German not measured):
+xx_ent_wiki_sm @ https://github.com/explosion/spacy-models/releases/download/xx_ent_wiki_sm-3.8.0/xx_ent_wiki_sm-3.8.0-py3-none-any.whl#sha256=6f3c4b853852ea9e9d2dc76cc950dddb10a7e4c42d813308caefe6c5e8be2f0a

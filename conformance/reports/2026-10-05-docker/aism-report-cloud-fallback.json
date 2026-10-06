@@ -1,0 +1,119 @@
+{
+  "aism_report_version": "1",
+  "suite_version": "0.2.0",
+  "generated_at": "2026-10-05T07:14:00+00:00",
+  "target": {
+    "base_url": "http://governance-proxy:8000",
+    "compose_file": "/repo/docker-compose.yml",
+    "policy_file": "/repo/conformance/tests/run/policy-cloud/policy.yaml"
+  },
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0
+  },
+  "levels": {
+    "K1": {
+      "name": "Basic",
+      "achieved": false,
+      "must_failed": [],
+      "must_not_run": [],
+      "should_failed": []
+    },
+    "K2": {
+      "name": "Governed",
+      "achieved": false,
+      "must_failed": [],
+      "must_not_run": [],
+      "should_failed": []
+    },
+    "K3": {
+      "name": "Sovereign/Auditable",
+      "achieved": false,
+      "must_failed": [],
+      "must_not_run": [],
+      "should_failed": []
+    }
+  },
+  "achieved_level": "none",
+  "results": [
+    {
+      "id": "AISM-K2-08",
+      "level": "K2",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "M-05",
+        "AUD"
+      ],
+      "test": "test_k2_governed.py::test_audit_has_no_plaintext_pii",
+      "outcome": "passed",
+      "duration_s": 0.0,
+      "message": ""
+    },
+    {
+      "id": "AISM-K2-09",
+      "level": "K2",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "M-15",
+        "AUD"
+      ],
+      "test": "test_k2_governed.py::test_audit_entries_carry_policy_version",
+      "outcome": "passed",
+      "duration_s": 0.0,
+      "message": ""
+    },
+    {
+      "id": "AISM-K3-03",
+      "level": "K3",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "S-10",
+        "AUD"
+      ],
+      "test": "test_k3_sovereign.py::test_audit_entries_have_trace_id",
+      "outcome": "passed",
+      "duration_s": 0.0,
+      "message": ""
+    },
+    {
+      "id": "AISM-K3-04",
+      "level": "K3",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "S-13",
+        "M-04"
+      ],
+      "test": "test_k3_sovereign.py::test_cloud_egress_has_proof",
+      "outcome": "passed",
+      "duration_s": 0.0,
+      "message": ""
+    },
+    {
+      "id": "AISM-K3-07",
+      "level": "K3",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "S-02"
+      ],
+      "test": "test_k3_sovereign.py::test_audit_hash_chain",
+      "outcome": "passed",
+      "duration_s": 0.0,
+      "message": ""
+    },
+    {
+      "id": "AISM-K3-10",
+      "level": "K3",
+      "requirement": "SOLLTE",
+      "spec_refs": [
+        "M-04",
+        "PEP-9",
+        "S-13"
+      ],
+      "test": "scenario_cloud_fallback.py::test_cloud_fallback_only_as_policy_allows",
+      "outcome": "passed",
+      "duration_s": 0.34,
+      "message": ""
+    }
+  ]
+}

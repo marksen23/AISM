@@ -1,0 +1,339 @@
+{
+ "dataset": "pii_eval_de_heldout.jsonl",
+ "sentences": 73,
+ "entities": {
+  "PERSON": 50,
+  "EMAIL": 10,
+  "IBAN": 15,
+  "SECRET": 5
+ },
+ "runs": [
+  {
+   "ner": "spacy:xx_ent_wiki_sm",
+   "dropped_detectors": [
+    "person-title"
+   ],
+   "ms_per_sentence": 1.46,
+   "per_type": {
+    "PERSON": {
+     "gold": 50,
+     "strict": 35,
+     "masked": 42,
+     "partial": 0,
+     "pred": 44,
+     "pred_ok": 42,
+     "recall_strict": 0.7,
+     "recall_masked": 0.84,
+     "precision": 0.955
+    },
+    "EMAIL": {
+     "gold": 10,
+     "strict": 10,
+     "masked": 10,
+     "partial": 0,
+     "pred": 10,
+     "pred_ok": 10,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 15,
+     "strict": 15,
+     "masked": 15,
+     "partial": 0,
+     "pred": 15,
+     "pred_ok": 15,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 5,
+     "strict": 5,
+     "masked": 5,
+     "partial": 0,
+     "pred": 5,
+     "pred_ok": 5,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "misses": [
+    {
+     "id": "ho-007",
+     "type": "PERSON",
+     "value": "Wolf",
+     "covered": "0/4",
+     "tags": [
+      "person",
+      "title_last"
+     ]
+    },
+    {
+     "id": "ho-015",
+     "type": "PERSON",
+     "value": "Moritz",
+     "covered": "0/6",
+     "tags": [
+      "person",
+      "first"
+     ]
+    },
+    {
+     "id": "ho-017",
+     "type": "PERSON",
+     "value": "Svetlana",
+     "covered": "0/8",
+     "tags": [
+      "person",
+      "first"
+     ]
+    },
+    {
+     "id": "ho-025",
+     "type": "PERSON",
+     "value": "anna nguyen",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "lower"
+     ]
+    },
+    {
+     "id": "ho-029",
+     "type": "PERSON",
+     "value": "lukas krüger",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "lower"
+     ]
+    },
+    {
+     "id": "ho-031",
+     "type": "PERSON",
+     "value": "Ülkü Wolf",
+     "covered": "0/8",
+     "tags": [
+      "person",
+      "full"
+     ]
+    },
+    {
+     "id": "ho-034",
+     "type": "PERSON",
+     "value": "Ülkü Lange",
+     "covered": "0/9",
+     "tags": [
+      "person",
+      "full"
+     ]
+    },
+    {
+     "id": "ho-039",
+     "type": "PERSON",
+     "value": "Max",
+     "covered": "0/3",
+     "tags": [
+      "person",
+      "first"
+     ]
+    }
+   ],
+   "false_positives": [
+    {
+     "id": "ho-023",
+     "type": "PERSON",
+     "text": "Admin-Rechte",
+     "tags": [
+      "person",
+      "full"
+     ]
+    },
+    {
+     "id": "ho-071",
+     "type": "PERSON",
+     "text": "Teams",
+     "tags": [
+      "negative"
+     ]
+    }
+   ]
+  },
+  {
+   "ner": "spacy:de_core_news_md",
+   "dropped_detectors": [
+    "person-title"
+   ],
+   "ms_per_sentence": 2.87,
+   "per_type": {
+    "PERSON": {
+     "gold": 50,
+     "strict": 38,
+     "masked": 42,
+     "partial": 0,
+     "pred": 46,
+     "pred_ok": 42,
+     "recall_strict": 0.76,
+     "recall_masked": 0.84,
+     "precision": 0.913
+    },
+    "EMAIL": {
+     "gold": 10,
+     "strict": 10,
+     "masked": 10,
+     "partial": 0,
+     "pred": 10,
+     "pred_ok": 10,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 15,
+     "strict": 15,
+     "masked": 15,
+     "partial": 0,
+     "pred": 15,
+     "pred_ok": 15,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 5,
+     "strict": 5,
+     "masked": 5,
+     "partial": 0,
+     "pred": 5,
+     "pred_ok": 5,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "misses": [
+    {
+     "id": "ho-009",
+     "type": "PERSON",
+     "value": "Fischer",
+     "covered": "0/7",
+     "tags": [
+      "person",
+      "title_last"
+     ]
+    },
+    {
+     "id": "ho-017",
+     "type": "PERSON",
+     "value": "Svetlana",
+     "covered": "0/8",
+     "tags": [
+      "person",
+      "first"
+     ]
+    },
+    {
+     "id": "ho-025",
+     "type": "PERSON",
+     "value": "anna nguyen",
+     "covered": "0/10",
+     "tags": [
+      "person",
+      "lower"
+     ]
+    },
+    {
+     "id": "ho-026",
+     "type": "PERSON",
+     "value": "lea krause",
+     "covered": "0/9",
+     "tags": [
+      "person",
+      "lower"
+     ]
+    },
+    {
+     "id": "ho-027",
+     "type": "PERSON",
+     "value": "peter kowalski",
+     "covered": "0/13",
+     "tags": [
+      "person",
+      "lower"
+     ]
+    },
+    {
+     "id": "ho-028",
+     "type": "PERSON",
+     "value": "mehmet meyer",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "lower"
+     ]
+    },
+    {
+     "id": "ho-029",
+     "type": "PERSON",
+     "value": "lukas krüger",
+     "covered": "0/11",
+     "tags": [
+      "person",
+      "lower"
+     ]
+    },
+    {
+     "id": "ho-039",
+     "type": "PERSON",
+     "value": "Max",
+     "covered": "0/3",
+     "tags": [
+      "person",
+      "first"
+     ]
+    }
+   ],
+   "false_positives": [
+    {
+     "id": "ho-000",
+     "type": "PERSON",
+     "text": "Gestern",
+     "tags": [
+      "person",
+      "full"
+     ]
+    },
+    {
+     "id": "ho-001",
+     "type": "PERSON",
+     "text": "Gestern",
+     "tags": [
+      "person",
+      "full"
+     ]
+    },
+    {
+     "id": "ho-002",
+     "type": "PERSON",
+     "text": "Gestern",
+     "tags": [
+      "person",
+      "full"
+     ]
+    },
+    {
+     "id": "ho-004",
+     "type": "PERSON",
+     "text": "Gestern",
+     "tags": [
+      "person",
+      "full"
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,68 @@
+digraph AISM {
+  graph [rankdir=TB, fontname="Helvetica", fontsize=22, labelloc=t, nodesep=0.6, ranksep=0.7, pad=0.4, newrank=true,
+         label=<<b>AISM: 7-Stage Request Pipeline (S1–S7)</b><br/><font point-size="14">Arrows show request → and return ← directions · dashed red = policy-gated egress · dotted = telemetry / config</font>>];
+  node  [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=13, penwidth=1.4, margin="0.2,0.1", fillcolor="#ffffff"];
+  edge  [fontname="Helvetica", fontsize=11, penwidth=1.4, color="#333333"];
+
+  user [label="User", shape=ellipse];
+
+  subgraph cluster_s1 { label="S1  UI & Session"; style="rounded,filled"; fillcolor="#e8f1fb"; color="#4a86c5"; fontsize=14;
+    ui [label="Open WebUI\nbuilt-in RAG / web search disabled"]; }
+
+  subgraph cluster_s2 { label="S2  Governance gateway (enforced before model, index or network)"; style="rounded,filled"; fillcolor="#fdeaea"; color="#c54a4a"; fontsize=14;
+    policy [label="policy.yaml\n(Git-reviewed)", shape=note];
+    gov [label="Governance proxy :8000\nAuthN · PII masking · policy · route decision"];
+    audit [label="Audit log\n(no plaintext PII)", shape=cylinder];
+    egress [label="Egress control :8001\ncloud only if policy allows"];
+    { rank=same; policy; gov; audit; egress; }
+  }
+
+  cloud [label="Cloud API\n(external, optional)", style="rounded,filled,dashed", fillcolor="#f2f2f2"];
+
+  subgraph cluster_s3 { label="S3  Orchestration & agents"; style="rounded,filled"; fillcolor="#e6f6f7"; color="#2a9aa5"; fontsize=14;
+    orch [label="Orchestrator\ncontext enrichment · inference calls\ntool-call validation (allowlist + JSON Schema)"];
+    n8n [label="n8n tool gateway\nexecutes validated calls only"];
+    { rank=same; orch; n8n; }
+  }
+
+  subgraph cluster_s4 { label="S4  Retrieval (RAG)"; style="rounded,filled"; fillcolor="#eaf7ea"; color="#4a9a4a"; fontsize=14;
+    emb [label="Embedding server\n/v1/embeddings"];
+    qdrant [label="Qdrant\naccess filter", shape=cylinder];
+  }
+
+  subgraph cluster_s6 { label="S6  Inference"; style="rounded,filled"; fillcolor="#efe8fb"; color="#7a4ac5"; fontsize=14;
+    local [label="llama-server\n/v1/chat/completions · SSE"]; }
+
+  subgraph cluster_s5 { label="S5  Grounding"; style="rounded,filled"; fillcolor="#fff6e0"; color="#c59a2a"; fontsize=14;
+    search [label="SearXNG\nformat=json"]; }
+
+  subgraph cluster_s7 { label="S7  Compute (device mapping, not a network layer)"; style="rounded,filled"; fillcolor="#eeeeee"; color="#666666"; fontsize=14;
+    compute [label="Docker · NVIDIA Container Toolkit / CDI · CUDA · ROCm · CPU fallback", width=10]; }
+
+  dash [label="Telemetry & dashboard\nDocker socket · DCGM/NVML · rocm-smi\nVRAM · tokens/s · latency · health", fillcolor="#fffbe6", color="#b08a00"];
+
+  { rank=same; emb; local; search; }
+  { rank=same; gov; cloud; }
+
+  user -> ui [dir=both, label=" prompt / answer"];
+  ui -> gov [dir=both, label=" 1 /v1/chat/completions (only backend)\n 9 SSE stream, unmasked for authorized user"];
+  policy -> gov [style=dotted, arrowhead=none];
+  gov -> audit [style=dotted, arrowhead=none];
+  audit -> egress [style=invis];
+  gov -> orch [dir=both, label=" 2 masked request + route decision\n 6 tool result → masking + audit\n 8 SSE stream"];
+
+  orch -> emb [dir=both, color="#4a9a4a", fontcolor="#2a6a2a", label=" 3a masked query\n top-k chunks"];
+  emb -> qdrant [color="#4a9a4a", label=" vector"];
+  orch -> search [dir=both, color="#c59a2a", fontcolor="#8a6a10", label=" 3b masked query (if allowed)\n results"];
+  orch -> local [dir=both, color="#7a4ac5", fontcolor="#5a2aa5", label=" 4 prompt + context + allowed tools\n tool_calls / SSE tokens"];
+  orch -> n8n [dir=both, color="#2a9aa5", fontcolor="#1a6a75", label=" 5 validated call\n result"];
+
+  orch -> egress [style=dashed, color="#c54a4a", fontcolor="#c54a4a", label=" 4' cloud route", constraint=false];
+  egress -> cloud [style=dashed, color="#c54a4a", fontcolor="#c54a4a", label=" masked, audited"];
+
+  qdrant -> compute [style=invis];
+  local -> compute [style=invis];
+  search -> compute [style=invis];
+  orch -> dash [style=invis];
+  dash -> compute [style=dotted, color="#b08a00", dir=back, label=" observes all containers & GPUs", fontcolor="#8a6a00", constraint=false];
+}

@@ -1,0 +1,511 @@
+{
+  "aism_report_version": "1",
+  "suite_version": "0.2.0",
+  "generated_at": "2026-10-05T07:15:06+00:00",
+  "target": {
+    "base_url": "http://governance-proxy:8000",
+    "compose_file": "/repo/docker-compose.yml",
+    "policy_file": "/repo/conformance/tests/run/policy/policy.yaml"
+  },
+  "summary": {
+    "passed": 37,
+    "failed": 0,
+    "skipped": 0
+  },
+  "levels": {
+    "K1": {
+      "name": "Basic",
+      "achieved": true,
+      "must_failed": [],
+      "must_not_run": [],
+      "should_failed": []
+    },
+    "K2": {
+      "name": "Governed",
+      "achieved": true,
+      "must_failed": [],
+      "must_not_run": [],
+      "should_failed": []
+    },
+    "K3": {
+      "name": "Sovereign/Auditable",
+      "achieved": true,
+      "must_failed": [],
+      "must_not_run": [],
+      "should_failed": []
+    }
+  },
+  "achieved_level": "K3",
+  "results": [
+    {
+      "id": "AISM-K1-01",
+      "level": "K1",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "Spez. §6.2 (GET /health)"
+      ],
+      "test": "test_k1_basic.py::test_health",
+      "outcome": "passed",
+      "duration_s": 0.002,
+      "message": ""
+    },
+    {
+      "id": "AISM-K1-02",
+      "level": "K1",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "M-06"
+      ],
+      "test": "test_k1_basic.py::test_models_list_format",
+      "outcome": "passed",
+      "duration_s": 0.002,
+      "message": ""
+    },
+    {
+      "id": "AISM-K1-03",
+      "level": "K1",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "M-06"
+      ],
+      "test": "test_k1_basic.py::test_chat_completion_schema",
+      "outcome": "passed",
+      "duration_s": 0.182,
+      "message": ""
+    },
+    {
+      "id": "AISM-K1-04",
+      "level": "K1",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "M-06",
+        "Spez. §6.6"
+      ],
+      "test": "test_k1_basic.py::test_sse_stream_format",
+      "outcome": "passed",
+      "duration_s": 0.062,
+      "message": ""
+    },
+    {
+      "id": "AISM-K1-05",
+      "level": "K1",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "M-01",
+        "S-06"
+      ],
+      "test": "test_k1_basic.py::test_gateway_bypass_not_possible",
+      "outcome": "passed",
+      "duration_s": 0.162,
+      "message": ""
+    },
+    {
+      "id": "AISM-K1-06",
+      "level": "K1",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "Spez. §6.2 Schritt 1",
+        "PEP-1"
+      ],
+      "test": "test_k1_basic.py::test_unauthenticated_request_rejected",
+      "outcome": "passed",
+      "duration_s": 0.004,
+      "message": ""
+    },
+    {
+      "id": "AISM-K1-07",
+      "level": "K1",
+      "requirement": "SOLLTE",
+      "spec_refs": [
+        "Spez. §6 (Fehlerformat)"
+      ],
+      "test": "test_k1_basic.py::test_error_object_format",
+      "outcome": "passed",
+      "duration_s": 0.002,
+      "message": ""
+    },
+    {
+      "id": "AISM-K1-08",
+      "level": "K1",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "M-01",
+        "Spez. §6.1"
+      ],
+      "test": "test_k1_basic.py::test_static_ui_only_talks_to_gateway",
+      "outcome": "passed",
+      "duration_s": 0.0,
+      "message": ""
+    },
+    {
+      "id": "AISM-K1-09",
+      "level": "K1",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "M-01",
+        "S-06"
+      ],
+      "test": "test_k1_basic.py::test_static_inference_not_published",
+      "outcome": "passed",
+      "duration_s": 0.0,
+      "message": ""
+    },
+    {
+      "id": "AISM-K1-10",
+      "level": "K1",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "M-13"
+      ],
+      "test": "test_k1_basic.py::test_static_no_privileged_containers",
+      "outcome": "passed",
+      "duration_s": 0.0,
+      "message": ""
+    },
+    {
+      "id": "AISM-K2-01",
+      "level": "K2",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "M-15"
+      ],
+      "test": "test_k2_governed.py::test_policy_loaded_endpoint",
+      "outcome": "passed",
+      "duration_s": 0.002,
+      "message": ""
+    },
+    {
+      "id": "AISM-K2-02",
+      "level": "K2",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "M-15",
+        "Policy-Format §8"
+      ],
+      "test": "test_k2_governed.py::test_static_policy_schema_valid",
+      "outcome": "passed",
+      "duration_s": 0.007,
+      "message": ""
+    },
+    {
+      "id": "AISM-K2-03",
+      "level": "K2",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "M-02",
+        "PEP-2"
+      ],
+      "test": "test_k2_governed.py::test_pii_masked_before_inference",
+      "outcome": "passed",
+      "duration_s": 0.07,
+      "message": ""
+    },
+    {
+      "id": "AISM-K2-04",
+      "level": "K2",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "M-02",
+        "M-09",
+        "PEP-5"
+      ],
+      "test": "test_k2_governed.py::test_rag_query_masked",
+      "outcome": "passed",
+      "duration_s": 0.111,
+      "message": ""
+    },
+    {
+      "id": "AISM-K2-05",
+      "level": "K2",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "M-07",
+        "M-08",
+        "PEP-7"
+      ],
+      "test": "test_k2_governed.py::test_disallowed_tool_rejected",
+      "outcome": "passed",
+      "duration_s": 0.166,
+      "message": ""
+    },
+    {
+      "id": "AISM-K2-06",
+      "level": "K2",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "M-08",
+        "PEP-7"
+      ],
+      "test": "test_k2_governed.py::test_schema_invalid_arguments_rejected",
+      "outcome": "passed",
+      "duration_s": 0.16,
+      "message": ""
+    },
+    {
+      "id": "AISM-K2-07",
+      "level": "K2",
+      "requirement": "SOLLTE",
+      "spec_refs": [
+        "Policy-Format §4.7"
+      ],
+      "test": "test_k2_governed.py::test_only_permitted_tools_offered",
+      "outcome": "passed",
+      "duration_s": 0.064,
+      "message": ""
+    },
+    {
+      "id": "AISM-K2-08",
+      "level": "K2",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "M-05",
+        "AUD"
+      ],
+      "test": "test_k2_governed.py::test_audit_has_no_plaintext_pii",
+      "outcome": "passed",
+      "duration_s": 0.001,
+      "message": ""
+    },
+    {
+      "id": "AISM-K2-09",
+      "level": "K2",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "M-15",
+        "AUD"
+      ],
+      "test": "test_k2_governed.py::test_audit_entries_carry_policy_version",
+      "outcome": "passed",
+      "duration_s": 0.0,
+      "message": ""
+    },
+    {
+      "id": "AISM-K2-10",
+      "level": "K2",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "M-04",
+        "PEP-4"
+      ],
+      "test": "test_k2_governed.py::test_cloud_route_denied_when_disabled",
+      "outcome": "passed",
+      "duration_s": 0.006,
+      "message": ""
+    },
+    {
+      "id": "AISM-K2-11",
+      "level": "K2",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "M-02",
+        "Spez. §6.1"
+      ],
+      "test": "test_k2_governed.py::test_static_ui_builtin_rag_and_search_disabled",
+      "outcome": "passed",
+      "duration_s": 0.0,
+      "message": ""
+    },
+    {
+      "id": "AISM-K2-12",
+      "level": "K2",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "M-15"
+      ],
+      "test": "test_k2_governed.py::test_static_policy_mounted_readonly",
+      "outcome": "passed",
+      "duration_s": 0.0,
+      "message": ""
+    },
+    {
+      "id": "AISM-K2-13",
+      "level": "K2",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "M-11",
+        "PEP-6"
+      ],
+      "test": "test_k2_governed.py::test_web_search_blocked_when_policy_disallows",
+      "outcome": "passed",
+      "duration_s": 0.119,
+      "message": ""
+    },
+    {
+      "id": "AISM-K2-15",
+      "level": "K2",
+      "requirement": "SOLLTE",
+      "spec_refs": [
+        "S-12"
+      ],
+      "test": "test_k2_governed.py::test_static_backend_network_internal",
+      "outcome": "passed",
+      "duration_s": 0.0,
+      "message": ""
+    },
+    {
+      "id": "AISM-K2-16",
+      "level": "K2",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "M-07",
+        "Spez. §6.3"
+      ],
+      "test": "test_k2_governed.py::test_allowed_tool_executed_and_returned_as_tool_message",
+      "outcome": "passed",
+      "duration_s": 0.215,
+      "message": ""
+    },
+    {
+      "id": "AISM-K2-18",
+      "level": "K2",
+      "requirement": "SOLLTE",
+      "spec_refs": [
+        "PEP-10",
+        "Spez. §6.6"
+      ],
+      "test": "test_k2_governed.py::test_stream_demasking_handles_split_placeholders",
+      "outcome": "passed",
+      "duration_s": 0.07,
+      "message": ""
+    },
+    {
+      "id": "AISM-K2-19",
+      "level": "K2",
+      "requirement": "SOLLTE",
+      "spec_refs": [
+        "PEP-6",
+        "M-02"
+      ],
+      "test": "test_k2_governed.py::test_web_search_query_masked_and_results_masked",
+      "outcome": "passed",
+      "duration_s": 0.232,
+      "message": ""
+    },
+    {
+      "id": "AISM-K2-20",
+      "level": "K2",
+      "requirement": "SOLLTE",
+      "spec_refs": [
+        "S-03",
+        "M-08"
+      ],
+      "test": "test_k2_governed.py::test_write_tool_requires_confirmation",
+      "outcome": "passed",
+      "duration_s": 0.414,
+      "message": ""
+    },
+    {
+      "id": "AISM-K2-21",
+      "level": "K2",
+      "requirement": "SOLLTE",
+      "spec_refs": [
+        "S-01"
+      ],
+      "test": "test_k2_governed.py::test_oidc_bearer_validated_via_jwks",
+      "outcome": "passed",
+      "duration_s": 0.097,
+      "message": ""
+    },
+    {
+      "id": "AISM-K3-01",
+      "level": "K3",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "S-11",
+        "Policy-Format §6"
+      ],
+      "test": "test_k3_sovereign.py::test_static_policy_signature_declared",
+      "outcome": "passed",
+      "duration_s": 0.011,
+      "message": ""
+    },
+    {
+      "id": "AISM-K3-02",
+      "level": "K3",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "S-10"
+      ],
+      "test": "test_k3_sovereign.py::test_traceparent_propagated",
+      "outcome": "passed",
+      "duration_s": 0.068,
+      "message": ""
+    },
+    {
+      "id": "AISM-K3-03",
+      "level": "K3",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "S-10",
+        "AUD"
+      ],
+      "test": "test_k3_sovereign.py::test_audit_entries_have_trace_id",
+      "outcome": "passed",
+      "duration_s": 0.0,
+      "message": ""
+    },
+    {
+      "id": "AISM-K3-04",
+      "level": "K3",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "S-13",
+        "M-04"
+      ],
+      "test": "test_k3_sovereign.py::test_cloud_egress_has_proof",
+      "outcome": "passed",
+      "duration_s": 0.0,
+      "message": ""
+    },
+    {
+      "id": "AISM-K3-05",
+      "level": "K3",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "S-07"
+      ],
+      "test": "test_k3_sovereign.py::test_static_images_pinned_by_digest",
+      "outcome": "passed",
+      "duration_s": 0.0,
+      "message": ""
+    },
+    {
+      "id": "AISM-K3-07",
+      "level": "K3",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "S-02"
+      ],
+      "test": "test_k3_sovereign.py::test_audit_hash_chain",
+      "outcome": "passed",
+      "duration_s": 0.001,
+      "message": ""
+    },
+    {
+      "id": "AISM-K3-08",
+      "level": "K3",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "S-11",
+        "Policy-Format §6"
+      ],
+      "test": "test_k3_sovereign.py::test_unsigned_or_tampered_policy_not_activated",
+      "outcome": "passed",
+      "duration_s": 18.596,
+      "message": ""
+    },
+    {
+      "id": "AISM-K3-09",
+      "level": "K3",
+      "requirement": "MUSS",
+      "spec_refs": [
+        "S-11",
+        "M-15"
+      ],
+      "test": "test_k3_sovereign.py::test_gateway_reports_verified_signature",
+      "outcome": "passed",
+      "duration_s": 0.002,
+      "message": ""
+    }
+  ]
+}

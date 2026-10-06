@@ -1,0 +1,20 @@
+{
+  "_comment": "Synthetische Testdaten. Namen sind gängige Mustermann-Platzhalter, E-Mail-Domains nach RFC 2606 reserviert, Schlüssel sind ungültige Beispielwerte (AWS-Beispielschlüssel aus der AWS-Dokumentation). Keine echten Personen oder Zugangsdaten.",
+  "entities": [
+    {"entity": "PERSON", "value": "Erika Mustermann"},
+    {"entity": "PERSON", "value": "Max Mustermann"},
+    {"entity": "EMAIL", "value": "erika.mustermann@example.com"},
+    {"entity": "EMAIL", "value": "max.mustermann@example.org"},
+    {"entity": "SECRET", "value": "sk-aismtest0000000000000000000000000000"},
+    {"entity": "SECRET", "value": "AKIAIOSFODNN7EXAMPLE"},
+    {"entity": "SECRET", "value": "ghp_AISMTEST000000000000000000000000000000"}
+  ],
+  "optional_entities": [
+    {"entity": "IBAN", "value": "DE89370400440532013000", "note": "Verbreitete Beispiel-IBAN; nur prüfen, wenn ein IBAN-Detektor konfiguriert ist"}
+  ],
+  "prompts": {
+    "de": "Bitte fasse zusammen: Erika Mustermann (erika.mustermann@example.com) hat Max Mustermann (max.mustermann@example.org) den Schlüssel sk-aismtest0000000000000000000000000000 sowie AKIAIOSFODNN7EXAMPLE und ghp_AISMTEST000000000000000000000000000000 geschickt.",
+    "en": "Please summarize: Erika Mustermann (erika.mustermann@example.com) sent Max Mustermann (max.mustermann@example.org) the key sk-aismtest0000000000000000000000000000 plus AKIAIOSFODNN7EXAMPLE and ghp_AISMTEST000000000000000000000000000000."
+  },
+  "expected_placeholder_prefixes": ["<PERSON_", "<EMAIL_", "<SECRET_"]
+}

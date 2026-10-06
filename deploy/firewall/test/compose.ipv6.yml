@@ -1,0 +1,15 @@
+# Test override: dual-stack frontend/egress networks to verify the IPv6 part of the host firewall.
+# (The reference compose file does not enable IPv6; if you enable it, the firewall must cover it.)
+networks:
+  frontend:
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: 172.30.10.0/24
+        - subnet: fd00:0:0:f::/64
+  egress:
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: 172.30.11.0/24
+        - subnet: fd00:0:0:e::/64
