@@ -16,6 +16,8 @@ without editing the policy file:
   gaz-lg      gazetteer + spacy:de_core_news_lg
   gliner      person-title + gliner:urchade/gliner_multi_pii-v1 (label "person", minScore 0.35)
   gaz-gliner  gazetteer + that GLiNER model
+  cascade     gazetteer + spacy:xx_ent_wiki_sm, and ner.cascade = that GLiNER model
+              (minScore 0.55, default triggers; secondary runs only on suspicious sentences)
   policy      detectors exactly as in the policy file
 
 Metrics per entity type (gold spans = annotated values; titles like "Herr Dr." are not annotated):
@@ -36,6 +38,7 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+import math
 import pathlib
 import sys
 import time
@@ -45,14 +48,18 @@ ROOT = HERE.parent.parent
 sys.path.insert(0, str(ROOT / "gateway"))
 import yaml  # noqa: E402
 
+from aism_gateway.cascade import DEFAULT_TRIGGERS  # noqa: E402
 from aism_gateway.pii import Masker, build_detectors  # noqa: E402
 
 TYPES = ["PERSON", "EMAIL", "IBAN", "SECRET"]
 GLINER_MODEL = "gliner:urchade/gliner_multi_pii-v1"
+# Historical gliner / gaz-gliner profiles stay at 0.35 so earlier tables remain comparable.
+# The cascade score was chosen on the dev set only (precision rose, masked recall did not fall).
 GLINER_SCORE = 0.35
+CASCADE_SCORE = 0.55
 PROFILES = (
     "before", "spacy-md", "spacy-lg", "pairs", "context", "gazetteer",
-    "gaz-xx", "gaz-md", "gaz-lg", "gliner", "gaz-gliner", "policy",
+    "gaz-xx", "gaz-md", "gaz-lg", "gliner", "gaz-gliner", "cascade", "policy",
 )
 
 
@@ -108,6 +115,14 @@ def apply_profile(spec, profile):
         _ner(spec, GLINER_MODEL, ["person"], GLINER_SCORE)
     elif profile == "gaz-gliner":
         _ner(spec, GLINER_MODEL, ["person"], GLINER_SCORE)
+    elif profile == "cascade":
+        det = _ner(spec, "spacy:xx_ent_wiki_sm", ["PER"])
+        det["ner"]["cascade"] = {
+            "model": GLINER_MODEL,
+            "labels": ["person"],
+            "minScore": CASCADE_SCORE,
+            "triggers": dict(DEFAULT_TRIGGERS),
+        }
     else:
         raise SystemExit(f"unknown profile {profile!r}; choose from {', '.join(PROFILES)}")
     spec["piiDetectors"] = [d for d in spec["piiDetectors"] if d["id"] not in drop]
@@ -116,6 +131,15 @@ def apply_profile(spec, profile):
 
 def _ratio(num, den):
     return round(num / den, 3) if den else None
+
+
+def _p95(samples: list[float]) -> float:
+    """Nearest-rank percentile. One sample returns that sample."""
+    if not samples:
+        return 0.0
+    ordered = sorted(samples)
+    rank = max(0, math.ceil(0.95 * len(ordered)) - 1)
+    return ordered[rank]
 
 
 def run(rows, spec, profile, policy_dir, drop=()):
@@ -127,10 +151,11 @@ def run(rows, spec, profile, policy_dir, drop=()):
     masker = Masker(detectors, {"PERSON": 2, "EMAIL": 2, "IBAN": 2, "SECRET": 3})
     st = {t: {"gold": 0, "strict": 0, "masked": 0, "partial": 0, "pred": 0, "pred_ok": 0} for t in TYPES}
     vocab = {k: {"gold": 0, "masked": 0, "strict": 0} for k in ("inv", "oov")}
-    misses, fps = [], []
-    t0 = time.perf_counter()
+    misses, fps, times = [], [], []
     for r in rows:
+        t0 = time.perf_counter()
         pred = [(s, e, d.entity) for s, e, d in masker.resolve(r["text"], "prompt")]
+        times.append((time.perf_counter() - t0) * 1000)
         covered = set()
         for s, e, _ in pred:
             covered.update(range(s, e))
@@ -163,7 +188,7 @@ def run(rows, spec, profile, policy_dir, drop=()):
                 st[t]["pred_ok"] += 1
             else:
                 fps.append({"id": r["id"], "type": t, "text": r["text"][s:e], "tags": r["tags"]})
-    ms = (time.perf_counter() - t0) * 1000 / max(len(rows), 1)
+    ms = sum(times) / max(len(rows), 1)
     res = {}
     for t, x in st.items():
         res[t] = {**x, "recall_strict": _ratio(x["strict"], x["gold"]),
@@ -174,8 +199,15 @@ def run(rows, spec, profile, policy_dir, drop=()):
         if bucket["gold"]:
             by_vocab[key] = {**bucket, "recall_masked": _ratio(bucket["masked"], bucket["gold"]),
                              "recall_strict": _ratio(bucket["strict"], bucket["gold"])}
+    cascade = None
+    for det in detectors:
+        stats = getattr(getattr(det, "cascade", None), "stats", None)
+        if stats is not None:
+            cascade = stats()
     return {"profile": profile, "dropped_detectors": list(drop), "ms_per_sentence": round(ms, 2),
-            "per_type": res, "person_by_vocab": by_vocab, "misses": misses, "false_positives": fps}
+            "ms_p95": round(_p95(times), 2),
+            "per_type": res, "person_by_vocab": by_vocab, "cascade": cascade,
+            "misses": misses, "false_positives": fps}
 
 
 def _check_gate(runs, gate):
@@ -223,7 +255,10 @@ def main():
 
     for r in out["runs"]:
         drop = f", ohne {','.join(r['dropped_detectors'])}" if r["dropped_detectors"] else ""
-        print(f"\n== {r['profile']}{drop}  ({r['ms_per_sentence']} ms/Satz)")
+        casc = ""
+        if r.get("cascade"):
+            casc = f", Kaskade {r['cascade']['trigger_fraction']} der Sätze"
+        print(f"\n== {r['profile']}{drop}  (mean {r['ms_per_sentence']} ms/Satz, p95 {r['ms_p95']}{casc})")
         print(f"{'Typ':8} {'n':>4} {'R strikt':>9} {'R maskiert':>11} {'teilweise':>10} {'Präzision':>10} {'FP':>4}")
         for t, x in r["per_type"].items():
             print(f"{t:8} {x['gold']:>4} {fmt(x['recall_strict']):>9} {fmt(x['recall_masked']):>11} {x['partial']:>10} "

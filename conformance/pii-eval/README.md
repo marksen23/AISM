@@ -24,14 +24,21 @@ schwieriger. Die Zahlen sind **eine Obergrenze für diese Satzmuster, kein Quali
 M-12 (fail-closed bei Detektorausfall) schützt nicht vor Fehlklassifikation. Für Cloud-Egress
 bleibt ein nicht erkannter Name ein Restrisiko.
 
+Optional, nicht im Standard-Image: eine Kaskade lässt Gazetteer plus `xx_ent_wiki_sm` immer
+laufen und `urchade/gliner_multi_pii-v1` nur auf verdächtigen Sätzen (Abschnitt H). Auf v2 steigt
+der maskierte Personen-Recall von 0,703 auf 0,969, auf dem vorher eingefrorenen Held-out v3 von
+0,734 auf 1,000. Die mittlere Latenz liegt dort bei 49–55 ms/Satz, weil etwa 60 % der Sätze das
+schwere Modell auslösen. Das CI-Gate 0,703 bleibt unverändert; die Kaskade hat eigene Gates.
+
 ## Daten
 
 | Datei | Inhalt |
 |---|---|
-| [`generate_dataset.py`](generate_dataset.py) | deterministischer Generator (Seeds 20261005 / 4711 für die ersten Dateien; 20261006 für die Dev-Erweiterung `dx-*`; 424242 für Held-out v2 `h2-*`) |
+| [`generate_dataset.py`](generate_dataset.py) | deterministischer Generator (Seeds 20261005 / 4711 für die ersten Dateien; 20261006 für die Dev-Erweiterung `dx-*`; 424242 für Held-out v2 `h2-*`; 20261007 für Held-out v3 `h3-*`) |
 | [`pii_eval_de.jsonl`](pii_eval_de.jsonl) | **Dev-Set**: die ursprünglichen 165 Sätze (unverändert) plus 71 Sätze Erweiterung. Zusammen 236 Sätze, 241 Entitäten (146 PERSON, 45 EMAIL, 30 IBAN, 20 SECRET). Die Erweiterung trägt `oov` |
 | [`pii_eval_de_heldout.jsonl`](pii_eval_de_heldout.jsonl) | **Held-out v1**: 73 Sätze, 80 Entitäten. Historische Messung 0,86. Nicht zum Abstimmen der Gazetteer-Regeln verwendet |
-| [`pii_eval_de_heldout_v2.jsonl`](pii_eval_de_heldout_v2.jsonl) | **Held-out v2 (maßgeblich)**: 94 Sätze, 88 Entitäten (64 PERSON, 8 EMAIL, 12 IBAN, 4 SECRET), davon 41 mit `oov: true`. Namen und Schablonen disjunkt zur Dev-Erweiterung |
+| [`pii_eval_de_heldout_v2.jsonl`](pii_eval_de_heldout_v2.jsonl) | **Held-out v2 (maßgeblich für den Standard)**: 94 Sätze, 88 Entitäten (64 PERSON, 8 EMAIL, 12 IBAN, 4 SECRET), davon 41 mit `oov: true`. Namen und Schablonen disjunkt zur Dev-Erweiterung |
+| [`pii_eval_de_heldout_v3.jsonl`](pii_eval_de_heldout_v3.jsonl) | **Held-out v3 (eingefroren vor dem Abstimmen der Kaskade)**: 94 Sätze, 88 Entitäten (64 PERSON, 8 EMAIL, 12 IBAN, 4 SECRET), davon 43 mit `oov: true`. Namen disjunkt zu Dev, v1 und v2. Prüfsumme [`pii_eval_de_heldout_v3.sha256`](pii_eval_de_heldout_v3.sha256) |
 
 Alle Werte sind synthetisch: zufällige Kombinationen gängiger Vor-/Nachnamen (inkl. ü/ö/ß,
 türkischer und anderer Namen), E-Mail-Domains nach RFC 2606, IBANs mit gültiger mod-97-Prüfziffer
@@ -185,6 +192,65 @@ Quelle: [`results-heldout-v2.json`](results-heldout-v2.json). CI-Schwelle: PERSO
 | gaz-lg | 0.900 | 1.000 | 1.000 | 0 | 5.28 |
 | gliner | 0.800 | 1.000 | 0.962 | 2 | 80.47 |
 
+## Messung 2026-10-06 (Kaskade)
+
+Die Trigger und die GLiNER-Schwelle der Kaskade (`minScore` 0,55) wurden nur auf dem Dev-Set
+festgelegt. Held-out v2 und v3 wurden dafür nicht verwendet. v3 (Seed 20261007) lag schon fest,
+bevor diese Wahl getroffen wurde. Das Profil `gliner` bleibt bei `minScore` 0,35, damit die
+älteren Tabellen vergleichbar bleiben. `listedGivenName` ist aus: auf dem Dev-Set hob der Trigger
+den maskierten Recall nur um etwa 0,013 und steigerte die Auslöserate von 0,366 auf 0,582.
+
+Die drei Profile unten sind in getrennten Prozessen mit derselben Uhr gemessen (`Masker.resolve`
+je JSONL-Zeile). Die Millisekunden der Abschnitte E–G stammen aus einem anderen Lauf und bleiben
+dort stehen. p95 ist der Nearest-Rank-Wert (`ceil(0,95·n) − 1`). Die Auslöserate zählt geteilte
+Sätze, nicht JSONL-Zeilen (v2: 104 Sätze auf 94 Zeilen, v3: 109 auf 94). EMAIL, IBAN und SECRET
+sind in jedem Lauf maskiert 1,0 bei Präzision 1,0.
+
+**H) Standard, nur GLiNER, Kaskade** (Quelle: [`results-cascade-heldout.json`](results-cascade-heldout.json))
+
+| Menge | Profil | PERSON maskiert | Präzision | FP | Mittel ms | p95 ms | Auslöser |
+|---|---|---:|---:|---:|---:|---:|---:|
+| v1 (73 Sätze, 50 PERSON) | gaz-xx | 0.940 | 0.959 | 2 | 1.50 | 1.95 | – |
+|  | gliner | 1.000 | 0.962 | 2 | 63.73 | 75.62 | – |
+|  | cascade | 0.980 | 0.961 | 2 | 42.10 | 79.32 | 0.589 |
+| v2 (94 Sätze, 64 PERSON) | gaz-xx | 0.703 | 0.868 | 7 | 1.40 | 1.75 | – |
+|  | gliner | 1.000 | 0.877 | 9 | 68.85 | 89.45 | – |
+|  | cascade | 0.969 | 0.886 | 8 | 49.22 | 94.06 | 0.615 |
+| v3 (94 Sätze, 64 PERSON) | gaz-xx | 0.734 | 0.746 | 16 | 1.49 | 1.81 | – |
+|  | gliner | 1.000 | 0.901 | 7 | 75.41 | 105.53 | – |
+|  | cascade | 1.000 | 0.780 | 18 | 54.96 | 115.11 | 0.679 |
+
+Auf v2 bleibt der Listen-Recall der Kaskade bei 0,913 (wie `gaz-xx`); die 41 Namen außerhalb der
+Liste sind vollständig maskiert. Auf v3 sind beide Gruppen bei 1,000 (Gazetteer: 0,905 in der
+Liste, 0,651 außerhalb).
+
+Grenzen, die nach dieser Messung so bleiben:
+
+- Einzelne Vornamen aus dem Wortlexikon ohne Cue gehen weiter durch, solange `listedGivenName`
+  aus ist. Auf v1 fehlt „Svetlana“, auf v2 fehlen „Hannah“ und „Lena“ (beide in der Liste).
+  Kleingeschriebene Einzel-Tokens und Paare, deren beide Teile häufige Wörter sind, lösen die
+  Kaskade ebenfalls nicht aus.
+- Die Vereinigung übernimmt die False Positives des schnellen Modells. Auf v3 liegt die
+  Personen-Präzision der Kaskade bei 0,780 (18 FP), unter nur-GLiNER (0,901, 7 FP).
+- `lowConfidence` hat auf v1, v2 und v3 null Sätze ausgelöst. Die Beam-Margen von
+  `xx_ent_wiki_sm` liegen bei den Primärtreffern nahe 1.
+- Das Wortlexikon ist Untertitel-Häufigkeit, keine Nomenliste. Namen, die zugleich häufige
+  Wörter sind („König“, „Wolf“, „Müller“), sehen für den Trigger nicht unbekannt aus.
+- Die Auslöserate hängt vom Text ab. Diese Sätze sind namensdicht; 0,59–0,68 ist keine Zusage
+  für Betriebspost. Der p95 liegt nahe am Nur-GLiNER-Lauf, weil ein ausgelöster Satz beide
+  Modelle bezahlt. Gespart wird der Mittelwert über die Sätze ohne Verdacht.
+- Ist `ner.cascade` gesetzt und das Sekundärmodell nicht ladbar oder zur Laufzeit ausgefallen,
+  antwortet das Gateway mit 503. Es gibt keinen stillen Rückfall auf das schnelle Modell.
+- Die Kaskade ist im Beispiel und in der Konformitätspolicy aus. Das Standard-Image enthält
+  kein torch. `INSTALL_GLINER=1` ist eine optionale Image-Variante und nicht der
+  reproduzierbare, hash-gesperrte Build.
+
+CI: [`gate.json`](gate.json) bleibt bei PERSON 0,703 (Profil `policy` auf v2).
+[`gate-cascade-v2.json`](gate-cascade-v2.json) verlangt PERSON 0,969,
+[`gate-cascade-v3.json`](gate-cascade-v3.json) PERSON 1,000, jeweils EMAIL/IBAN/SECRET 1,0.
+Job `pii-cascade` in [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml), lokal
+`tools/ci-local.sh pii-cascade` (nicht Teil von `all`).
+
 ### Vorher / nachher
 
 | Menge | Detektor | PERSON maskiert | Präzision | FP | ms/Satz |
@@ -228,21 +294,32 @@ Die Listen (5921 Vornamen, 1998 Nachnamen, Stand 2026-10-06) sind Häufigkeitsli
   `de_core_news_md` mit Gazetteer liegt auf v2 bei 0,734 und etwa 4 ms, ist aber nicht im Image.
   `de_core_news_lg` ist auf v2 nicht besser als `md` und auf dem Dev-Set beim strikten SECRET-Recall
   schlechter. GLiNER ist über `ner.model` zuschaltbar (`gliner:urchade/gliner_multi_pii-v1`,
-  Labels `person`, `minScore` 0,35): auf v2 maskiert 1,00 bei etwa 82 ms/Satz. Eine Messung auf
-  echten, pseudonymisierten Betriebsdaten fehlt.
+  Labels `person`, `minScore` 0,35): auf v2 maskiert 1,00 bei etwa 82 ms/Satz. Dieselbe
+  Erkennung als `ner.cascade` (Abschnitt H, Schwelle 0,55) erreicht auf v2 0,969 und auf v3
+  1,000 maskiert, bei 49–55 ms Mittelwert auf diesen Sätzen, und bleibt aus, solange die Policy
+  sie nicht setzt. Eine Messung auf echten, pseudonymisierten Betriebsdaten fehlt.
 
 ## Reproduzieren
 
 ```bash
-python3 conformance/pii-eval/generate_dataset.py   # schreibt Dev, v1 und v2 neu; Seeds sind fest
+python3 conformance/pii-eval/generate_dataset.py   # schreibt Dev, v1, v2 und v3 neu; Seeds sind fest
 python3 conformance/pii-eval/evaluate.py \
   --data conformance/pii-eval/pii_eval_de_heldout_v2.jsonl \
   --profile policy --gate conformance/pii-eval/gate.json --no-misses
-# Varianten: --profile before|spacy-md|spacy-lg|pairs|context|gazetteer|gaz-xx|gaz-md|gaz-lg|gliner|gaz-gliner
+# Varianten: --profile before|spacy-md|spacy-lg|pairs|context|gazetteer|gaz-xx|gaz-md|gaz-lg|gliner|gaz-gliner|cascade
 # de_core_news_md/lg und GLiNER (torch, transformers) sind nicht im Gateway-Image.
+# Kaskade (nach pip install -r gateway/requirements-gliner.txt), je ein frischer Prozess:
+python3 conformance/pii-eval/evaluate.py \
+  --data conformance/pii-eval/pii_eval_de_heldout_v2.jsonl \
+  --profile cascade --gate conformance/pii-eval/gate-cascade-v2.json --no-misses
+python3 conformance/pii-eval/evaluate.py \
+  --data conformance/pii-eval/pii_eval_de_heldout_v3.jsonl \
+  --profile cascade --gate conformance/pii-eval/gate-cascade-v3.json --no-misses
 ```
 
 `tools/ci-local.sh pii` prüft nur das Profil `policy` gegen [`gate.json`](gate.json).
+`tools/ci-local.sh pii-cascade` prüft die Kaskade auf v2 und v3 und die Prüfsumme von v3.
+v3 nach der Messung nicht umschreiben, um ein Gate zu treffen.
 
 Ergebnisdateien der Messung von 2026-10-05: `results-v0-before-fixes.json` (A), `results-dev.json` (B),
 `results-heldout.json` (C), `results-heldout-no-title-rule.json` (D).

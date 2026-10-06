@@ -28,7 +28,7 @@ from fastapi.responses import JSONResponse, Response, StreamingResponse
 from . import trace as tracectx
 from .audit import AuditLog, sha256_json
 from .auth import AuthError, Subject, authenticate, resolve_secret
-from .pii import Masker, StreamDemasker, Vault, build_detectors, demask
+from .pii import DetectorUnavailable, Masker, StreamDemasker, Vault, build_detectors, demask
 from .policy import (Policy, PolicyError, SignatureConfig, allowed_collections, allowed_tools, data_class,
                      load_policy, match_route, web_search_allowed)
 
@@ -369,6 +369,11 @@ async def chat(request: Request):
             masked_msgs.append(nm)
     except ValueError:
         return err(400, "invalid_request", "Nicht-Text-Inhalte werden vom Prototyp nicht unterstützt")
+    except DetectorUnavailable:
+        log.exception("pii detector failed")
+        audit("request.denied", request_id=request_id, trace_id=trace_id, subject=subj.id, client=subj.client,
+              reason="pii_detector_unavailable")
+        return err(503, "pii_detector_unavailable", "PII-Erkennung nicht verfügbar (fail-closed)")
 
     dc = data_class(pol, entities, subj.roles)
     rank = pol.data_class_rank(dc)
@@ -552,10 +557,15 @@ async def embeddings(request: Request):
         audit("request.denied", **base, reason="policy_denied", endpoint="embeddings")
         return err(403, "policy_denied", "Keine Rolle – Embeddings verweigert (default deny)")
     vault, ents, masked = Vault(), set(), []
-    for x in items:
-        t, f = S.masker.mask(x, vault, "rag_ingest")
-        masked.append(t)
-        ents |= f
+    try:
+        for x in items:
+            t, f = S.masker.mask(x, vault, "rag_ingest")
+            masked.append(t)
+            ents |= f
+    except DetectorUnavailable:
+        log.exception("pii detector failed")
+        audit("request.denied", **base, reason="pii_detector_unavailable", endpoint="embeddings")
+        return err(503, "pii_detector_unavailable", "PII-Erkennung nicht verfügbar (fail-closed)")
     out = {**body, "input": masked[0] if single else masked}
     audit("request.accepted", **base, endpoint="embeddings", pii_masked=dict(vault.counts), inputs=len(items))
     try:
@@ -656,7 +666,13 @@ async def internal_mask(request: Request):
     if not isinstance(content, str):
         return err(400, "invalid_request", "content muss ein String sein")
     before = dict(ctx.vault.counts)
-    masked, _ = S.masker.mask(content, ctx.vault, context)
+    try:
+        masked, _ = S.masker.mask(content, ctx.vault, context)
+    except DetectorUnavailable:
+        log.exception("pii detector failed")
+        audit("request.denied", request_id=ctx.request_id, trace_id=ctx.trace_id, subject=ctx.subject.id,
+              reason="pii_detector_unavailable", context=context)
+        return err(503, "pii_detector_unavailable", "PII-Erkennung nicht verfügbar (fail-closed)")
     delta = {k: v - before.get(k, 0) for k, v in ctx.vault.counts.items() if v - before.get(k, 0)}
     if delta:
         audit("pii.masked", request_id=ctx.request_id, trace_id=ctx.trace_id, subject=ctx.subject.id,
@@ -700,9 +716,14 @@ async def internal_egress(request: Request):
           and (reason == "explicit" or reason in route.get("fallbackOn", [])))
     # PEP-9: re-check that the outgoing payload contains no detectable PII
     probe = Vault()
-    for m in body.get("messages") or []:
-        if isinstance(m.get("content"), str):
-            S.masker.mask(m["content"], probe, "prompt")
+    try:
+        for m in body.get("messages") or []:
+            if isinstance(m.get("content"), str):
+                S.masker.mask(m["content"], probe, "prompt")
+    except DetectorUnavailable:
+        log.exception("pii detector failed")
+        audit("request.denied", **base, reason="pii_detector_unavailable", detail="egress")
+        return err(503, "pii_detector_unavailable", "PII-Erkennung nicht verfügbar (fail-closed)")
     if probe.counts:
         ok = False
         reason = "pii_detected_in_egress_payload"

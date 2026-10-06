@@ -10,6 +10,9 @@ Output:
   pii_eval_de_heldout.jsonl    first held-out set (seed 4711); not used to tune the 2026-10-06 detectors
   pii_eval_de_heldout_v2.jsonl fresh held-out set (seed 424242, other templates and a disjoint
                                out-of-gazetteer name list); measured only after the detector was frozen
+  pii_eval_de_heldout_v3.jsonl held-out set for the NER cascade (seed 20261007). Written and frozen
+                               before cascade triggers were tuned. Disjoint names, mix of in-list and
+                               OOV, varied cues. Do not tune detectors on this file or on v2.
 Format: {"id", "text", "entities": [{"start","end","type","value"}], "tags"}
 """
 import json
@@ -369,6 +372,153 @@ def _write_ids(rows, name, prefix):
     print(f"{len(rows)} sentences, {n_ent} entities ({n_oov} oov) -> {out}")
 
 
+# Held-out v3. Frozen before the cascade triggers were tuned (seed 20261007).
+# Names are disjoint from the dev pools and from held-out v1/v2. In-list names were checked
+# against the built-in gazetteer; OOV names are not on those lists. Synthetic combinations only.
+_V3_FORBIDDEN = {
+    "anna", "lukas", "sophie", "jonas", "marie", "felix", "laura", "paul", "lea", "tim", "hannah",
+    "moritz", "katharina", "jan-hendrik", "ülkü", "mehmet", "svetlana", "giulia", "björn", "ines",
+    "frank", "peter", "sabine", "jürgen", "ayşe", "dimitrios", "karl-heinz", "lena", "max", "emma",
+    "michael", "thomas", "erika", "nkechi", "chinedu", "ostap", "brankica", "yaren", "ilaria", "gül",
+    "wolfgang", "müller", "schmidt", "schneider", "fischer", "weber", "meyer", "wagner", "becker",
+    "schulz", "hoffmann", "koch", "richter", "klein", "wolf", "schröder", "neumann", "schwarz",
+    "zimmermann", "braun", "krüger", "hartmann", "lange", "werner", "krause", "lehmann", "yılmaz",
+    "kowalski", "nguyen", "großmann", "öztürk", "holtkamp", "bierstedt", "kaltenegger", "ngono",
+    "mustermann", "çelik", "vosskamp", "reitmeier", "diallo", "bergström", "iwanow", "haddad",
+    "popescu", "abiola", "vuković", "sørensen",
+}
+_V3_INV_FIRST = ["Stefan", "Klaus", "Andreas", "Birgit", "Uwe", "Heike", "Markus", "Torsten", "Brigitte", "Horst", "Dieter", "Helga"]
+_V3_OOV_FIRST = ["Tijana", "Kwame", "Naledi", "Oksana", "Koffi", "Enisa", "Chioma", "Arben"]
+_V3_INV_LAST = ["Schäfer", "Bauer", "Keller", "Berger", "Huber", "König", "Fuchs", "Vogel", "Sommer", "Stein", "Franke", "Krämer"]
+_V3_OOV_LAST = ["Quirnbach", "Linscheid", "Okonkwo", "Schenkendorf", "Hölzken", "Białek", "Nordholt", "Piepenbrock", "Kaltwasser", "Seidensticker", "Eichwald"]
+T_V3_PERSON = [
+    ("Im Übergabeprotokoll hat {P:full} den Change quittiert.", "full"),
+    ("Rückmeldung von {P:title_last} zur geplanten Wartung.", "title_last"),
+    ("gez. {P:full}", "full"),
+    ("Mit kollegialen Grüßen\n{P:full}\nSekretariat", "full"),
+    ("Ich melde mich als {P:lower}.", "lower"),
+    ("Die Ansprechpartnerin hierfür ist {P:title_full}.", "title_full"),
+    ("Ob {P:first} das Zertifikat erneuern kann, ist offen.", "first"),
+    ("{P:lower} steht unter dem Formular.", "lower"),
+    ("Notiz an {P:full}: bitte das Rack prüfen.", "full"),
+    ("Sowohl {P:first} als auch {P:first} haben Zugriff.", "first"),
+    ("i. V. der Abteilungsleitung {P:full}", "full"),
+    ("{P:title_full} wartet seit zehn Minuten in der Leitung.", "title_full"),
+    ("Im Verzeichnis steht nur {P:lower}.", "lower"),
+    ("Kurzer Gruß von {P:full} aus dem Lager.", "full"),
+]
+T_V3_OTHER = [
+    "Neue Mailadresse: {E}.",
+    "Bitte den Betrag auf {I} buchen.",
+    "Verwendungszweck Reise, IBAN {I}.",
+    "Der gefundene Schlüssel war {S}.",
+    "Kontakt {P:full}, {E}, Konto {I}.",
+]
+NEG_V3 = [
+    "Das Lager bleibt am Brückentag geschlossen.",
+    "Bitte die Stückliste bis Freitag fortschreiben.",
+    "Frank und frei ist hier nur eine Redewendung.",
+    "Die Müller GmbH liefert das Gehäuse.",
+    "Qwen läuft weiter auf dem Laborrechner.",
+    "Kubernetes und Grafana bleiben unangetastet.",
+    "Sehr geehrte Damen und Herren, der Wartungsvertrag läuft.",
+    "Hallo zusammen, der Call entfällt.",
+    "Danke für die Tabelle, mehr braucht es nicht.",
+    "Mein Name steht nicht in dieser Meldung.",
+    "Viele Grüße\nEmpfang\nHaus 2",
+    "Die Kostenstelle wechselt zum Quartalsende.",
+    "Max. vier Versuche, danach sperrt das Formular.",
+    "Der Drucker im Kopierraum hat kein Papier.",
+    "Projekt Phoenix hat einen neuen Meilenstein.",
+    "Bitte das Funktionspostfach statt einer Person nutzen.",
+    "Outlook und Teams waren kurz nicht erreichbar.",
+    "Die Referenz CH00 0000 0000 ist ungültig.",
+]
+
+
+def _mail_local(rng, first, last):
+    f, l = rng.choice(first), rng.choice(last)
+    tr = str.maketrans({"ü": "ue", "ö": "oe", "ä": "ae", "ß": "ss", "ı": "i", "ş": "s", "Ü": "Ue", "Ö": "Oe",
+                        "ł": "l", "Ł": "L", "ć": "c", "č": "c", "š": "s", "ž": "z"})
+    local = rng.choice([f"{f}.{l}", f"{f[0]}.{l}", f"{l}{rng.randint(1, 99)}", f"{f}_{l}"]).translate(tr).lower()
+    return f"{local}@{rng.choice(DOMAINS)}"
+
+
+def _iban_rng(rng, country="DE"):
+    lens = {"DE": 18, "AT": 16, "CH": 17}
+    bban = "".join(rng.choice(string.digits) for _ in range(lens[country]))
+    num = int("".join(str(int(c, 36)) for c in bban + country + "00"))
+    s = f"{country}{98 - num % 97:02d}{bban}"
+    spaced = rng.random() < 0.5
+    return " ".join(s[i:i + 4] for i in range(0, len(s), 4)) if spaced else s
+
+
+def _secret_rng(rng):
+    k = rng.choice(["sk", "akia", "ghp"])
+    if k == "sk":
+        return "sk-" + "".join(rng.choice(string.ascii_letters + string.digits) for _ in range(32))
+    if k == "akia":
+        return "AKIA" + "".join(rng.choice(string.ascii_uppercase + string.digits) for _ in range(16))
+    return "ghp_" + "".join(rng.choice(string.ascii_letters + string.digits) for _ in range(36))
+
+
+def _fill_v3(rng, tpl, tags, first, last, given, surnames):
+    text, ents, i = "", [], 0
+    import re
+    for m in re.finditer(r"\{(P:\w+|E|I|S)\}", tpl):
+        text += tpl[i:m.start()]
+        slot = m.group(1)
+        extra = {}
+        if slot.startswith("P:"):
+            kind = slot[2:]
+            prefix, val = _person_lists(rng, first, last, kind)
+            text += prefix
+            typ = "PERSON"
+            extra = {"oov": _is_oov(val, kind, given, surnames)}
+        elif slot == "E":
+            val, typ = _mail_local(rng, first, last), "EMAIL"
+        elif slot == "I":
+            val, typ = _iban_rng(rng, rng.choice(["DE", "DE", "AT", "CH"])), "IBAN"
+        else:
+            val, typ = _secret_rng(rng), "SECRET"
+        ents.append({"start": len(text), "end": len(text) + len(val), "type": typ, "value": val, **extra})
+        text += val
+        i = m.end()
+    text += tpl[i:]
+    return {"text": text, "entities": ents, "tags": tags}
+
+
+def heldout_v3(given, surnames):
+    pools = (
+        (_V3_INV_FIRST, False, given), (_V3_OOV_FIRST, True, given),
+        (_V3_INV_LAST, False, surnames), (_V3_OOV_LAST, True, surnames),
+    )
+    for pool, oov, bag in pools:
+        for name in pool:
+            folded = name.casefold()
+            if folded in _V3_FORBIDDEN:
+                raise SystemExit(f"v3 name {name} overlaps an older set")
+            if oov and (folded in given or folded in surnames):
+                raise SystemExit(f"v3 OOV name {name} is on the gazetteer")
+            if not oov and folded not in bag:
+                raise SystemExit(f"v3 in-list name {name} is not on the gazetteer")
+    rng = random.Random(20261007)
+    first, last = _split_pools(_V3_INV_FIRST, _V3_OOV_FIRST, _V3_INV_LAST, _V3_OOV_LAST)
+    rows = []
+    for tpl, kind in T_V3_PERSON:
+        for _ in range(4):
+            rows.append(_fill_v3(rng, tpl, ["person", kind, "v3"], first, last, given, surnames))
+    for tpl in T_V3_OTHER:
+        for _ in range(4):
+            rows.append(_fill_v3(rng, tpl, ["other", "v3"], first, last, given, surnames))
+    for n in NEG_V3:
+        rows.append({"text": n, "entities": [], "tags": ["negative", "v3"]})
+    persons = [g for r in rows for g in r["entities"] if g["type"] == "PERSON"]
+    if not any(g.get("oov") for g in persons) or not any(not g.get("oov") for g in persons):
+        raise SystemExit("v3 must mix in-list and OOV person names")
+    return rows
+
+
 def main():
     rows = []
     for tpl, kind in T_PERSON:
@@ -401,6 +551,7 @@ def main():
             f.write(json.dumps({"id": f"dx-{i:03d}", **r}, ensure_ascii=False) + "\n")
     print(f"appended {len(ext)} dev-extension sentences -> {dev_path}")
     _write_ids(heldout_v2(given, surnames), "pii_eval_de_heldout_v2.jsonl", "h2")
+    _write_ids(heldout_v3(given, surnames), "pii_eval_de_heldout_v3.jsonl", "h3")
 
 
 if __name__ == "__main__":

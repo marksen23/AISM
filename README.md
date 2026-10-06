@@ -567,7 +567,7 @@ None of the following exists yet; it is listed so that contributors know the int
 
 ## 9. Roadmap
 
-- **Governance gateway** (prototype in [`gateway/`](gateway/)): test with a real IdP (Keycloak/Entra ID); signing-key rotation and multi-signature (four-eyes) policies; name detection beyond the gazetteer plus small spaCy model (fresh held-out masked recall 0.70; an optional GLiNER model reaches 1.00 at about 80 ms/sentence, [`conformance/pii-eval/`](conformance/pii-eval/README.md)); OpenTelemetry export, hardening and load tests.
+- **Governance gateway** (prototype in [`gateway/`](gateway/)): test with a real IdP (Keycloak/Entra ID); signing-key rotation and multi-signature (four-eyes) policies; name detection on real text (default held-out v2 masked recall 0.703; an optional cascade reaches 0.969 on v2 and 1.000 on frozen v3, GLiNER-only reaches 1.00, [`conformance/pii-eval/`](conformance/pii-eval/README.md)); OpenTelemetry export, hardening and load tests.
 - **Orchestrator** (prototype in [`orchestrator/`](orchestrator/)): persistent store for pending confirmations and a UI for them; per-query web-search policy evaluation; RAG ingest; MCP execution.
 - **Conformance suite**: CI now runs it against the mock stack. Still open: the real components (Open WebUI, llama.cpp on GPU, n8n, SearXNG), the remaining manual checks (K2-14, K3-06 model checksums), and a public test report format for third-party implementations.
 - **Specification**: public comment period towards AISM 1.0; mapping of the criteria to common control catalogues.
@@ -584,7 +584,7 @@ None of the following exists yet; it is listed so that contributors know the int
 | [`gateway/README.md`](gateway/README.md) | English | Governance gateway prototype (S2): features, configuration, limitations |
 | [`orchestrator/README.md`](orchestrator/README.md) | English | Orchestrator prototype (S3): tool loop, confirmation flow, web search |
 | [`deploy/firewall/README.md`](deploy/firewall/README.md) | English | Reference host firewall: no internet egress from the frontend network; results on a real Docker host incl. IPv6 |
-| [`conformance/pii-eval/README.md`](conformance/pii-eval/README.md) | German | Synthetic German PII evaluation and measured detection rates (regex, gazetteer, spaCy, optional GLiNER) |
+| [`conformance/pii-eval/README.md`](conformance/pii-eval/README.md) | German | Synthetic German PII evaluation and measured detection rates (regex, gazetteer, spaCy, optional GLiNER, optional cascade) |
 | [`config/policy-trust/README.md`](config/policy-trust/README.md) | English | Trust anchor (`allowed_signers`) for policy signatures |
 | [`tools/`](tools/) | English | `ci-local.sh` (same steps as CI), `aism-policy-sign.py` (keygen/sign/verify), `validate_policy.py` (JSON Schema), `build_name_gazetteer.py` (rebuild the German name lists), `resolve_digests.py` (registry digests), `repro_build.sh` (reproducible build check), `build_spec_pdf.py` (Markdown → PDF for the spec, policy format and conformance documents) |
 | [`diagram.png`](diagram.png) | English | Architecture and request flow ([`diagram.dot`](diagram.dot), [`diagram.mmd`](diagram.mmd)) |

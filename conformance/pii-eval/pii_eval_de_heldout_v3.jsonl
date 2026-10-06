@@ -1,0 +1,94 @@
+{"id": "h3-000", "text": "Im Übergabeprotokoll hat Torsten Krämer den Change quittiert.", "entities": [{"start": 25, "end": 39, "type": "PERSON", "value": "Torsten Krämer", "oov": false}], "tags": ["person", "full", "v3"]}
+{"id": "h3-001", "text": "Im Übergabeprotokoll hat Arben Piepenbrock den Change quittiert.", "entities": [{"start": 25, "end": 42, "type": "PERSON", "value": "Arben Piepenbrock", "oov": true}], "tags": ["person", "full", "v3"]}
+{"id": "h3-002", "text": "Im Übergabeprotokoll hat Brigitte Huber den Change quittiert.", "entities": [{"start": 25, "end": 39, "type": "PERSON", "value": "Brigitte Huber", "oov": false}], "tags": ["person", "full", "v3"]}
+{"id": "h3-003", "text": "Im Übergabeprotokoll hat Chioma Berger den Change quittiert.", "entities": [{"start": 25, "end": 38, "type": "PERSON", "value": "Chioma Berger", "oov": true}], "tags": ["person", "full", "v3"]}
+{"id": "h3-004", "text": "Rückmeldung von Frau Kaltwasser zur geplanten Wartung.", "entities": [{"start": 21, "end": 31, "type": "PERSON", "value": "Kaltwasser", "oov": true}], "tags": ["person", "title_last", "v3"]}
+{"id": "h3-005", "text": "Rückmeldung von Frau König zur geplanten Wartung.", "entities": [{"start": 21, "end": 26, "type": "PERSON", "value": "König", "oov": false}], "tags": ["person", "title_last", "v3"]}
+{"id": "h3-006", "text": "Rückmeldung von Frau Eichwald zur geplanten Wartung.", "entities": [{"start": 21, "end": 29, "type": "PERSON", "value": "Eichwald", "oov": true}], "tags": ["person", "title_last", "v3"]}
+{"id": "h3-007", "text": "Rückmeldung von Frau Schenkendorf zur geplanten Wartung.", "entities": [{"start": 21, "end": 33, "type": "PERSON", "value": "Schenkendorf", "oov": true}], "tags": ["person", "title_last", "v3"]}
+{"id": "h3-008", "text": "gez. Chioma Franke", "entities": [{"start": 5, "end": 18, "type": "PERSON", "value": "Chioma Franke", "oov": true}], "tags": ["person", "full", "v3"]}
+{"id": "h3-009", "text": "gez. Kwame Bauer", "entities": [{"start": 5, "end": 16, "type": "PERSON", "value": "Kwame Bauer", "oov": true}], "tags": ["person", "full", "v3"]}
+{"id": "h3-010", "text": "gez. Klaus Bauer", "entities": [{"start": 5, "end": 16, "type": "PERSON", "value": "Klaus Bauer", "oov": false}], "tags": ["person", "full", "v3"]}
+{"id": "h3-011", "text": "gez. Stefan Bauer", "entities": [{"start": 5, "end": 17, "type": "PERSON", "value": "Stefan Bauer", "oov": false}], "tags": ["person", "full", "v3"]}
+{"id": "h3-012", "text": "Mit kollegialen Grüßen\nNaledi Berger\nSekretariat", "entities": [{"start": 23, "end": 36, "type": "PERSON", "value": "Naledi Berger", "oov": true}], "tags": ["person", "full", "v3"]}
+{"id": "h3-013", "text": "Mit kollegialen Grüßen\nDieter Kaltwasser\nSekretariat", "entities": [{"start": 23, "end": 40, "type": "PERSON", "value": "Dieter Kaltwasser", "oov": true}], "tags": ["person", "full", "v3"]}
+{"id": "h3-014", "text": "Mit kollegialen Grüßen\nOksana Okonkwo\nSekretariat", "entities": [{"start": 23, "end": 37, "type": "PERSON", "value": "Oksana Okonkwo", "oov": true}], "tags": ["person", "full", "v3"]}
+{"id": "h3-015", "text": "Mit kollegialen Grüßen\nTijana Hölzken\nSekretariat", "entities": [{"start": 23, "end": 37, "type": "PERSON", "value": "Tijana Hölzken", "oov": true}], "tags": ["person", "full", "v3"]}
+{"id": "h3-016", "text": "Ich melde mich als torsten białek.", "entities": [{"start": 19, "end": 33, "type": "PERSON", "value": "torsten białek", "oov": true}], "tags": ["person", "lower", "v3"]}
+{"id": "h3-017", "text": "Ich melde mich als tijana huber.", "entities": [{"start": 19, "end": 31, "type": "PERSON", "value": "tijana huber", "oov": true}], "tags": ["person", "lower", "v3"]}
+{"id": "h3-018", "text": "Ich melde mich als enisa kaltwasser.", "entities": [{"start": 19, "end": 35, "type": "PERSON", "value": "enisa kaltwasser", "oov": true}], "tags": ["person", "lower", "v3"]}
+{"id": "h3-019", "text": "Ich melde mich als naledi sommer.", "entities": [{"start": 19, "end": 32, "type": "PERSON", "value": "naledi sommer", "oov": true}], "tags": ["person", "lower", "v3"]}
+{"id": "h3-020", "text": "Die Ansprechpartnerin hierfür ist Herr Dr. Arben Bauer.", "entities": [{"start": 43, "end": 54, "type": "PERSON", "value": "Arben Bauer", "oov": true}], "tags": ["person", "title_full", "v3"]}
+{"id": "h3-021", "text": "Die Ansprechpartnerin hierfür ist Frau Dr. Helga Vogel.", "entities": [{"start": 43, "end": 54, "type": "PERSON", "value": "Helga Vogel", "oov": false}], "tags": ["person", "title_full", "v3"]}
+{"id": "h3-022", "text": "Die Ansprechpartnerin hierfür ist Frau Dr. Markus Stein.", "entities": [{"start": 43, "end": 55, "type": "PERSON", "value": "Markus Stein", "oov": false}], "tags": ["person", "title_full", "v3"]}
+{"id": "h3-023", "text": "Die Ansprechpartnerin hierfür ist Herr Andreas Białek.", "entities": [{"start": 39, "end": 53, "type": "PERSON", "value": "Andreas Białek", "oov": true}], "tags": ["person", "title_full", "v3"]}
+{"id": "h3-024", "text": "Ob Stefan das Zertifikat erneuern kann, ist offen.", "entities": [{"start": 3, "end": 9, "type": "PERSON", "value": "Stefan", "oov": false}], "tags": ["person", "first", "v3"]}
+{"id": "h3-025", "text": "Ob Enisa das Zertifikat erneuern kann, ist offen.", "entities": [{"start": 3, "end": 8, "type": "PERSON", "value": "Enisa", "oov": true}], "tags": ["person", "first", "v3"]}
+{"id": "h3-026", "text": "Ob Arben das Zertifikat erneuern kann, ist offen.", "entities": [{"start": 3, "end": 8, "type": "PERSON", "value": "Arben", "oov": true}], "tags": ["person", "first", "v3"]}
+{"id": "h3-027", "text": "Ob Enisa das Zertifikat erneuern kann, ist offen.", "entities": [{"start": 3, "end": 8, "type": "PERSON", "value": "Enisa", "oov": true}], "tags": ["person", "first", "v3"]}
+{"id": "h3-028", "text": "brigitte stein steht unter dem Formular.", "entities": [{"start": 0, "end": 14, "type": "PERSON", "value": "brigitte stein", "oov": false}], "tags": ["person", "lower", "v3"]}
+{"id": "h3-029", "text": "birgit bauer steht unter dem Formular.", "entities": [{"start": 0, "end": 12, "type": "PERSON", "value": "birgit bauer", "oov": false}], "tags": ["person", "lower", "v3"]}
+{"id": "h3-030", "text": "enisa kaltwasser steht unter dem Formular.", "entities": [{"start": 0, "end": 16, "type": "PERSON", "value": "enisa kaltwasser", "oov": true}], "tags": ["person", "lower", "v3"]}
+{"id": "h3-031", "text": "arben linscheid steht unter dem Formular.", "entities": [{"start": 0, "end": 15, "type": "PERSON", "value": "arben linscheid", "oov": true}], "tags": ["person", "lower", "v3"]}
+{"id": "h3-032", "text": "Notiz an Koffi Hölzken: bitte das Rack prüfen.", "entities": [{"start": 9, "end": 22, "type": "PERSON", "value": "Koffi Hölzken", "oov": true}], "tags": ["person", "full", "v3"]}
+{"id": "h3-033", "text": "Notiz an Heike Linscheid: bitte das Rack prüfen.", "entities": [{"start": 9, "end": 24, "type": "PERSON", "value": "Heike Linscheid", "oov": true}], "tags": ["person", "full", "v3"]}
+{"id": "h3-034", "text": "Notiz an Klaus König: bitte das Rack prüfen.", "entities": [{"start": 9, "end": 20, "type": "PERSON", "value": "Klaus König", "oov": false}], "tags": ["person", "full", "v3"]}
+{"id": "h3-035", "text": "Notiz an Torsten Keller: bitte das Rack prüfen.", "entities": [{"start": 9, "end": 23, "type": "PERSON", "value": "Torsten Keller", "oov": false}], "tags": ["person", "full", "v3"]}
+{"id": "h3-036", "text": "Sowohl Uwe als auch Arben haben Zugriff.", "entities": [{"start": 7, "end": 10, "type": "PERSON", "value": "Uwe", "oov": false}, {"start": 20, "end": 25, "type": "PERSON", "value": "Arben", "oov": true}], "tags": ["person", "first", "v3"]}
+{"id": "h3-037", "text": "Sowohl Arben als auch Birgit haben Zugriff.", "entities": [{"start": 7, "end": 12, "type": "PERSON", "value": "Arben", "oov": true}, {"start": 22, "end": 28, "type": "PERSON", "value": "Birgit", "oov": false}], "tags": ["person", "first", "v3"]}
+{"id": "h3-038", "text": "Sowohl Naledi als auch Koffi haben Zugriff.", "entities": [{"start": 7, "end": 13, "type": "PERSON", "value": "Naledi", "oov": true}, {"start": 23, "end": 28, "type": "PERSON", "value": "Koffi", "oov": true}], "tags": ["person", "first", "v3"]}
+{"id": "h3-039", "text": "Sowohl Torsten als auch Naledi haben Zugriff.", "entities": [{"start": 7, "end": 14, "type": "PERSON", "value": "Torsten", "oov": false}, {"start": 24, "end": 30, "type": "PERSON", "value": "Naledi", "oov": true}], "tags": ["person", "first", "v3"]}
+{"id": "h3-040", "text": "i. V. der Abteilungsleitung Markus Eichwald", "entities": [{"start": 28, "end": 43, "type": "PERSON", "value": "Markus Eichwald", "oov": true}], "tags": ["person", "full", "v3"]}
+{"id": "h3-041", "text": "i. V. der Abteilungsleitung Kwame Sommer", "entities": [{"start": 28, "end": 40, "type": "PERSON", "value": "Kwame Sommer", "oov": true}], "tags": ["person", "full", "v3"]}
+{"id": "h3-042", "text": "i. V. der Abteilungsleitung Tijana Krämer", "entities": [{"start": 28, "end": 41, "type": "PERSON", "value": "Tijana Krämer", "oov": true}], "tags": ["person", "full", "v3"]}
+{"id": "h3-043", "text": "i. V. der Abteilungsleitung Chioma Seidensticker", "entities": [{"start": 28, "end": 48, "type": "PERSON", "value": "Chioma Seidensticker", "oov": true}], "tags": ["person", "full", "v3"]}
+{"id": "h3-044", "text": "Frau Andreas Huber wartet seit zehn Minuten in der Leitung.", "entities": [{"start": 5, "end": 18, "type": "PERSON", "value": "Andreas Huber", "oov": false}], "tags": ["person", "title_full", "v3"]}
+{"id": "h3-045", "text": "Frau Dr. Heike Białek wartet seit zehn Minuten in der Leitung.", "entities": [{"start": 9, "end": 21, "type": "PERSON", "value": "Heike Białek", "oov": true}], "tags": ["person", "title_full", "v3"]}
+{"id": "h3-046", "text": "Prof. Klaus Schenkendorf wartet seit zehn Minuten in der Leitung.", "entities": [{"start": 6, "end": 24, "type": "PERSON", "value": "Klaus Schenkendorf", "oov": true}], "tags": ["person", "title_full", "v3"]}
+{"id": "h3-047", "text": "Herr Dr. Uwe Schäfer wartet seit zehn Minuten in der Leitung.", "entities": [{"start": 9, "end": 20, "type": "PERSON", "value": "Uwe Schäfer", "oov": false}], "tags": ["person", "title_full", "v3"]}
+{"id": "h3-048", "text": "Im Verzeichnis steht nur horst könig.", "entities": [{"start": 25, "end": 36, "type": "PERSON", "value": "horst könig", "oov": false}], "tags": ["person", "lower", "v3"]}
+{"id": "h3-049", "text": "Im Verzeichnis steht nur oksana könig.", "entities": [{"start": 25, "end": 37, "type": "PERSON", "value": "oksana könig", "oov": true}], "tags": ["person", "lower", "v3"]}
+{"id": "h3-050", "text": "Im Verzeichnis steht nur arben seidensticker.", "entities": [{"start": 25, "end": 44, "type": "PERSON", "value": "arben seidensticker", "oov": true}], "tags": ["person", "lower", "v3"]}
+{"id": "h3-051", "text": "Im Verzeichnis steht nur markus schäfer.", "entities": [{"start": 25, "end": 39, "type": "PERSON", "value": "markus schäfer", "oov": false}], "tags": ["person", "lower", "v3"]}
+{"id": "h3-052", "text": "Kurzer Gruß von Koffi Kaltwasser aus dem Lager.", "entities": [{"start": 16, "end": 32, "type": "PERSON", "value": "Koffi Kaltwasser", "oov": true}], "tags": ["person", "full", "v3"]}
+{"id": "h3-053", "text": "Kurzer Gruß von Heike Seidensticker aus dem Lager.", "entities": [{"start": 16, "end": 35, "type": "PERSON", "value": "Heike Seidensticker", "oov": true}], "tags": ["person", "full", "v3"]}
+{"id": "h3-054", "text": "Kurzer Gruß von Horst Schenkendorf aus dem Lager.", "entities": [{"start": 16, "end": 34, "type": "PERSON", "value": "Horst Schenkendorf", "oov": true}], "tags": ["person", "full", "v3"]}
+{"id": "h3-055", "text": "Kurzer Gruß von Birgit König aus dem Lager.", "entities": [{"start": 16, "end": 28, "type": "PERSON", "value": "Birgit König", "oov": false}], "tags": ["person", "full", "v3"]}
+{"id": "h3-056", "text": "Neue Mailadresse: schenkendorf24@firma.example.", "entities": [{"start": 18, "end": 46, "type": "EMAIL", "value": "schenkendorf24@firma.example"}], "tags": ["other", "v3"]}
+{"id": "h3-057", "text": "Neue Mailadresse: torsten.stein@example.com.", "entities": [{"start": 18, "end": 43, "type": "EMAIL", "value": "torsten.stein@example.com"}], "tags": ["other", "v3"]}
+{"id": "h3-058", "text": "Neue Mailadresse: enisa_fuchs@example.net.", "entities": [{"start": 18, "end": 41, "type": "EMAIL", "value": "enisa_fuchs@example.net"}], "tags": ["other", "v3"]}
+{"id": "h3-059", "text": "Neue Mailadresse: enisa_fuchs@mail.example.com.", "entities": [{"start": 18, "end": 46, "type": "EMAIL", "value": "enisa_fuchs@mail.example.com"}], "tags": ["other", "v3"]}
+{"id": "h3-060", "text": "Bitte den Betrag auf DE12401073404863672886 buchen.", "entities": [{"start": 21, "end": 43, "type": "IBAN", "value": "DE12401073404863672886"}], "tags": ["other", "v3"]}
+{"id": "h3-061", "text": "Bitte den Betrag auf CH96 8763 4789 7827 8797 7 buchen.", "entities": [{"start": 21, "end": 47, "type": "IBAN", "value": "CH96 8763 4789 7827 8797 7"}], "tags": ["other", "v3"]}
+{"id": "h3-062", "text": "Bitte den Betrag auf CH2483026688620764611 buchen.", "entities": [{"start": 21, "end": 42, "type": "IBAN", "value": "CH2483026688620764611"}], "tags": ["other", "v3"]}
+{"id": "h3-063", "text": "Bitte den Betrag auf DE32439198411564079828 buchen.", "entities": [{"start": 21, "end": 43, "type": "IBAN", "value": "DE32439198411564079828"}], "tags": ["other", "v3"]}
+{"id": "h3-064", "text": "Verwendungszweck Reise, IBAN DE16660616633519944165.", "entities": [{"start": 29, "end": 51, "type": "IBAN", "value": "DE16660616633519944165"}], "tags": ["other", "v3"]}
+{"id": "h3-065", "text": "Verwendungszweck Reise, IBAN CH43 0445 1135 6385 9290 9.", "entities": [{"start": 29, "end": 55, "type": "IBAN", "value": "CH43 0445 1135 6385 9290 9"}], "tags": ["other", "v3"]}
+{"id": "h3-066", "text": "Verwendungszweck Reise, IBAN DE94 5874 2606 0060 8266 92.", "entities": [{"start": 29, "end": 56, "type": "IBAN", "value": "DE94 5874 2606 0060 8266 92"}], "tags": ["other", "v3"]}
+{"id": "h3-067", "text": "Verwendungszweck Reise, IBAN AT78 6249 9107 5608 0930.", "entities": [{"start": 29, "end": 53, "type": "IBAN", "value": "AT78 6249 9107 5608 0930"}], "tags": ["other", "v3"]}
+{"id": "h3-068", "text": "Der gefundene Schlüssel war AKIAX7FZL6LZDORJEPUF.", "entities": [{"start": 28, "end": 48, "type": "SECRET", "value": "AKIAX7FZL6LZDORJEPUF"}], "tags": ["other", "v3"]}
+{"id": "h3-069", "text": "Der gefundene Schlüssel war AKIA5PNFA12WIGMQAE17.", "entities": [{"start": 28, "end": 48, "type": "SECRET", "value": "AKIA5PNFA12WIGMQAE17"}], "tags": ["other", "v3"]}
+{"id": "h3-070", "text": "Der gefundene Schlüssel war ghp_qrJ7wq7cRLaM7D3Fo6o5WMb1cYvnlMAeBhz6.", "entities": [{"start": 28, "end": 68, "type": "SECRET", "value": "ghp_qrJ7wq7cRLaM7D3Fo6o5WMb1cYvnlMAeBhz6"}], "tags": ["other", "v3"]}
+{"id": "h3-071", "text": "Der gefundene Schlüssel war AKIA71FINF8UDZYZDSFS.", "entities": [{"start": 28, "end": 48, "type": "SECRET", "value": "AKIA71FINF8UDZYZDSFS"}], "tags": ["other", "v3"]}
+{"id": "h3-072", "text": "Kontakt Torsten Piepenbrock, kaltwasser28@firma.example, Konto AT609010008093433802.", "entities": [{"start": 8, "end": 27, "type": "PERSON", "value": "Torsten Piepenbrock", "oov": true}, {"start": 29, "end": 55, "type": "EMAIL", "value": "kaltwasser28@firma.example"}, {"start": 63, "end": 83, "type": "IBAN", "value": "AT609010008093433802"}], "tags": ["other", "v3"]}
+{"id": "h3-073", "text": "Kontakt Horst Berger, oksana.quirnbach@mail.example.com, Konto CH5333287058530573148.", "entities": [{"start": 8, "end": 20, "type": "PERSON", "value": "Horst Berger", "oov": false}, {"start": 22, "end": 55, "type": "EMAIL", "value": "oksana.quirnbach@mail.example.com"}, {"start": 63, "end": 84, "type": "IBAN", "value": "CH5333287058530573148"}], "tags": ["other", "v3"]}
+{"id": "h3-074", "text": "Kontakt Naledi Quirnbach, quirnbach59@example.org, Konto AT75 9453 8483 8581 7161.", "entities": [{"start": 8, "end": 24, "type": "PERSON", "value": "Naledi Quirnbach", "oov": true}, {"start": 26, "end": 49, "type": "EMAIL", "value": "quirnbach59@example.org"}, {"start": 57, "end": 81, "type": "IBAN", "value": "AT75 9453 8483 8581 7161"}], "tags": ["other", "v3"]}
+{"id": "h3-075", "text": "Kontakt Klaus Hölzken, c.linscheid@example.com, Konto DE98 7730 9390 6875 7532 85.", "entities": [{"start": 8, "end": 21, "type": "PERSON", "value": "Klaus Hölzken", "oov": true}, {"start": 23, "end": 46, "type": "EMAIL", "value": "c.linscheid@example.com"}, {"start": 54, "end": 81, "type": "IBAN", "value": "DE98 7730 9390 6875 7532 85"}], "tags": ["other", "v3"]}
+{"id": "h3-076", "text": "Das Lager bleibt am Brückentag geschlossen.", "entities": [], "tags": ["negative", "v3"]}
+{"id": "h3-077", "text": "Bitte die Stückliste bis Freitag fortschreiben.", "entities": [], "tags": ["negative", "v3"]}
+{"id": "h3-078", "text": "Frank und frei ist hier nur eine Redewendung.", "entities": [], "tags": ["negative", "v3"]}
+{"id": "h3-079", "text": "Die Müller GmbH liefert das Gehäuse.", "entities": [], "tags": ["negative", "v3"]}
+{"id": "h3-080", "text": "Qwen läuft weiter auf dem Laborrechner.", "entities": [], "tags": ["negative", "v3"]}
+{"id": "h3-081", "text": "Kubernetes und Grafana bleiben unangetastet.", "entities": [], "tags": ["negative", "v3"]}
+{"id": "h3-082", "text": "Sehr geehrte Damen und Herren, der Wartungsvertrag läuft.", "entities": [], "tags": ["negative", "v3"]}
+{"id": "h3-083", "text": "Hallo zusammen, der Call entfällt.", "entities": [], "tags": ["negative", "v3"]}
+{"id": "h3-084", "text": "Danke für die Tabelle, mehr braucht es nicht.", "entities": [], "tags": ["negative", "v3"]}
+{"id": "h3-085", "text": "Mein Name steht nicht in dieser Meldung.", "entities": [], "tags": ["negative", "v3"]}
+{"id": "h3-086", "text": "Viele Grüße\nEmpfang\nHaus 2", "entities": [], "tags": ["negative", "v3"]}
+{"id": "h3-087", "text": "Die Kostenstelle wechselt zum Quartalsende.", "entities": [], "tags": ["negative", "v3"]}
+{"id": "h3-088", "text": "Max. vier Versuche, danach sperrt das Formular.", "entities": [], "tags": ["negative", "v3"]}
+{"id": "h3-089", "text": "Der Drucker im Kopierraum hat kein Papier.", "entities": [], "tags": ["negative", "v3"]}
+{"id": "h3-090", "text": "Projekt Phoenix hat einen neuen Meilenstein.", "entities": [], "tags": ["negative", "v3"]}
+{"id": "h3-091", "text": "Bitte das Funktionspostfach statt einer Person nutzen.", "entities": [], "tags": ["negative", "v3"]}
+{"id": "h3-092", "text": "Outlook und Teams waren kurz nicht erreichbar.", "entities": [], "tags": ["negative", "v3"]}
+{"id": "h3-093", "text": "Die Referenz CH00 0000 0000 ist ungültig.", "entities": [], "tags": ["negative", "v3"]}

@@ -1,0 +1,11 @@
+# Optional cascade dependencies. Not installed by the default gateway image and not hash-locked
+# (the CPU torch wheel is published on the PyTorch index). Install with:
+#   pip install -r gateway/requirements-gliner.txt
+# Image: docker build --build-arg INSTALL_GLINER=1 -f gateway/Dockerfile .
+# protobuf and sentencepiece are required to load the GLiNER tokenizer (mdeberta sentencepiece).
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.14.1+cpu
+gliner==0.2.29
+transformers==5.16.1
+sentencepiece==0.2.2
+protobuf==7.36.2

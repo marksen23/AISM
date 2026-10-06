@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Local equivalent of .github/workflows/ci.yml.
-#   tools/ci-local.sh lint|unit|policy|signature|pii|repro|conformance|all
+#   tools/ci-local.sh lint|unit|policy|signature|pii|pii-cascade|repro|conformance|all
+# pii-cascade needs the optional GLiNER install (gateway/requirements-gliner.txt) and is not part of "all".
 # Never writes a signing key into the repository. Conformance and repro need Docker.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -48,6 +49,27 @@ pii() {
     --gate conformance/pii-eval/gate.json \
     --no-misses \
     --out "$out"
+}
+
+pii_cascade() {
+  # Separate from pii(): torch is not in the default image or the default CI job.
+  # Held-out v3 is frozen; the checksum fails the job if the file changes.
+  (
+    cd conformance/pii-eval
+    sha256sum -c pii_eval_de_heldout_v3.sha256
+  )
+  python3 conformance/pii-eval/evaluate.py \
+    --data conformance/pii-eval/pii_eval_de_heldout_v2.jsonl \
+    --profile cascade \
+    --gate conformance/pii-eval/gate-cascade-v2.json \
+    --no-misses \
+    --out conformance/pii-eval/results-ci-cascade-v2.json
+  python3 conformance/pii-eval/evaluate.py \
+    --data conformance/pii-eval/pii_eval_de_heldout_v3.jsonl \
+    --profile cascade \
+    --gate conformance/pii-eval/gate-cascade-v3.json \
+    --no-misses \
+    --out conformance/pii-eval/results-ci-cascade-v3.json
 }
 
 repro() {
@@ -148,6 +170,7 @@ case "$STEP" in
   policy) policy ;;
   signature) signature ;;
   pii) pii ;;
+  pii-cascade) pii_cascade ;;
   repro) repro ;;
   conformance) conformance ;;
   all)
@@ -160,7 +183,7 @@ case "$STEP" in
     conformance
     ;;
   *)
-    echo "usage: tools/ci-local.sh lint|unit|policy|signature|pii|repro|conformance|all" >&2
+    echo "usage: tools/ci-local.sh lint|unit|policy|signature|pii|pii-cascade|repro|conformance|all" >&2
     exit 2
     ;;
 esac

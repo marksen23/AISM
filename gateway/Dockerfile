@@ -17,6 +17,21 @@ RUN pip install --no-cache-dir --no-compile --require-hashes --no-deps -r requir
 COPY policy/policy.schema.json /app/policy.schema.json
 COPY gateway/aism_gateway /app/aism_gateway
 
+# Optional GLiNER cascade. The default build (INSTALL_GLINER=0) does not install torch and stays
+# on the hash-locked requirements.lock above. The variant is not part of the reproducible image:
+#   docker build --build-arg INSTALL_GLINER=1 -f gateway/Dockerfile .
+# It prefetches urchade/gliner_multi_pii-v1 into HF_HOME so startup does not need the network.
+# A policy that sets ner.cascade still fails closed if that model cannot be loaded.
+ARG INSTALL_GLINER=0
+COPY gateway/requirements-gliner.txt /tmp/requirements-gliner.txt
+RUN mkdir -p /opt/hf && chown 10001:10001 /opt/hf
+ENV HF_HOME=/opt/hf
+RUN if [ "$INSTALL_GLINER" = "1" ]; then \
+      pip install --no-cache-dir --no-compile -r /tmp/requirements-gliner.txt && \
+      python -c "from gliner import GLiNER; GLiNER.from_pretrained('urchade/gliner_multi_pii-v1')" && \
+      chown -R 10001:10001 /opt/hf; \
+    fi
+
 RUN mkdir -p /audit && chown 10001:10001 /audit
 USER 10001:10001
 EXPOSE 8000 8001

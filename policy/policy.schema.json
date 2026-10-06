@@ -195,7 +195,40 @@
             },
             "labels": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
             "minScore": { "type": "number", "minimum": 0, "maximum": 1 },
-            "languages": { "type": "array", "items": { "type": "string", "pattern": "^[a-z]{2}$" } }
+            "languages": { "type": "array", "items": { "type": "string", "pattern": "^[a-z]{2}$" } },
+            "cascade": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["model", "labels", "minScore"],
+              "description": "Optionales schwereres NER-Modell. Es läuft nur auf verdächtigen Sätzen; die Treffer werden mit dem primären Modell vereinigt. Fehlt der Schlüssel, ist die Kaskade aus (kein torch nötig). Ist sie gesetzt und das Modell nicht ladbar, verweigert das Gateway den Start (fail-closed), ohne auf das schnelle Modell allein zurückzufallen.",
+              "properties": {
+                "model": {
+                  "type": "string",
+                  "pattern": "^(spacy|gliner):\\S+$",
+                  "description": "Sekundärmodell, gleiche Schreibweise wie ner.model. Beispiel: gliner:urchade/gliner_multi_pii-v1"
+                },
+                "labels": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+                "minScore": { "type": "number", "minimum": 0, "maximum": 1 },
+                "triggers": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "Welche Verdachtssignale das Sekundärmodell starten. Fehlende Schlüssel nutzen die Defaults. Alle false lädt das Modell trotzdem; ein Ladefehler bleibt fail-closed.",
+                  "properties": {
+                    "capitalizedUnknown": { "type": "boolean", "default": true, "description": "Großgeschriebenes namensförmiges Token, nicht am Satzanfang, nicht im deutschen Wortlexikon" },
+                    "sentenceStartUnknown": { "type": "boolean", "default": true, "description": "Satzanfang-Token außerhalb des Wortlexikons (gewöhnliche Satzanfänge stehen im Lexikon)" },
+                    "unknownBigram": { "type": "boolean", "default": true, "description": "Zwei benachbarte großgeschriebene Tokens, mindestens eines außerhalb des Lexikons" },
+                    "unknownLowerBigram": { "type": "boolean", "default": true, "description": "Zwei benachbarte nicht beide großgeschriebene namensförmige Tokens, mindestens eines außerhalb des Lexikons" },
+                    "listedGivenName": { "type": "boolean", "default": false, "description": "Token auf der eingebauten Vornamensliste. Großschreibung zählt immer; Kleinschreibung nur, wenn das Token nicht im Wortlexikon steht (sonst träfe das Verb bin). Standard aus: auf dem Dev-Satz hob der Trigger den Recall kaum und verdoppelte fast die Auslöserate." },
+                    "nearPersonCue": { "type": "boolean", "default": true, "description": "Namensförmiges Token nahe Herr/Frau/Dr., Signatur, Gruß, Ansprechpartner, i. V., Ich bin" },
+                    "lowConfidence": { "type": "boolean", "default": true, "description": "Primärtreffer unter lowConfidenceBelow. spaCy-Kleinmodelle haben keinen Score; es wird die Beam-Marge genutzt, sonst bleibt der Trigger still" },
+                    "lowConfidenceBelow": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.5 },
+                    "cueWindowTokens": { "type": "integer", "minimum": 1, "maximum": 12, "default": 4 },
+                    "minTokenLength": { "type": "integer", "minimum": 2, "maximum": 12, "default": 3 },
+                    "maxSentenceChars": { "type": "integer", "minimum": 80, "maximum": 8000, "default": 2000, "description": "Längere Sätze: das Sekundärmodell sieht nur ein Fenster um die verdächtigen Tokens" }
+                  }
+                }
+              }
+            }
           }
         },
         "gazetteer": {

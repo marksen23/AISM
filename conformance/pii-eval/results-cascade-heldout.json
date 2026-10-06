@@ -1,0 +1,731 @@
+{
+ "note": "Isolated processes, 2026-10-06. ms is Masker.resolve only. Trigger fraction is per split sentence. Triggers were not changed after these numbers were read.",
+ "runs": [
+  {
+   "profile": "gaz-xx",
+   "dropped_detectors": [],
+   "ms_per_sentence": 1.5,
+   "ms_p95": 1.95,
+   "per_type": {
+    "PERSON": {
+     "gold": 50,
+     "strict": 40,
+     "masked": 47,
+     "partial": 0,
+     "pred": 49,
+     "pred_ok": 47,
+     "recall_strict": 0.8,
+     "recall_masked": 0.94,
+     "precision": 0.959
+    },
+    "EMAIL": {
+     "gold": 10,
+     "strict": 10,
+     "masked": 10,
+     "partial": 0,
+     "pred": 10,
+     "pred_ok": 10,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 15,
+     "strict": 15,
+     "masked": 15,
+     "partial": 0,
+     "pred": 15,
+     "pred_ok": 15,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 5,
+     "strict": 5,
+     "masked": 5,
+     "partial": 0,
+     "pred": 5,
+     "pred_ok": 5,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {},
+   "cascade": null,
+   "dataset": "pii_eval_de_heldout.jsonl",
+   "sentences": 73,
+   "entities": {
+    "PERSON": 50,
+    "EMAIL": 10,
+    "IBAN": 15,
+    "SECRET": 5
+   }
+  },
+  {
+   "profile": "gliner",
+   "dropped_detectors": [],
+   "ms_per_sentence": 63.73,
+   "ms_p95": 75.62,
+   "per_type": {
+    "PERSON": {
+     "gold": 50,
+     "strict": 40,
+     "masked": 50,
+     "partial": 0,
+     "pred": 52,
+     "pred_ok": 50,
+     "recall_strict": 0.8,
+     "recall_masked": 1.0,
+     "precision": 0.962
+    },
+    "EMAIL": {
+     "gold": 10,
+     "strict": 10,
+     "masked": 10,
+     "partial": 0,
+     "pred": 10,
+     "pred_ok": 10,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 15,
+     "strict": 15,
+     "masked": 15,
+     "partial": 0,
+     "pred": 15,
+     "pred_ok": 15,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 5,
+     "strict": 5,
+     "masked": 5,
+     "partial": 0,
+     "pred": 5,
+     "pred_ok": 5,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {},
+   "cascade": null,
+   "dataset": "pii_eval_de_heldout.jsonl",
+   "sentences": 73,
+   "entities": {
+    "PERSON": 50,
+    "EMAIL": 10,
+    "IBAN": 15,
+    "SECRET": 5
+   }
+  },
+  {
+   "profile": "cascade",
+   "dropped_detectors": [],
+   "ms_per_sentence": 42.1,
+   "ms_p95": 79.32,
+   "per_type": {
+    "PERSON": {
+     "gold": 50,
+     "strict": 36,
+     "masked": 49,
+     "partial": 0,
+     "pred": 51,
+     "pred_ok": 49,
+     "recall_strict": 0.72,
+     "recall_masked": 0.98,
+     "precision": 0.961
+    },
+    "EMAIL": {
+     "gold": 10,
+     "strict": 10,
+     "masked": 10,
+     "partial": 0,
+     "pred": 10,
+     "pred_ok": 10,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 15,
+     "strict": 15,
+     "masked": 15,
+     "partial": 0,
+     "pred": 15,
+     "pred_ok": 15,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 5,
+     "strict": 5,
+     "masked": 5,
+     "partial": 0,
+     "pred": 5,
+     "pred_ok": 5,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {},
+   "cascade": {
+    "sentences": 73,
+    "triggered": 43,
+    "trigger_fraction": 0.589,
+    "reasons": {
+     "capitalizedUnknown": 28,
+     "sentenceStartUnknown": 16,
+     "unknownBigram": 14,
+     "unknownLowerBigram": 11,
+     "listedGivenName": 0,
+     "nearPersonCue": 6,
+     "lowConfidence": 0
+    },
+    "triggers": {
+     "capitalizedUnknown": true,
+     "sentenceStartUnknown": true,
+     "unknownBigram": true,
+     "unknownLowerBigram": true,
+     "listedGivenName": false,
+     "nearPersonCue": true,
+     "lowConfidence": true,
+     "lowConfidenceBelow": 0.5,
+     "cueWindowTokens": 4,
+     "minTokenLength": 3,
+     "maxSentenceChars": 2000
+    }
+   },
+   "dataset": "pii_eval_de_heldout.jsonl",
+   "sentences": 73,
+   "entities": {
+    "PERSON": 50,
+    "EMAIL": 10,
+    "IBAN": 15,
+    "SECRET": 5
+   }
+  },
+  {
+   "profile": "gaz-xx",
+   "dropped_detectors": [],
+   "ms_per_sentence": 1.4,
+   "ms_p95": 1.75,
+   "per_type": {
+    "PERSON": {
+     "gold": 64,
+     "strict": 31,
+     "masked": 45,
+     "partial": 1,
+     "pred": 53,
+     "pred_ok": 46,
+     "recall_strict": 0.484,
+     "recall_masked": 0.703,
+     "precision": 0.868
+    },
+    "EMAIL": {
+     "gold": 8,
+     "strict": 8,
+     "masked": 8,
+     "partial": 0,
+     "pred": 8,
+     "pred_ok": 8,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 12,
+     "strict": 12,
+     "masked": 12,
+     "partial": 0,
+     "pred": 12,
+     "pred_ok": 12,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 4,
+     "strict": 4,
+     "masked": 4,
+     "partial": 0,
+     "pred": 4,
+     "pred_ok": 4,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 23,
+     "masked": 21,
+     "strict": 13,
+     "recall_masked": 0.913,
+     "recall_strict": 0.565
+    },
+    "oov": {
+     "gold": 41,
+     "masked": 24,
+     "strict": 18,
+     "recall_masked": 0.585,
+     "recall_strict": 0.439
+    }
+   },
+   "cascade": null,
+   "dataset": "pii_eval_de_heldout_v2.jsonl",
+   "sentences": 94,
+   "entities": {
+    "PERSON": 64,
+    "EMAIL": 8,
+    "IBAN": 12,
+    "SECRET": 4
+   }
+  },
+  {
+   "profile": "gliner",
+   "dropped_detectors": [],
+   "ms_per_sentence": 68.85,
+   "ms_p95": 89.45,
+   "per_type": {
+    "PERSON": {
+     "gold": 64,
+     "strict": 53,
+     "masked": 64,
+     "partial": 0,
+     "pred": 73,
+     "pred_ok": 64,
+     "recall_strict": 0.828,
+     "recall_masked": 1.0,
+     "precision": 0.877
+    },
+    "EMAIL": {
+     "gold": 8,
+     "strict": 8,
+     "masked": 8,
+     "partial": 0,
+     "pred": 8,
+     "pred_ok": 8,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 12,
+     "strict": 12,
+     "masked": 12,
+     "partial": 0,
+     "pred": 12,
+     "pred_ok": 12,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 4,
+     "strict": 4,
+     "masked": 4,
+     "partial": 0,
+     "pred": 4,
+     "pred_ok": 4,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 23,
+     "masked": 23,
+     "strict": 19,
+     "recall_masked": 1.0,
+     "recall_strict": 0.826
+    },
+    "oov": {
+     "gold": 41,
+     "masked": 41,
+     "strict": 34,
+     "recall_masked": 1.0,
+     "recall_strict": 0.829
+    }
+   },
+   "cascade": null,
+   "dataset": "pii_eval_de_heldout_v2.jsonl",
+   "sentences": 94,
+   "entities": {
+    "PERSON": 64,
+    "EMAIL": 8,
+    "IBAN": 12,
+    "SECRET": 4
+   }
+  },
+  {
+   "profile": "cascade",
+   "dropped_detectors": [],
+   "ms_per_sentence": 49.22,
+   "ms_p95": 94.06,
+   "per_type": {
+    "PERSON": {
+     "gold": 64,
+     "strict": 42,
+     "masked": 62,
+     "partial": 0,
+     "pred": 70,
+     "pred_ok": 62,
+     "recall_strict": 0.656,
+     "recall_masked": 0.969,
+     "precision": 0.886
+    },
+    "EMAIL": {
+     "gold": 8,
+     "strict": 8,
+     "masked": 8,
+     "partial": 0,
+     "pred": 8,
+     "pred_ok": 8,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 12,
+     "strict": 12,
+     "masked": 12,
+     "partial": 0,
+     "pred": 12,
+     "pred_ok": 12,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 4,
+     "strict": 4,
+     "masked": 4,
+     "partial": 0,
+     "pred": 4,
+     "pred_ok": 4,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 23,
+     "masked": 21,
+     "strict": 11,
+     "recall_masked": 0.913,
+     "recall_strict": 0.478
+    },
+    "oov": {
+     "gold": 41,
+     "masked": 41,
+     "strict": 31,
+     "recall_masked": 1.0,
+     "recall_strict": 0.756
+    }
+   },
+   "cascade": {
+    "sentences": 104,
+    "triggered": 64,
+    "trigger_fraction": 0.615,
+    "reasons": {
+     "capitalizedUnknown": 42,
+     "sentenceStartUnknown": 14,
+     "unknownBigram": 26,
+     "unknownLowerBigram": 33,
+     "listedGivenName": 0,
+     "nearPersonCue": 24,
+     "lowConfidence": 0
+    },
+    "triggers": {
+     "capitalizedUnknown": true,
+     "sentenceStartUnknown": true,
+     "unknownBigram": true,
+     "unknownLowerBigram": true,
+     "listedGivenName": false,
+     "nearPersonCue": true,
+     "lowConfidence": true,
+     "lowConfidenceBelow": 0.5,
+     "cueWindowTokens": 4,
+     "minTokenLength": 3,
+     "maxSentenceChars": 2000
+    }
+   },
+   "dataset": "pii_eval_de_heldout_v2.jsonl",
+   "sentences": 94,
+   "entities": {
+    "PERSON": 64,
+    "EMAIL": 8,
+    "IBAN": 12,
+    "SECRET": 4
+   }
+  },
+  {
+   "profile": "gaz-xx",
+   "dropped_detectors": [],
+   "ms_per_sentence": 1.49,
+   "ms_p95": 1.81,
+   "per_type": {
+    "PERSON": {
+     "gold": 64,
+     "strict": 42,
+     "masked": 47,
+     "partial": 0,
+     "pred": 63,
+     "pred_ok": 47,
+     "recall_strict": 0.656,
+     "recall_masked": 0.734,
+     "precision": 0.746
+    },
+    "EMAIL": {
+     "gold": 8,
+     "strict": 8,
+     "masked": 8,
+     "partial": 0,
+     "pred": 8,
+     "pred_ok": 8,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 12,
+     "strict": 12,
+     "masked": 12,
+     "partial": 0,
+     "pred": 12,
+     "pred_ok": 12,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 4,
+     "strict": 4,
+     "masked": 4,
+     "partial": 0,
+     "pred": 4,
+     "pred_ok": 4,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 21,
+     "masked": 19,
+     "strict": 18,
+     "recall_masked": 0.905,
+     "recall_strict": 0.857
+    },
+    "oov": {
+     "gold": 43,
+     "masked": 28,
+     "strict": 24,
+     "recall_masked": 0.651,
+     "recall_strict": 0.558
+    }
+   },
+   "cascade": null,
+   "dataset": "pii_eval_de_heldout_v3.jsonl",
+   "sentences": 94,
+   "entities": {
+    "PERSON": 64,
+    "EMAIL": 8,
+    "IBAN": 12,
+    "SECRET": 4
+   }
+  },
+  {
+   "profile": "gliner",
+   "dropped_detectors": [],
+   "ms_per_sentence": 75.41,
+   "ms_p95": 105.53,
+   "per_type": {
+    "PERSON": {
+     "gold": 64,
+     "strict": 51,
+     "masked": 64,
+     "partial": 0,
+     "pred": 71,
+     "pred_ok": 64,
+     "recall_strict": 0.797,
+     "recall_masked": 1.0,
+     "precision": 0.901
+    },
+    "EMAIL": {
+     "gold": 8,
+     "strict": 8,
+     "masked": 8,
+     "partial": 0,
+     "pred": 8,
+     "pred_ok": 8,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 12,
+     "strict": 12,
+     "masked": 12,
+     "partial": 0,
+     "pred": 12,
+     "pred_ok": 12,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 4,
+     "strict": 4,
+     "masked": 4,
+     "partial": 0,
+     "pred": 4,
+     "pred_ok": 4,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 21,
+     "masked": 21,
+     "strict": 16,
+     "recall_masked": 1.0,
+     "recall_strict": 0.762
+    },
+    "oov": {
+     "gold": 43,
+     "masked": 43,
+     "strict": 35,
+     "recall_masked": 1.0,
+     "recall_strict": 0.814
+    }
+   },
+   "cascade": null,
+   "dataset": "pii_eval_de_heldout_v3.jsonl",
+   "sentences": 94,
+   "entities": {
+    "PERSON": 64,
+    "EMAIL": 8,
+    "IBAN": 12,
+    "SECRET": 4
+   }
+  },
+  {
+   "profile": "cascade",
+   "dropped_detectors": [],
+   "ms_per_sentence": 54.96,
+   "ms_p95": 115.11,
+   "per_type": {
+    "PERSON": {
+     "gold": 64,
+     "strict": 53,
+     "masked": 64,
+     "partial": 0,
+     "pred": 82,
+     "pred_ok": 64,
+     "recall_strict": 0.828,
+     "recall_masked": 1.0,
+     "precision": 0.78
+    },
+    "EMAIL": {
+     "gold": 8,
+     "strict": 8,
+     "masked": 8,
+     "partial": 0,
+     "pred": 8,
+     "pred_ok": 8,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "IBAN": {
+     "gold": 12,
+     "strict": 12,
+     "masked": 12,
+     "partial": 0,
+     "pred": 12,
+     "pred_ok": 12,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    },
+    "SECRET": {
+     "gold": 4,
+     "strict": 4,
+     "masked": 4,
+     "partial": 0,
+     "pred": 4,
+     "pred_ok": 4,
+     "recall_strict": 1.0,
+     "recall_masked": 1.0,
+     "precision": 1.0
+    }
+   },
+   "person_by_vocab": {
+    "inv": {
+     "gold": 21,
+     "masked": 21,
+     "strict": 18,
+     "recall_masked": 1.0,
+     "recall_strict": 0.857
+    },
+    "oov": {
+     "gold": 43,
+     "masked": 43,
+     "strict": 35,
+     "recall_masked": 1.0,
+     "recall_strict": 0.814
+    }
+   },
+   "cascade": {
+    "sentences": 109,
+    "triggered": 74,
+    "trigger_fraction": 0.679,
+    "reasons": {
+     "capitalizedUnknown": 47,
+     "sentenceStartUnknown": 9,
+     "unknownBigram": 40,
+     "unknownLowerBigram": 32,
+     "listedGivenName": 0,
+     "nearPersonCue": 17,
+     "lowConfidence": 0
+    },
+    "triggers": {
+     "capitalizedUnknown": true,
+     "sentenceStartUnknown": true,
+     "unknownBigram": true,
+     "unknownLowerBigram": true,
+     "listedGivenName": false,
+     "nearPersonCue": true,
+     "lowConfidence": true,
+     "lowConfidenceBelow": 0.5,
+     "cueWindowTokens": 4,
+     "minTokenLength": 3,
+     "maxSentenceChars": 2000
+    }
+   },
+   "dataset": "pii_eval_de_heldout_v3.jsonl",
+   "sentences": 94,
+   "entities": {
+    "PERSON": 64,
+    "EMAIL": 8,
+    "IBAN": 12,
+    "SECRET": 4
+   }
+  }
+ ]
+}
