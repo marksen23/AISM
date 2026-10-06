@@ -9,3 +9,16 @@ https://github.com/fxnn/vornamen and are licensed CC BY 3.0 DE; attribute Stadt 
 Other rows come from ndsvw/JSON-Namen (MIT), PenTestical/german_names (MIT) and
 sigpwned/popular-names-by-country-dataset (CC0). Details and the rebuild command are in
 gateway/aism_gateway/data/README.md.
+
+gateway/aism_gateway/data/de_common_words.txt is derived from hermitdave/FrequencyWords
+content/2018/de/de_50k.txt (OpenSubtitles 2018). The FrequencyWords content is licensed
+CC BY-SA 4.0; attribute Hermit Dave (https://github.com/hermitdave/FrequencyWords).
+The derived word list is shared under CC BY-SA 4.0 as a whole, including a short
+project-maintained supplement of technical tokens. That licence applies to the word-list
+file. It does not relicense the Apache-2.0 code in this repository.
+
+The optional NER cascade can load urchade/gliner_multi_pii-v1 (Apache-2.0; a fine-tune of
+urchade/gliner_multi-v2.1 by Urchade Zaratiana, https://huggingface.co/urchade/gliner_multi_pii-v1).
+The model weights are not bundled. The optional Python packages (gliner, torch, transformers,
+sentencepiece, protobuf) keep their own upstream licences and are installed only when
+gateway/requirements-gliner.txt or the Docker build arg INSTALL_GLINER=1 is used.

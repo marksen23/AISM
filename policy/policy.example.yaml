@@ -76,6 +76,15 @@ spec:
         #   spacy:de_core_news_md | spacy:de_core_news_lg
         # GLiNER (minScore IS applied; set labels to the model strings, usually ["person"]):
         #   gliner:urchade/gliner_multi_pii-v1
+        # Optional cascade (off here: the default image has no torch). The fast model above
+        # always runs; the secondary model runs only on suspicious sentences and the spans
+        # are unioned. If cascade is set and the model cannot be loaded, the gateway refuses
+        # to start (fail-closed) instead of silently using the fast model alone.
+        #   cascade:
+        #     model: "gliner:urchade/gliner_multi_pii-v1"
+        #     labels: ["person"]
+        #     minScore: 0.55          # cascade threshold chosen on the dev set; gliner-only comparisons use 0.35
+        #     # triggers omitted: listedGivenName defaults to false (see policy schema)
         model: "spacy:xx_ent_wiki_sm"
         labels: ["PER"]
         minScore: 0.80                  # ignored for spaCy (no per-entity score); threshold for gliner

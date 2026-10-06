@@ -36,6 +36,46 @@ jobs:
           path: conformance/pii-eval/results-ci.json
           if-no-files-found: warn
 
+  pii-cascade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            gateway/requirements.txt
+            gateway/requirements-gliner.txt
+      - name: Cache the GLiNER model
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-gliner-multi-pii-v1-${{ hashFiles('gateway/requirements-gliner.txt') }}
+      - name: Install gateway and optional GLiNER dependencies
+        env:
+          HF_HUB_DISABLE_TELEMETRY: "1"
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r gateway/requirements.txt -r gateway/requirements-gliner.txt
+      - name: Prefetch GLiNER
+        env:
+          HF_HUB_DISABLE_TELEMETRY: "1"
+        run: python -c "from gliner import GLiNER; GLiNER.from_pretrained('urchade/gliner_multi_pii-v1')"
+      - name: Cascade recall gates (v2 and frozen v3)
+        env:
+          HF_HUB_DISABLE_TELEMETRY: "1"
+        run: bash tools/ci-local.sh pii-cascade
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pii-eval-cascade
+          path: |
+            conformance/pii-eval/results-ci-cascade-v2.json
+            conformance/pii-eval/results-ci-cascade-v3.json
+          if-no-files-found: warn
+
   reproducible-build:
     runs-on: ubuntu-latest
     timeout-minutes: 180

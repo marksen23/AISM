@@ -152,6 +152,162 @@ def test_gazetteer_absolute_file_rejected(tmp_path):
         load_policy(path, SCHEMA)
 
 
+def test_default_policy_has_no_cascade(pol):
+    person = next(d for d in pol.spec["piiDetectors"] if d["id"] == "person-name")
+    assert "cascade" not in person["ner"]
+
+
+def test_cascade_triggers_and_lexicon():
+    from aism_gateway.cascade import Cascade, load_common_lexicon, split_sentences, suspicious_sentences
+
+    lex = load_common_lexicon()
+    assert "server" in lex and "frankfurt" in lex
+    assert "holtkamp" not in lex and "nkechi" not in lex
+    assert "grüße".casefold() in lex
+    casc = Cascade.from_policy(
+        {"model": "gliner:test/model", "labels": ["person"], "minScore": 0.35},
+        lambda text: None, lex)
+
+    def why(text, primary=(), **overrides):
+        settings = dict(casc.settings)
+        settings.update(overrides)
+        _sents, reasons, _spans = suspicious_sentences(text, settings, lex, list(primary), given=casc.given)
+        return set().union(*reasons.values()) if reasons else set()
+
+    assert "capitalizedUnknown" in why("Bitte Holtkamp heute anrufen.")
+    assert why("Der Server in Frankfurt ist online.") == set()
+    assert "nearPersonCue" in why("Ich bin nkechi und rufe an.")
+    assert why("Ich bin im Büro.") == set()
+    assert "unknownLowerBigram" in why("kannst du nkechi ngono bescheid geben")
+    assert "unknownLowerBigram" in why("ines holtkamp bleibt zuhause")
+    assert "listedGivenName" in why("Björn ist hier.", listedGivenName=True)
+    assert why("Björn ist hier.") == set()
+    assert "unknownBigram" in why("Ngono Holtkamp kam vorbei.")
+    assert why("Holtkamp ist hier.", sentenceStartUnknown=False) == set()
+    assert "sentenceStartUnknown" in why("Holtkamp ist hier.")
+    server = "Der Server läuft."
+    s = server.index("Server")
+    assert "lowConfidence" in why(server, primary=[(s, s + 6, 0.2)])
+    assert why(server, primary=[(s, s + 6, 0.9)]) == set()
+    assert split_sentences("Dr. Braun kam.") == [(0, len("Dr. Braun kam."))]
+    assert len(split_sentences("i. V. Holtkamp")) == 1
+    assert len(split_sentences("Satz eins. Satz zwei.")) == 2
+    assert len(split_sentences("Viele Grüße\nHoltkamp")) == 2
+    assert len(split_sentences("Release 2.3.1 ist da.")) == 1
+
+
+class _Ent:
+    def __init__(self, s, e, label="person", score=0.95):
+        self.start_char, self.end_char, self.label_, self.score = s, e, label, score
+
+
+class _FixedNlp:
+    def __init__(self, ents):
+        self._ents = ents
+
+    def __call__(self, text):
+        return type("Doc", (), {"ents": self._ents})()
+
+
+class _BoomNlp:
+    def __call__(self, text):
+        raise RuntimeError("secondary down")
+
+
+def _cascade_detector(primary_ents, runner):
+    from aism_gateway.cascade import Cascade, load_common_lexicon
+    from aism_gateway.pii import Detector
+
+    det = Detector(id="person-name", entity="PERSON", type="ner", masking=_PERSON_MASK, apply_to={"prompt"})
+    det.ner_labels = {"PER"}
+    det.ner_min_score = 0.8
+    det.ner_backend = "spacy"
+    det.nlp = _FixedNlp(primary_ents)
+    det.cascade = Cascade.from_policy(
+        {"model": "gliner:test/model", "labels": ["person"], "minScore": 0.35},
+        runner, load_common_lexicon())
+    return det
+
+
+def test_cascade_unions_masks_and_demasks_stream():
+    text = "Bitte Holtkamp heute anrufen."
+    start = text.index("Holtkamp")
+    det = _cascade_detector([], _FixedNlp([_Ent(start, start + len("Holtkamp"))]))
+    masker = Masker([det], {"PERSON": 2})
+    vault = Vault()
+    out, ents = masker.mask(text, vault, "prompt")
+    assert "Holtkamp" not in out and "PERSON" in ents
+    assert "Bitte" in out and "anrufen" in out
+    masked = out
+    demasked = demask(masked, vault, ["staff"])
+    assert "Holtkamp" in demasked
+    stream = StreamDemasker(vault, ["staff"])
+    assert "".join(stream.feed(masked[i:i + 3]) for i in range(0, len(masked), 3)) + stream.flush() == demasked
+    assert det.cascade.stats()["triggered"] >= 1
+
+
+def test_cascade_runtime_failure_does_not_return_fast_path_only():
+    from aism_gateway.pii import DetectorUnavailable
+
+    text = "Bitte Holtkamp heute anrufen."
+    start = text.index("Holtkamp")
+    det = _cascade_detector([_Ent(start, start + len("Holtkamp"), "PER", None)], _BoomNlp())
+    with pytest.raises(DetectorUnavailable):
+        det.spans(text)
+
+
+def test_cascade_unavailable_at_load_is_fail_closed(monkeypatch):
+    import aism_gateway.pii as pii
+
+    real = pii._load_backend
+
+    def wrapped(kind, name):
+        if kind == "gliner":
+            raise ImportError("gliner missing")
+        return real(kind, name)
+
+    monkeypatch.setattr(pii, "_load_backend", wrapped)
+    spec = {"piiDetectors": [{
+        "id": "person-name", "entity": "PERSON", "type": "ner",
+        "ner": {
+            "model": "spacy:xx_ent_wiki_sm", "labels": ["PER"], "minScore": 0.8,
+            "cascade": {"model": "gliner:aism/missing", "labels": ["person"], "minScore": 0.35},
+        },
+        "masking": _PERSON_MASK,
+    }]}
+    dets, errs = build_detectors(spec)
+    assert errs and "Kaskade" in errs[0]
+    assert all(d.id != "person-name" for d in dets)
+
+
+def test_cascade_schema_and_regex_rejection(tmp_path):
+    import yaml
+
+    raw = yaml.safe_load(POLICY.read_text())
+    person = next(d for d in raw["spec"]["piiDetectors"] if d["id"] == "person-name")
+    person["ner"]["cascade"] = {
+        "model": "gliner:urchade/gliner_multi_pii-v1", "labels": ["person"], "minScore": 0.35,
+    }
+    path = tmp_path / "p.yaml"
+    path.write_text(yaml.safe_dump(raw, allow_unicode=True), encoding="utf-8")
+    load_policy(path, SCHEMA)
+
+    person["ner"]["cascade"]["triggers"] = {"notATrigger": True}
+    path.write_text(yaml.safe_dump(raw, allow_unicode=True), encoding="utf-8")
+    with pytest.raises(PolicyError):
+        load_policy(path, SCHEMA)
+
+    raw = yaml.safe_load(POLICY.read_text())
+    email = next(d for d in raw["spec"]["piiDetectors"] if d["id"] == "email")
+    email["ner"] = {
+        "model": "spacy:xx_ent_wiki_sm", "labels": ["PER"], "minScore": 0.5,
+        "cascade": {"model": "gliner:urchade/gliner_multi_pii-v1", "labels": ["person"], "minScore": 0.35},
+    }
+    path.write_text(yaml.safe_dump(raw, allow_unicode=True), encoding="utf-8")
+    with pytest.raises(PolicyError, match="nur bei type ner"):
+        load_policy(path, SCHEMA)
+
+
 def test_traceparent():
     tid, tp = trace.continue_or_start("00-" + "a" * 32 + "-" + "b" * 16 + "-01")
     assert tid == "a" * 32 and tp.split("-")[1] == tid and tp.split("-")[2] != "b" * 16

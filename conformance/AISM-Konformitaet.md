@@ -234,7 +234,7 @@ Ein früherer Docker-Lauf **ohne** vorheriges Cloud-Szenario ergab 36 bestanden 
 - Der Lauf belegt das Verhalten der **Prototypen** mit **Mocks** statt Open WebUI, llama.cpp, n8n und SearXNG. Er ist kein Nachweis für eine produktive Installation. CI (`.github/workflows/ci.yml`, lokal `tools/ci-local.sh conformance`) wiederholt diesen Mock-Lauf: zuerst das Cloud-Fallback-Szenario, danach den vollständigen Lauf. Die echten Komponenten starten auch dort nicht.
 - OIDC (K2-21) ist nur gegen den Test-IdP [`tests/mock_idp.py`](tests/mock_idp.py) geprüft, nicht gegen einen echten IdP.
 - K3-05 prüft bei lokal gebauten Images nur das Basis-Image; die gebauten Images sind reproduzierbar (README), aber nicht per Digest referenziert, solange sie nicht in einer Registry liegen.
-- AISM-K2-03 und -18 prüfen nur die synthetischen Testdaten. Die Erkennungsquote auf synthetischen deutschen Sätzen steht in [`pii-eval/README.md`](pii-eval/README.md) (CI-Schwelle: maskierter Personen-Recall auf dem frischen Held-out-Set). Reale Daten sind nicht gemessen.
+- AISM-K2-03 und -18 prüfen nur die synthetischen Testdaten. Die Erkennungsquote auf synthetischen deutschen Sätzen steht in [`pii-eval/README.md`](pii-eval/README.md). Das CI-Gate des Standards bleibt der maskierte Personen-Recall 0,703 auf Held-out v2. Ein eigener Job prüft die optionale Kaskade auf v2 und v3. Reale Daten sind nicht gemessen.
 - Firewall-Ergebnisse auf dem Docker-Host (inkl. IPv6): [`../deploy/firewall/README.md`](../deploy/firewall/README.md).
 
 ### 7.6 Früherer Lauf ohne Docker (05.10.2026)

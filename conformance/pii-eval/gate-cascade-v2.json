@@ -1,0 +1,6 @@
+{
+  "PERSON": {"recall_masked": 0.969},
+  "EMAIL": {"recall_masked": 1.0},
+  "IBAN": {"recall_masked": 1.0},
+  "SECRET": {"recall_masked": 1.0}
+}

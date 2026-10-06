@@ -6,7 +6,10 @@ Detector types (Policy-Format §4.4):
   ner        – named-entity recognition. "spacy:<model>" (spaCy; minScore is not applied,
                small models have no per-entity score) or "gliner:<model>" (GLiNER; minScore
                is the decision threshold, labels are the strings passed to the model,
-               typically "person")
+               typically "person"). Optional ner.cascade runs a second model only on
+               suspicious sentences and unions the spans (aism_gateway.cascade). If that
+               model is configured but cannot be loaded or fails at runtime, detection
+               fails closed: no silent fallback to the fast model.
   gazetteer  – listed given name + surname, plus optional context rules
                (aism_gateway.person_gazetteer; preset "de")
 Detection quality was measured on a small synthetic German set: conformance/pii-eval/README.md.
@@ -67,6 +70,7 @@ class Detector:
     gaz_surnames: frozenset[str] = field(default_factory=frozenset)
     gaz_pairs: bool = True
     gaz_rules: list = field(default_factory=list)
+    cascade: object | None = None
 
     def spans(self, text: str) -> list[tuple[int, int]]:
         out = []
@@ -81,7 +85,9 @@ class Detector:
                             continue
                     out.append((s, e))
         elif self.type == "ner":
-            for ent in self.nlp(text).ents:
+            doc = self.nlp(text)
+            primary: list[tuple[int, int, float | None]] = []
+            for ent in doc.ents:
                 if ent.label_ not in self.ner_labels:
                     continue
                 # spaCy small models expose no score; minScore applies only to backends that set ent.score
@@ -89,11 +95,24 @@ class Detector:
                 if score is not None and score < self.ner_min_score:
                     continue
                 out.append((ent.start_char, ent.end_char))
+                primary.append((ent.start_char, ent.end_char, float(score) if score is not None else None))
+            if self.cascade is not None:
+                from .cascade import CascadeUnavailable, spacy_confidence  # noqa: PLC0415
+                try:
+                    out.extend(self.cascade.extra_spans(text, primary, lambda: self._spacy_confidence(doc, spacy_confidence)))
+                except CascadeUnavailable as exc:
+                    raise DetectorUnavailable(str(exc)) from exc
         elif self.type == "gazetteer":
             from .person_gazetteer import person_spans  # noqa: PLC0415
             out.extend(person_spans(text, self.gaz_given, self.gaz_surnames, self.gaz_pairs, self.gaz_rules))
         return out
 
+
+    def _spacy_confidence(self, doc, score_fn) -> dict[tuple[int, int], float]:
+        nlp = self.nlp
+        if not hasattr(nlp, "pipe_names") or "ner" not in getattr(nlp, "pipe_names", []):
+            return {}
+        return score_fn(doc, nlp.get_pipe("ner"), self.ner_labels)
 
     def _checksum_end(self, text: str, s: int, e: int) -> int | None:
         """End of the longest checksum-valid prefix of text[s:e] that ends at a token boundary.
@@ -199,6 +218,16 @@ def build_detectors(policy_spec: dict, base_dir: str | None = None) -> tuple[lis
             except DetectorUnavailable as exc:
                 errors.append(f"{d['id']}: {exc}")
                 continue
+            cascade_cfg = d["ner"].get("cascade")
+            if cascade_cfg:
+                from .cascade import Cascade, CascadeUnavailable, load_common_lexicon  # noqa: PLC0415
+                try:
+                    labels = set(cascade_cfg["labels"])
+                    runner = _load_ner(cascade_cfg["model"], labels, float(cascade_cfg["minScore"]))
+                    det.cascade = Cascade.from_policy(cascade_cfg, runner, load_common_lexicon())
+                except (DetectorUnavailable, CascadeUnavailable, KeyError, TypeError, ValueError) as exc:
+                    errors.append(f"{d['id']}: Kaskade nicht ladbar ({exc})")
+                    continue
         dets.append(det)
     return dets, errors
 

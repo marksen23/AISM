@@ -112,6 +112,16 @@ def _semantic_checks(p: dict) -> list[str]:
         for r in d["masking"].get("demaskFor", []):
             if r not in roles:
                 errs.append(f"Detektor {d['id']}: unbekannte Rolle {r}")
+        ner = d.get("ner") or {}
+        cascade = ner.get("cascade")
+        if cascade is not None:
+            if d["type"] != "ner":
+                errs.append(f"Detektor {d['id']}: ner.cascade ist nur bei type ner zulässig")
+            model = str(cascade.get("model") or "")
+            if not re.fullmatch(r"(spacy|gliner):\S+", model):
+                errs.append(f"Detektor {d['id']}: Kaskaden-Modell {model!r} muss 'spacy:<modell>' oder 'gliner:<modell>' sein")
+            if not cascade.get("labels"):
+                errs.append(f"Detektor {d['id']}: ner.cascade.labels fehlt")
 
     prov_type = {x["id"]: x["type"] for x in spec["routing"]["providers"]}
     prio_seen: dict[int, str] = {}
