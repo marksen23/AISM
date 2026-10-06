@@ -275,3 +275,177 @@ def test_keyring_rotation_overlap(cfg, gateway):
         stayed = gateway.get("/aism/v1/policy").json()
         assert stayed["keyring"]["version"] == version + 1 and stayed["digest"] == digest
         assert gateway.get("/health").status_code == 200
+
+
+def _require_audit_env():
+    needed = (
+        "AISM_AUDIT_LOG", "AISM_KEYRING", "AISM_AUDIT_SIGNER", "AISM_KEYRING_STATE",
+        "AISM_AUDIT_S3_ENDPOINT", "AISM_AUDIT_S3_BUCKET",
+        "AISM_AUDIT_S3_ACCESS_KEY", "AISM_AUDIT_S3_SECRET_KEY",
+    )
+    missing = [name for name in needed if not os.environ.get(name)]
+    if missing:
+        pytest.fail("WORM-Prüfung ohne Umgebung: " + ", ".join(missing))
+
+
+def _audit_prefix() -> str:
+    prefix = os.environ.get("AISM_AUDIT_S3_PREFIX", "aism/")
+    if prefix and not prefix.endswith("/"):
+        prefix += "/"
+    return prefix
+
+
+def _s3():
+    sys.path.insert(0, str(REPO / "gateway"))
+    from aism_gateway.s3client import S3Client
+    return S3Client(
+        os.environ["AISM_AUDIT_S3_ENDPOINT"],
+        os.environ["AISM_AUDIT_S3_ACCESS_KEY"],
+        os.environ["AISM_AUDIT_S3_SECRET_KEY"],
+        os.environ.get("AISM_AUDIT_S3_REGION", "us-east-1"),
+    )
+
+
+def _wait_audit_stable(gateway, timeout: float = 90):
+    """Checkpoint covers every local line, the queue is empty, the keyring anchor is in WORM."""
+    deadline = time.time() + timeout
+    last: dict = {}
+    state_path = pathlib.Path(os.environ["AISM_KEYRING_STATE"])
+    while time.time() < deadline:
+        response = gateway.get("/aism/v1/audit")
+        if response.status_code != 200:
+            last = {"http": response.status_code, "body": response.text[:500]}
+            time.sleep(0.5)
+            continue
+        last = response.json()
+        checkpoint = last.get("checkpoint") or {}
+        try:
+            digest = "sha256:" + hashlib.sha256(state_path.read_bytes()).hexdigest()
+        except OSError as exc:
+            last = {**last, "keyring_state_error": str(exc)}
+            time.sleep(0.5)
+            continue
+        queued = (last.get("queue") or {}).get("depth")
+        if (last.get("accepting") and last.get("checkpoint_seq", 0) >= 1 and queued == 0
+                and checkpoint.get("entries") == last.get("entries") and last.get("entries", 0) >= 1
+                and digest in (last.get("keyring_state_acked") or [])
+                and last.get("worm_objects", 0) >= last.get("entries", 0)):
+            return last
+        time.sleep(0.5)
+    pytest.fail("Audit-Senke nicht stabil: " + json.dumps(last, ensure_ascii=False)[:2000])
+
+
+@pytest.mark.live
+@pytest.mark.aism(id="AISM-K3-14", level="K3", req="MUSS", refs=["S-02"])
+def test_audit_checkpoint_and_worm_verify(gateway):
+    """Chain, checkpoint signatures and the WORM mirror, including the keyring anchor."""
+    _require_audit_env()
+    _wait_audit_stable(gateway)
+    report_path = pathlib.Path(os.environ.get("AISM_REPORT", "aism-report.json")).parent / "audit-verify.json"
+    cmd = [
+        sys.executable, str(REPO / "tools" / "aism-audit-verify.py"),
+        "--log", os.environ["AISM_AUDIT_LOG"],
+        "--keyring", os.environ["AISM_KEYRING"],
+        "--signer", os.environ["AISM_AUDIT_SIGNER"],
+        "--s3-endpoint", os.environ["AISM_AUDIT_S3_ENDPOINT"],
+        "--s3-bucket", os.environ["AISM_AUDIT_S3_BUCKET"],
+        "--s3-prefix", _audit_prefix(),
+        "--keyring-state", os.environ["AISM_KEYRING_STATE"],
+        "--report", str(report_path),
+    ]
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    try:
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        report = {"raw": (proc.stdout + proc.stderr)[:2000]}
+    assert proc.returncode == 0 and report.get("ok") is True, json.dumps(report, ensure_ascii=False)[:2000]
+
+
+@pytest.mark.live
+@pytest.mark.aism(id="AISM-K3-13", level="K3", req="MUSS", refs=["S-02"])
+def test_audit_worm_object_lock_holds(gateway):
+    """A COMPLIANCE version cannot be deleted. A later version with different bytes is removed again."""
+    _require_audit_env()
+    _wait_audit_stable(gateway)
+    client = _s3()
+    bucket = os.environ["AISM_AUDIT_S3_BUCKET"]
+    prefix = _audit_prefix()
+    versions, _markers = client.list_versions(bucket, prefix + "entries/")
+    locked = [item for item in versions if str(item.get("key", "")).startswith(prefix + "entries/") and item.get("version_id")]
+    assert locked, f"keine versionierte Entry-Kopie unter {prefix}entries/"
+    target = locked[0]
+    key, version_id = target["key"], target["version_id"]
+    original, _vid = client.get_bytes(bucket, key, version_id)
+    denied = client.delete(bucket, key, version_id)
+    if denied < 300:
+        until = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(time.time() + 86400))
+        client.put_bytes(bucket, key, original, lock_mode="COMPLIANCE", retain_until=until)
+        pytest.fail(f"COMPLIANCE-Version ließ sich löschen (HTTP {denied})")
+    still, _vid = client.get_bytes(bucket, key, version_id)
+    assert still == original, "gesperrte Version hat sich geändert"
+    status, new_version = client.put_plain(bucket, key, b'{"tampered":true}\n')
+    try:
+        unchanged, _vid = client.get_bytes(bucket, key, version_id)
+        assert unchanged == original, "PUT hat die gesperrte Version überschrieben"
+        if status < 300:
+            assert new_version and new_version != version_id, f"PUT ohne neue Version-ID (HTTP {status})"
+            removed = client.delete(bucket, key, new_version)
+            assert removed < 300, f"Schattenversion nicht entfernt (HTTP {removed})"
+        latest, _vid = client.get_bytes(bucket, key)
+        assert latest == original, "aktuelle Sicht ist nicht mehr die gesperrte Fassung"
+    except Exception:
+        if new_version and new_version != version_id:
+            client.delete(bucket, key, new_version)
+        raise
+
+
+@pytest.mark.live
+@pytest.mark.capture
+@pytest.mark.aism(id="AISM-K3-15", level="K3", req="MUSS", refs=["S-02", "M-12"])
+def test_audit_sink_outage_fails_closed(gateway, model, capture, nonce):
+    """A fault marker makes the required sink unavailable: 503, and the mock sees nothing."""
+    _require_audit_env()
+    client = _s3()
+    bucket = os.environ["AISM_AUDIT_S3_BUCKET"]
+    key = _audit_prefix() + "fault/block"
+    created = None
+    try:
+        status, created = client.put_plain(bucket, key, b"block")
+        assert status < 300, f"Störungsmarker nicht angelegt (HTTP {status})"
+        deadline = time.time() + 20
+        last: dict = {}
+        while time.time() < deadline:
+            response = gateway.get("/aism/v1/audit")
+            last = response.json() if response.status_code == 200 else {"http": response.status_code, "body": response.text[:400]}
+            if last.get("faulted") and last.get("accepting") is False:
+                break
+            time.sleep(0.4)
+        else:
+            pytest.fail("Senke wurde nicht als ausgefallen erkannt: " + json.dumps(last, ensure_ascii=False)[:1500])
+        assert gateway.get("/health").status_code == 503
+        refused = gateway.post("/v1/chat/completions", json=chat_body(model, f"[{nonce}] outage"))
+        assert refused.status_code == 503, refused.text[:300]
+        assert refused.json()["error"]["code"] == "audit_unavailable"
+        seen = [item for item in capture.captured("/v1/chat/completions") if nonce in json.dumps(item["body"])]
+        assert not seen, "Anfrage wurde trotz Audit-Ausfall weitergeleitet"
+    finally:
+        try:
+            versions, _markers = client.list_versions(bucket, key)
+        except Exception:
+            versions = []
+        for item in versions:
+            if item.get("key") == key and item.get("version_id"):
+                client.delete(bucket, key, item["version_id"])
+        if created:
+            client.delete(bucket, key, created)
+        client.delete(bucket, key, None)
+        deadline = time.time() + 20
+        while time.time() < deadline:
+            health = gateway.get("/health")
+            status_response = gateway.get("/aism/v1/audit")
+            if (health.status_code == 200 and status_response.status_code == 200
+                    and status_response.json().get("accepting") and not status_response.json().get("faulted")):
+                break
+            time.sleep(0.4)
+        else:
+            pytest.fail("Gateway nach Entfernen der Störung nicht bereit")

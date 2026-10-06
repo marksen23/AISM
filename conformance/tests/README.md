@@ -46,6 +46,11 @@ Fehlende Voraussetzungen führen zu `skipped`, nicht zu `failed`. Übersprungene
 | `AISM_OIDC_TOKEN` / `AISM_OIDC_NEGATIVE_TOKENS` | – | – | gültiges IdP-Token bzw. kommagetrennte Tokens, die abgelehnt werden müssen (AISM-K2-21) |
 | `AISM_IDP_URL` | – | – | Test-IdP; `run_in_docker.sh` holt damit die OIDC-Tokens |
 | `AISM_LOCAL_DOWN`, `AISM_CLOUD_MOCK_URL` | – | – | nur Szenario Cloud-Fallback (AISM-K3-10) |
+| `AISM_AUDIT_S3_ENDPOINT` | – | – | WORM-Senke, im Stack `http://audit-worm:8333` (AISM-K3-13, -14, -15) |
+| `AISM_AUDIT_S3_BUCKET` / `AISM_AUDIT_S3_PREFIX` | – | – | Bucket `aism-audit`, Präfix `aism/` |
+| `AISM_AUDIT_S3_ACCESS_KEY` / `AISM_AUDIT_S3_SECRET_KEY` | – | – | Laufzeit-Zugangsdaten; `prepare_audit_sink.sh` schreibt daraus `run/seaweed/s3.json` |
+| `AISM_AUDIT_SIGNER` | – | – | Identität mit Rolle `audit`, Test: `aism-audit@localhost` |
+| `AISM_KEYRING_STATE` | – | – | `keyring-state.json` neben dem Audit-Log |
 
 ## Ausführung
 
@@ -63,12 +68,15 @@ python3 -m pytest -m static
 #    AISM_INTERNAL_TOKEN, AISM_QDRANT_API_KEY, AISM_N8N_WEBHOOK_TOKEN, AISM_SEARXNG_SECRET, z. B.:
 for v in AISM_UI_CLIENT_KEY AISM_FORWARD_JWT_SECRET AISM_INTERNAL_TOKEN AISM_QDRANT_API_KEY AISM_N8N_WEBHOOK_TOKEN AISM_SEARXNG_SECRET; do
   echo "$v=$(openssl rand -hex 32)"; done > .env && chmod 600 .env
-# 2. Test-Policy mit frisch erzeugtem Test-Schlüssel signieren -> conformance/tests/run/{policy,trust,keys}
+# 2. Test-Policy mit zwei Policy-Schlüsseln und einem Audit-Schlüssel signieren -> run/{policy,trust,keys}
 sh conformance/tests/prepare_signed_policy.sh
-# 3. Stack starten (Capture-Mock statt S6/S4/n8n/SearXNG, Test-IdP)
+# 3. S3-Zugangsdaten (nicht committen) und SeaweedFS-Identität
+#    AISM_AUDIT_S3_ACCESS_KEY und AISM_AUDIT_S3_SECRET_KEY in .env, dann:
+sh conformance/tests/prepare_audit_sink.sh
+# 4. Stack starten (Capture-Mock statt S6/S4/n8n/SearXNG, Test-IdP, SeaweedFS als audit-worm)
 C="docker compose -f docker-compose.yml -f conformance/tests/compose.conformance.yml"
-$C up -d --build governance-proxy orchestrator aism-mock mock-idp
-# 4. Suite aus dem Client-Netz (Runner-Container nur in aism_frontend; erzeugt Test-JWT und OIDC-Tokens)
+$C up -d --build governance-proxy orchestrator aism-mock mock-idp audit-worm
+# 5. Suite aus dem Client-Netz (Runner-Container nur in aism_frontend; erzeugt Test-JWT und OIDC-Tokens)
 $C --profile runner run --rm -e AISM_REPORT=/repo/conformance/reports/aism-report.json aism-runner
 ```
 
@@ -79,7 +87,7 @@ Optional: `-f deploy/firewall/test/compose.ipv6.yml` für Dual-Stack-Netze (Fire
 ```bash
 sh conformance/tests/prepare_cloud_scenario.sh        # signierte Cloud-Policy, Test-CA (CA-Schlüssel wird gelöscht)
 CL="$C -f conformance/tests/compose.cloud-fallback.yml"
-$CL up -d governance-proxy orchestrator aism-mock mock-cloud llama-mock mock-idp
+$CL up -d governance-proxy orchestrator aism-mock mock-cloud llama-mock mock-idp audit-worm
 $CL stop llama-mock                                   # lokales Modell "ausgefallen"
 $CL --profile runner run --rm aism-runner scenario_cloud_fallback.py test_k3_sovereign.py test_k2_governed.py -k "fallback or audit or egress"
 $CL down                                              # ohne -v: Audit-Volume bleibt für den Standardlauf
@@ -91,7 +99,7 @@ Die Test-Schlüssel unter `run/` sind Wegwerfschlüssel; `run/` ist in `.gitigno
 
 ## CI
 
-`.github/workflows/ci.yml` und `tools/ci-local.sh conformance` führen denselben Ablauf aus dem Repository-Root aus: `.env` nur anlegen, wenn keine existiert; `prepare_cloud_scenario.sh`; Cloud-Fallback-Szenario (lokales Modell gestoppt, Teilmenge `fallback or audit or egress`); `docker compose down` **ohne** `-v`; danach der vollständige Lauf. Der vollständige Bericht muss Stufe K3 erreichen, mit `failed: 0` und `skipped: 0`. Berichte und Badges liegen unter `conformance/reports/ci/` (nicht versioniert) und werden als Artifact hochgeladen. `aism-runner` nutzt das lokal von `mock-idp` gebaute Image (`pull_policy: never`) und zieht `ghcr.io/marksen23/aism-test-tools:dev` nicht.
+`.github/workflows/ci.yml` und `tools/ci-local.sh conformance` führen denselben Ablauf aus dem Repository-Root aus: `.env` anlegen oder ergänzen (inkl. `AISM_AUDIT_S3_*`); `prepare_audit_sink.sh`; `prepare_cloud_scenario.sh`; Cloud-Fallback-Szenario (lokales Modell gestoppt, Teilmenge `fallback or audit or egress`, Dienst `audit-worm` mit gestartet); `docker compose down` **ohne** `-v`; danach der vollständige Lauf, wieder mit `audit-worm`. Der vollständige Bericht muss Stufe K3 erreichen, mit `failed: 0` und `skipped: 0`. Berichte und Badges liegen unter `conformance/reports/ci/` (nicht versioniert) und werden als Artifact hochgeladen. `aism-runner` nutzt das lokal von `mock-idp` gebaute Image (`pull_policy: never`) und zieht `ghcr.io/marksen23/aism-test-tools:dev` nicht.
 
 `TEST_USER_JWT` ist ein mit `AISM_FORWARD_JWT_SECRET` (HS256) signiertes Testtoken, dessen Claims auf die Rolle `it-ops` abgebildet werden (Test-Policy: Claim `groups` enthält `it-ops`). **Hinweis:** Open WebUI selbst überträgt keinen `groups`-Claim (nur `sub`, `email`, `name`, `role`); das Testtoken steht für eine Identität mit Gruppeninformation, z. B. aus OIDC. Beispiel:
 

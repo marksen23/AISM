@@ -23,9 +23,32 @@ services:
       - "127.0.0.1:18080:18080"   # test runner reads /_captured from here
 
   governance-proxy:
+    environment:
+      AUDIT_SIGNING_KEY: /etc/aism/audit-keys/audit-signing.key
+      AISM_AUDIT_FAULT_INJECTION: "1"
+      AISM_AUDIT_S3_ACCESS_KEY: ${AISM_AUDIT_S3_ACCESS_KEY:?set AISM_AUDIT_S3_ACCESS_KEY in .env}
+      AISM_AUDIT_S3_SECRET_KEY: ${AISM_AUDIT_S3_SECRET_KEY:?set AISM_AUDIT_S3_SECRET_KEY in .env}
     volumes:   # signed copy + test trust anchor from conformance/tests/prepare_signed_policy.sh
       - ${AISM_POLICY_DIR:-./conformance/tests/run/policy}:/etc/aism/policy:ro
       - ${AISM_TRUST_DIR:-./conformance/tests/run/trust}:/etc/aism/trust:ro
+      - ${AISM_AUDIT_KEY_DIR:-./conformance/tests/run/keys/audit}:/etc/aism/audit-keys:ro
+    depends_on:
+      audit-worm:
+        condition: service_started
+
+  # S3 Object Lock (compliance, per object). Apache-2.0 SeaweedFS 4.48, pinned by digest.
+  # Filer/admin/volume ports stay unpublished. s3.json is generated at runtime (no secrets in git).
+  # !reset drops the base profile so this override actually starts the service.
+  audit-worm:
+    image: chrislusf/seaweedfs:4.48@sha256:4e61d15fd35994cb1e43e1e553dff106794841fd9a99ade2fc8c8bfce4d7872d
+    profiles: !reset []
+    command: ["mini", "-dir=/data", "-s3.config=/etc/seaweed/s3.json"]
+    volumes:
+      - audit-worm:/data
+      - ./conformance/tests/run/seaweed/s3.json:/etc/seaweed/s3.json:ro
+    networks: [backend, frontend]
+    ports:
+      - "127.0.0.1:8333:8333"
 
   orchestrator:
     environment:
@@ -73,6 +96,13 @@ services:
       AISM_ALLOWED_SIGNERS: /repo/conformance/tests/run/trust/allowed_signers
       AISM_KEYRING: /repo/conformance/tests/run/trust/keyring.yaml
       AISM_SIGNING_KEYS: /repo/conformance/tests/run/keys/manifest
+      AISM_AUDIT_S3_ENDPOINT: http://audit-worm:8333
+      AISM_AUDIT_S3_BUCKET: aism-audit
+      AISM_AUDIT_S3_PREFIX: aism/
+      AISM_AUDIT_S3_ACCESS_KEY: ${AISM_AUDIT_S3_ACCESS_KEY:?set AISM_AUDIT_S3_ACCESS_KEY in .env}
+      AISM_AUDIT_S3_SECRET_KEY: ${AISM_AUDIT_S3_SECRET_KEY:?set AISM_AUDIT_S3_SECRET_KEY in .env}
+      AISM_AUDIT_SIGNER: aism-audit@localhost
+      AISM_KEYRING_STATE: /audit/keyring-state.json
       AISM_POLICY_FAULT_INJECTION: ${AISM_POLICY_FAULT_INJECTION:-1}
       AISM_REPORT: ${AISM_REPORT:-/repo/conformance/tests/aism-report.json}
     volumes:

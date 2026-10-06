@@ -6,6 +6,7 @@
 |---|---|
 | Dokumentstatus | Entwurf 0.1 |
 | Datum | 05.10.2026 |
+| Nachtrag 06.10.2026 | Audit-Senken (`sinks`), Fail-closed-Warteschlange, signierte Prüfpunkte, optionaler RFC-3161-Zeuge (§4.10); Schlüsselring-Rolle `audit` (§6.2) |
 | Bezug | [`../AISM-Spezifikation.md`](../AISM-Spezifikation.md) (insb. §6.2, §8, §9), [`policy.schema.json`](policy.schema.json), [`policy.example.yaml`](policy.example.yaml) |
 | Normative Sprache | MUSS / DARF NICHT / SOLLTE / KANN gemäß RFC 2119 |
 
@@ -190,16 +191,23 @@ Referenz-Stack: Ist die Suche für den Request zulässig, bietet S3 dem Modell d
 
 | Feld | Bedeutung |
 |---|---|
-| `sink` | `file-jsonl` (Pfad), `syslog` oder `otlp-logs` (Endpunkt) |
-| `events` | zu protokollierende Ereignistypen (siehe Schema); neu in dieser Fassung: `tool.call.pending`, `tool.call.confirmed`, `tool.call.rejected` (Bestätigungsfluss) |
+| `sink` | lokale Hash-Kette: `file-jsonl` (Pfad). `syslog` und `otlp-logs` bleiben im Schema für den bisherigen Eintrag; das Referenz-Gateway schreibt die Kette weiter nach `sink.path` bzw. `AUDIT_LOG_PATH` |
+| `events` | zu protokollierende Ereignistypen (siehe Schema); darunter `tool.call.pending`, `tool.call.confirmed`, `tool.call.rejected` (Bestätigungsfluss) |
 | `plaintextPII` | immer `false`: Audit-Einträge enthalten Entitätstypen und Zähler, keine Klartextwerte (M-05) |
 | `storePayloadHash` | SHA-256 des maskierten Payloads, z. B. als Nachweis bei Cloud-Egress |
 | `retention.days` | Aufbewahrungsdauer; `basis` verweist auf die interne Vorgabe. Rechtliche Fristen legt dieses Format **nicht** fest. |
-| `integrity` | Hash-Verkettung der Einträge (S-02) |
+| `failClosed` | `true` nur zusammen mit einer `required`-Senke `s3-object-lock` im Modus `compliance`. Ist die begrenzte Warteschlange voll, werden keine Requests angenommen. Einträge werden nicht verworfen |
+| `queue.maxEntries` | Obergrenze der dauerhaften Warteschlange neben dem Log (`audit-queue.json`). Standard 1024 |
+| `sinks[]` | zusätzliche Senken. `s3-object-lock`: `endpoint` (http/https), `bucket`, `accessKeyRef`, `secretKeyRef`, `retentionDays`, optional `prefix`, `region`, `lockMode` (`compliance` oder `governance`). `syslog`: `endpoint` `tcp://` oder `udp://`. `required: false` macht die Senke optional. Doppelte `id` sind ungültig. `syslog` ist eine Weiterleitung und kein Integritätsanker |
+| `integrity.hashChain` / `algorithm` | Verkettung der lokalen Zeilen. Das Referenz-Gateway verkettet nur mit `sha256` |
+| `integrity.checkpoint` | `everyEntries`, `everySeconds`, `signer`. `signer` ist eine Identität im Schlüsselring mit Rolle `audit` (§6.2), nicht ein Policy-Schlüssel. Der private Schlüssel liegt in `AUDIT_SIGNING_KEY`. Das Referenz-Gateway schreibt immer einen Merkle-Baum (RFC 6962, SHA-256); `merkle: false` ändert das nicht |
+| `integrity.witness` | optional `{type: rfc3161, url, timeoutSeconds}`. Ein Ausfall blockiert den Request nicht |
 | `decisionLog` | Entscheidungsprotokoll mit Regel-Trace (siehe §5.3) |
 | `traceContext` | `w3c-traceparent`: Trace-ID aus dem W3C-Trace-Context-Header `traceparent` wird in jeden Eintrag übernommen (S-10) |
 
-Pflichtfelder eines Audit-Eintrags: `ts`, `request_id`, `trace_id` (falls vorhanden), `subject`, `event`, `policy` (`name`, `version`, `revision`, `digest`), `decision`, `rule_ids`.
+Pflichtfelder eines Audit-Eintrags: `ts`, `seq`, `prev_hash`, `request_id`, `trace_id` (falls vorhanden), `subject`, `event`, `policy` (`name`, `version`, `revision`, `digest`), `decision`, `rule_ids`. `seq` und `prev_hash` setzt das Gateway; sie stehen nicht in der Policy.
+
+Zugangsdaten der WORM-Senke sind `secretRef` (`env:` oder `file:`), nie Klartext in der Policy. Die Beispiel-Policy lässt die Senke `required: false` und den Prüfpunkt auskommentiert, damit ein Start ohne SeaweedFS und ohne `AUDIT_SIGNING_KEY` nicht mit 503 endet. K3 setzt `failClosed: true`, `required: true` und einen Prüfpunkt.
 
 ## 5. Bewertungssemantik
 
@@ -305,7 +313,7 @@ Die Einzelsignatur bleibt für Schwelle 1 (K1/K2) gültig. K3 verlangt ein Bünd
 
 ### 6.2 Schlüsselring, Rotation und Vier-Augen-Schwelle
 
-Der Schlüsselring (`keyring.yaml`, API `aism.trust/v1`, `kind: Keyring`) ist die Vertrauenswurzel, wenn Vier-Augen-Signaturen gebraucht werden. Er nennt für jeden Signierer Identität, öffentlichen `ssh-ed25519`-Schlüssel, Rollen (`policy`, `keyring`), Gültigkeitsfenster (`notBefore` einschließlich, `notAfter` ausschließlich) und `revoked`. `policyThreshold` ist die Mindestzahl **verschiedener** Identitäten für eine Policy (K3-Standard **2**; K1/K2 dürfen 1 setzen). `keyringThreshold` ist die Mindestzahl für eine Änderung des Rings selbst. Die kanonischen Bytes der Datei sind signiert; das Bündel liegt daneben (`keyring.yaml.sigs`, Namespace `aism-keyring`).
+Der Schlüsselring (`keyring.yaml`, API `aism.trust/v1`, `kind: Keyring`) ist die Vertrauenswurzel, wenn Vier-Augen-Signaturen gebraucht werden. Er nennt für jeden Signierer Identität, öffentlichen `ssh-ed25519`-Schlüssel, Rollen (`policy`, `keyring`, `audit`), Gültigkeitsfenster (`notBefore` einschließlich, `notAfter` ausschließlich) und `revoked`. `policyThreshold` ist die Mindestzahl **verschiedener** Identitäten für eine Policy (K3-Standard **2**; K1/K2 dürfen 1 setzen). `keyringThreshold` ist die Mindestzahl für eine Änderung des Rings selbst. Die Rolle `audit` signiert nur Audit-Prüfpunkte (Namespace `aism-audit`, §4.10) und zählt zu keiner der beiden Schwellen. Die kanonischen Bytes der Datei sind signiert; das Bündel liegt daneben (`keyring.yaml.sigs`, Namespace `aism-keyring`).
 
 | Regel | Festlegung |
 |---|---|
@@ -338,7 +346,7 @@ python3 tools/aism-policy-sign.py status --keyring config/policy-trust/keyring.y
 
 Jede einzelne SSHSIG im Bündel lässt sich mit `ssh-keygen -Y verify -n aism-policy` prüfen; die Schwelle, die Fenster und der Widerruf stehen nur im Schlüsselring. Eine Rotation (`add-key`, `rotate-key`, `revoke-key`) schreibt erst, wenn das Quorum des aktuellen Rings signiert hat.
 
-Grenzen: kein HSM und keine `sk-`-Schlüssel; kein Transparenzlog (zwei Quoren können widersprüchliche Nachfolger erzeugen, das Gateway behält den ersten akzeptierten); die Rollback-Marke liegt in der State-Datei auf dem Audit-Volume (wer Trust-Mount und State-Datei zugleich ersetzen kann, setzt die Wurzel zurück); die Genesis beim ersten Start ist der aus der Hand installierte Anker. Der Signierer bestätigt nur die Bytes.
+Grenzen: kein HSM und keine `sk-`-Schlüssel; kein Transparenzlog (zwei Quoren können widersprüchliche Nachfolger erzeugen, das Gateway behält den ersten akzeptierten); die Rollback-Marke liegt in der State-Datei auf dem Audit-Volume und, wenn eine Pflicht-WORM-Senke konfiguriert ist, zusätzlich inhaltsadressiert dort (wer Trust-Mount, State-Datei und Senke zugleich ersetzen kann, setzt die Wurzel zurück); die Genesis beim ersten Start ist der aus der Hand installierte Anker. Der Prüfer historischer Audit-Prüfpunkte wendet Fenster und Widerruf nicht an, weil der Ring keinen Widerrufszeitpunkt trägt. Der Signierer bestätigt nur die Bytes.
 
 ## 7. Optionale Abbildung auf OPA/Rego
 

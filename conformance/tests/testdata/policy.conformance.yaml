@@ -277,6 +277,27 @@ spec:
     retention:
       days: 180                  # Beispielwert; maßgeblich ist die interne Vorgabe
       basis: "Interne Aufbewahrungsrichtlinie (Verweis einzutragen)"
-    integrity: { hashChain: true, algorithm: sha256 }
+    failClosed: true
+    queue: { maxEntries: 2000 }
+    sinks:
+      - id: worm
+        type: s3-object-lock
+        required: true
+        endpoint: http://audit-worm:8333
+        bucket: aism-audit
+        region: us-east-1
+        accessKeyRef: env:AISM_AUDIT_S3_ACCESS_KEY
+        secretKeyRef: env:AISM_AUDIT_S3_SECRET_KEY
+        lockMode: compliance
+        retentionDays: 30
+        prefix: aism/
+    integrity:
+      hashChain: true
+      algorithm: sha256
+      checkpoint:
+        everyEntries: 25
+        everySeconds: 5
+        merkle: true
+        signer: aism-audit@localhost
     decisionLog: { enabled: true, includeRuleTrace: true }
     traceContext: w3c-traceparent

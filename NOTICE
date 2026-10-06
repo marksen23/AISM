@@ -17,6 +17,12 @@ The derived word list is shared under CC BY-SA 4.0 as a whole, including a short
 project-maintained supplement of technical tokens. That licence applies to the word-list
 file. It does not relicense the Apache-2.0 code in this repository.
 
+The optional audit WORM service is SeaweedFS (Apache-2.0, https://github.com/seaweedfs/seaweedfs),
+run as its own process. The gateway is not linked against it; it speaks S3 over HTTP with the
+Python standard library. MinIO and Garage were not used: both are AGPL-3.0. Pointing the same
+sink at an unmodified MinIO or Garage process does not link that code into AISM; the AGPL
+then applies to that separate program. No SeaweedFS image is copied into this repository.
+
 The optional NER cascade can load urchade/gliner_multi_pii-v1 (Apache-2.0; a fine-tune of
 urchade/gliner_multi-v2.1 by Urchade Zaratiana, https://huggingface.co/urchade/gliner_multi_pii-v1).
 The model weights are not bundled. The optional Python packages (gliner, torch, transformers,

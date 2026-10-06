@@ -19,6 +19,11 @@ Configuration via environment variables or pytest options (options win):
   AISM_SIGNING_KEYS                      manifest (identity, relative key path) for K3-12; test keys only
   AISM_POLICY_FAULT_INJECTION            1 = K3-08 temporarily replaces the mounted policy (restored afterwards)
   AISM_POLICY_RELOAD_WAIT                seconds to wait for a policy reload (K3-08), default 15
+  AISM_AUDIT_S3_ENDPOINT/BUCKET/PREFIX   WORM sink for K3-13..15 (prefix default aism/)
+  AISM_AUDIT_S3_ACCESS_KEY/SECRET_KEY    runtime S3 credentials (never committed)
+  AISM_AUDIT_SIGNER                      keyring identity with role audit
+  AISM_KEYRING_STATE                     keyring-state.json next to the audit log
+  AISM_AUDIT_FAULT_INJECTION             1 = K3-15 may plant {prefix}fault/block (removed afterwards)
   AISM_OIDC_TOKEN, AISM_OIDC_NEGATIVE_TOKENS   IdP tokens for K2-21 (valid / must be rejected)
   AISM_LOCAL_DOWN, AISM_CLOUD_MOCK_URL   cloud-fallback scenario only (scenario_cloud_fallback.py)
 """
@@ -36,7 +41,7 @@ import yaml
 
 HERE = pathlib.Path(__file__).resolve().parent
 REPO = HERE.parent.parent
-SUITE_VERSION = "0.2.1"
+SUITE_VERSION = "0.3.0"
 
 DEFAULT_DIRECT_URLS = ",".join([
     "http://127.0.0.1:8080/health",    # llama-server default port

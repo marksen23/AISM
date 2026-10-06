@@ -27,7 +27,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, Response, StreamingResponse
 
 from . import trace as tracectx
-from .audit import AuditLog, sha256_json
+from .audit import AuditLog, AuditUnavailable, config_from_policy, sha256_json
 from .auth import AuthError, Subject, authenticate, resolve_secret
 from .pii import DetectorUnavailable, Masker, StreamDemasker, Vault, build_detectors, demask
 from . import keyring as trust
@@ -42,6 +42,7 @@ SCHEMA_PATH = os.environ.get("POLICY_SCHEMA_PATH",
 UPSTREAM = os.environ.get("UPSTREAM_ORCHESTRATOR", "http://orchestrator:9000/v1").rstrip("/")
 INTERNAL_TOKEN = os.environ.get("INTERNAL_TOKEN", "")
 AUDIT_PATH_ENV = os.environ.get("AUDIT_LOG_PATH")  # overrides policy audit.sink.path
+AUDIT_SIGNING_KEY = os.environ.get("AUDIT_SIGNING_KEY") or None
 RELOAD_SECONDS = float(os.environ.get("POLICY_RELOAD_SECONDS", "5"))
 UPSTREAM_TIMEOUT = float(os.environ.get("UPSTREAM_TIMEOUT_SECONDS", "120"))
 CA_BUNDLE = os.environ.get("AISM_CA_BUNDLE")
@@ -108,9 +109,21 @@ def _entity_rank(pol: Policy) -> dict[str, int]:
 
 
 def _ensure_audit(pol: Policy | None):
-    if S.audit is None:
-        path = AUDIT_PATH_ENV or (pol.spec["audit"]["sink"].get("path") if pol else None) or "/audit/audit.jsonl"
+    path = AUDIT_PATH_ENV or (pol.spec["audit"]["sink"].get("path") if pol else None) or "/audit/audit.jsonl"
+    if S.audit is None or str(S.audit.path) != str(path):
+        if S.audit is not None:
+            S.audit.close()
         S.audit = AuditLog(path)
+    if pol is not None:
+        S.audit.configure(config_from_policy(
+            pol.spec, signing_key_path=AUDIT_SIGNING_KEY, keyring_doc=S.keyring_doc, resolve_secret=resolve_secret))
+
+
+def _backup_keyring_state() -> None:
+    if not KEYRING_STATE or S.audit is None or not os.path.isfile(KEYRING_STATE):
+        return
+    with open(KEYRING_STATE, "rb") as handle:
+        S.audit.note_keyring_state(handle.read())
 
 
 def audit(event: str, **fields):
@@ -179,16 +192,24 @@ def try_load(initial: bool = False) -> None:
         else:
             _drop_if_unauthorized()
         _ensure_audit(S.policy)
-        S.audit.write("policy.load_failed", S.policy.info() if S.policy else None, error=str(exc)[:500],
-                      kept_active=bool(S.policy))
+        try:
+            S.audit.write("policy.load_failed", S.policy.info() if S.policy else None, error=str(exc)[:500],
+                          kept_active=bool(S.policy))
+        except AuditUnavailable as audit_exc:
+            log.error("audit unavailable while recording policy.load_failed: %s", audit_exc)
+        _backup_keyring_state()
         log.error("policy load failed: %s", exc)
         return
     dets, errs = build_detectors(pol.spec, base_dir=os.path.dirname(os.path.abspath(POLICY_PATH)))
     S.policy, S.policy_error = pol, None
     S.masker, S.detector_errors = Masker(dets, _entity_rank(pol)), errs
     _ensure_audit(pol)
-    audit("policy.loaded", detectors=[d.id for d in dets], detector_errors=errs or None,
-          signature={k: v for k, v in pol.signature.items() if k != "ref"})
+    try:
+        audit("policy.loaded", detectors=[d.id for d in dets], detector_errors=errs or None,
+              signature={k: v for k, v in pol.signature.items() if k != "ref"})
+    except AuditUnavailable as audit_exc:
+        log.error("policy loaded but audit sink refused the entry: %s", audit_exc)
+    _backup_keyring_state()
     log.info("policy %s loaded (%s)", pol.info()["version"], pol.digest)
 
 
@@ -216,6 +237,8 @@ def ready() -> JSONResponse | None:
         return err(503, "policy_unavailable", "Keine gültige Policy geladen (fail-closed)")
     if S.detector_errors:
         return err(503, "pii_detector_unavailable", "PII-Erkennung nicht verfügbar (fail-closed)")
+    if S.audit is not None and not S.audit.accepting():
+        return err(503, "audit_unavailable", "Audit-Senke nicht verfügbar (fail-closed)")
     return None
 
 
@@ -284,6 +307,11 @@ public = FastAPI(title="AISM governance gateway (prototype)", docs_url=None, red
                  lifespan=lifespan)
 
 
+@public.exception_handler(AuditUnavailable)
+async def audit_unavailable_public(_request: Request, _exc: AuditUnavailable):
+    return err(503, "audit_unavailable", "Audit-Senke nicht verfügbar (fail-closed)")
+
+
 @public.get("/health")
 async def health():
     r = ready()
@@ -314,6 +342,14 @@ async def policy_info():
     if S.policy_error:
         info["last_load_error"] = S.policy_error[:300]   # a newer file was rejected; this policy stays active
     return info
+
+
+@public.get("/aism/v1/audit")
+async def audit_status():
+    """Queue depth, checkpoint head and sink errors. No audit entries and no secrets."""
+    if S.audit is None:
+        return err(503, "audit_unavailable", "Audit-Log ist nicht initialisiert")
+    return S.audit.status()
 
 
 async def _auth(request: Request, trace_id: str | None = None) -> Subject | JSONResponse:
@@ -691,6 +727,11 @@ async def confirmations_reject(cid: str, request: Request):
 # ── internal app (S3 only) ───────────────────────────────────────────
 
 internal = FastAPI(title="AISM gateway internal API", docs_url=None, redoc_url=None, openapi_url=None)
+
+
+@internal.exception_handler(AuditUnavailable)
+async def audit_unavailable_internal(_request: Request, _exc: AuditUnavailable):
+    return err(503, "audit_unavailable", "Audit-Senke nicht verfügbar (fail-closed)")
 INTERNAL_AUDIT_EVENTS = {"tool.call.allowed", "tool.call.denied", "tool.result", "rag.query", "egress.websearch",
                          "tool.call.pending", "tool.call.confirmed", "tool.call.rejected"}
 INTERNAL_AUDIT_FIELDS = {"tool", "decision", "reason", "args_sha256", "result_sha256", "collections", "chunks",

@@ -25,6 +25,7 @@ volumes:
   qdrant:
   n8n:
   audit:
+  audit-worm:
 
 services:
 
@@ -227,6 +228,22 @@ services:
     environment:
       SEARXNG_BASE_URL: http://searxng:8080/
       SEARXNG_SECRET: ${AISM_SEARXNG_SECRET:?set AISM_SEARXNG_SECRET in .env}
+
+  # Optional WORM audit sink (S3 Object Lock). Apache-2.0 SeaweedFS, not linked into the gateway.
+  # Start with: docker compose --profile audit-worm up -d
+  # The filer, admin and volume ports are not published. Object Lock is enforced on the S3 API;
+  # do not expose the filer (a delete there is outside the S3 lock). Credentials: .env.example.
+  audit-worm:
+    image: chrislusf/seaweedfs:4.48@sha256:4e61d15fd35994cb1e43e1e553dff106794841fd9a99ade2fc8c8bfce4d7872d
+    profiles: [audit-worm]
+    restart: unless-stopped
+    command: ["mini", "-dir=/data"]
+    environment:
+      AWS_ACCESS_KEY_ID: ${AISM_AUDIT_S3_ACCESS_KEY:-}
+      AWS_SECRET_ACCESS_KEY: ${AISM_AUDIT_S3_SECRET_KEY:-}
+    volumes:
+      - audit-worm:/data
+    networks: [backend]
 
   # Optional: Perplexica as an additional search UI. Its LLM provider MUST point at
   # http://governance-proxy:8000/v1. Enable with: docker compose --profile perplexica up -d

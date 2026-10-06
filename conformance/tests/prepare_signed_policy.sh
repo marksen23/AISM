@@ -20,24 +20,38 @@ PY="${PYTHON:-python3}"
 SIGN="$REPO/tools/aism-policy-sign.py"
 ID_A="aism-conformance-a@localhost"
 ID_B="aism-conformance-b@localhost"
+ID_AUDIT="aism-audit@localhost"
 NB="2020-01-01T00:00:00Z"
 NA="2100-01-01T00:00:00Z"
 KA="$OUT/keys/a"
 KB="$OUT/keys/b"
+KAUD="$OUT/keys/audit"
 mkdir -p "$OUT/policy" "$OUT/trust" "$OUT/keys"
 chmod 700 "$OUT/keys"
 [ -f "$KA/policy-signing.key" ] || "$PY" "$SIGN" keygen --out "$KA" --identity "$ID_A"
 [ -f "$KB/policy-signing.key" ] || "$PY" "$SIGN" keygen --out "$KB" --identity "$ID_B"
+[ -f "$KAUD/policy-signing.key" ] || "$PY" "$SIGN" keygen --out "$KAUD" --identity "$ID_AUDIT"
+cp "$KAUD/policy-signing.key" "$KAUD/audit-signing.key"
+# Test key only: the gateway user (uid 10001) must read it. Not a production mode.
+chmod 755 "$KAUD"
+chmod 644 "$KAUD/policy-signing.key" "$KAUD/audit-signing.key" "$KAUD/policy-signing.key.pub"
 member() {
   printf 'id=%s,pub=%s,roles=policy+keyring,not-before=%s,not-after=%s' "$1" "$2" "$NB" "$NA"
+}
+audit_member() {
+  printf 'id=%s,pub=%s,roles=audit,not-before=%s,not-after=%s' "$1" "$2" "$NB" "$NA"
 }
 if [ ! -f "$OUT/trust/keyring.yaml" ]; then
   "$PY" "$SIGN" init-keyring --out "$OUT/trust/keyring.yaml" \
     --keyring-threshold 2 --policy-threshold 2 \
     --member "$(member "$ID_A" "$KA/policy-signing.key.pub")" \
     --member "$(member "$ID_B" "$KB/policy-signing.key.pub")" \
+    --member "$(audit_member "$ID_AUDIT" "$KAUD/policy-signing.key.pub")" \
     --sign "$KA/policy-signing.key=$ID_A" \
     --sign "$KB/policy-signing.key=$ID_B"
+elif ! grep -q "$ID_AUDIT" "$OUT/trust/keyring.yaml"; then
+  echo "keyring $OUT/trust/keyring.yaml has no audit signer; delete it and rerun" >&2
+  exit 1
 fi
 cat "$KA/allowed_signers" "$KB/allowed_signers" > "$OUT/trust/allowed_signers"
 printf '%s\t%s\n%s\t%s\n' "$ID_A" "a/policy-signing.key" "$ID_B" "b/policy-signing.key" > "$OUT/keys/manifest"
