@@ -126,8 +126,8 @@ def parse_allowed_signers(text: str) -> list[tuple[list[str], bytes]]:
     return out
 
 
-def verify(message: bytes, armored: str, allowed_signers: str, principal: str | None,
-           namespace: str = NAMESPACE) -> SigInfo:
+def parse_sshsig(armored: str, namespace: str = NAMESPACE) -> tuple[bytes, bytes, str, str]:
+    """Structural parse. Returns (pubkey_blob, raw_signature, namespace, hash_alg)."""
     body = armored.strip()
     if not (body.startswith(ARMOR_BEGIN) and body.endswith(ARMOR_END)):
         raise SignatureError("keine SSH-Signatur (Armor fehlt)")
@@ -138,7 +138,8 @@ def verify(message: bytes, armored: str, allowed_signers: str, principal: str | 
     r = _Reader(blob)
     if r.raw(6) != MAGIC or r.u32() != 1:
         raise SignatureError("kein SSHSIG v1")
-    pub_blob, ns, _reserved, hash_alg, sig_blob = r.string(), r.string().decode(), r.string(), r.string().decode(), r.string()
+    pub_blob, ns, _reserved, hash_alg, sig_blob = (r.string(), r.string().decode(), r.string(),
+                                                   r.string().decode(), r.string())
     if ns != namespace:
         raise SignatureError(f"falscher Signatur-Namespace {ns!r} (erwartet {namespace!r})")
     if hash_alg not in HASHES:
@@ -146,7 +147,38 @@ def verify(message: bytes, armored: str, allowed_signers: str, principal: str | 
     sr = _Reader(sig_blob)
     if sr.string() != b"ssh-ed25519":
         raise SignatureError("nur ssh-ed25519-Signaturen werden unterstützt")
-    sig = sr.string()
+    return pub_blob, sr.string(), ns, hash_alg
+
+
+def verify_crypto(message: bytes, armored: str, namespace: str = NAMESPACE) -> tuple[bytes, str]:
+    """Verify an SSHSIG against the key embedded in it. Returns (pubkey_blob, fingerprint).
+
+    Does not consult a trust anchor: callers decide whether the key is allowed to count.
+    """
+    pub_blob, sig, ns, hash_alg = parse_sshsig(armored, namespace)
+    try:
+        _pub_from_blob(pub_blob).verify(sig, _signed_data(ns, hash_alg, message))
+    except InvalidSignature as exc:
+        raise SignatureError("Signatur ungültig (Inhalt verändert oder falscher Schlüssel)") from exc
+    return pub_blob, fingerprint(pub_blob)
+
+
+def openssh_ed25519_blob(text: str) -> bytes:
+    """Parse one OpenSSH public-key line (`ssh-ed25519 BASE64 [comment]`) into its wire blob."""
+    parts = text.split()
+    if len(parts) < 2 or parts[0] != "ssh-ed25519":
+        raise SignatureError("nur ssh-ed25519-Public-Keys werden unterstützt")
+    try:
+        blob = base64.b64decode(parts[1], validate=True)
+    except ValueError as exc:
+        raise SignatureError("Public Key ist kein base64") from exc
+    _pub_from_blob(blob)
+    return blob
+
+
+def verify(message: bytes, armored: str, allowed_signers: str, principal: str | None,
+           namespace: str = NAMESPACE) -> SigInfo:
+    pub_blob, sig, ns, hash_alg = parse_sshsig(armored, namespace)
     trusted = [p for p, b in parse_allowed_signers(allowed_signers) if b == pub_blob]
     if not trusted:
         raise SignatureError(f"Schlüssel {fingerprint(pub_blob)} nicht in allowed_signers (für {namespace})")

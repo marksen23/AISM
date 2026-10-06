@@ -38,7 +38,9 @@ Fehlende Voraussetzungen führen zu `skipped`, nicht zu `failed`. Übersprungene
 | `AISM_AUDIT_LOG` | – | – | Pfad zur Audit-JSONL-Datei |
 | `AISM_TIMEOUT` | – | `30` | HTTP-Timeout (s) |
 | `AISM_REPORT` | – | `aism-report.json` | Berichtsdatei; Badges daneben |
-| `AISM_ALLOWED_SIGNERS` | – | – | `allowed_signers`-Datei; AISM-K3-01 prüft damit die Signatur der Policy-Datei |
+| `AISM_ALLOWED_SIGNERS` | – | – | `allowed_signers`-Datei; AISM-K3-01 prüft damit eine Einzelsignatur (`.sig`) |
+| `AISM_KEYRING` | – | – | `keyring.yaml`; AISM-K3-01 prüft ein Bündel (`.sigs`), AISM-K3-12 rotiert den Ring |
+| `AISM_SIGNING_KEYS` | – | – | Manifest `Identität<TAB>relativer Pfad` der Test-Privatschlüssel für AISM-K3-12 |
 | `AISM_POLICY_FAULT_INJECTION` | – | aus | `1`: AISM-K3-08 ersetzt die gemountete Policy-Datei kurz durch unsignierte/manipulierte Fassungen und stellt sie wieder her |
 | `AISM_POLICY_RELOAD_WAIT` | – | `15` | Wartezeit (s) auf das Neuladen der Policy (K3-08) |
 | `AISM_OIDC_TOKEN` / `AISM_OIDC_NEGATIVE_TOKENS` | – | – | gültiges IdP-Token bzw. kommagetrennte Tokens, die abgelehnt werden müssen (AISM-K2-21) |

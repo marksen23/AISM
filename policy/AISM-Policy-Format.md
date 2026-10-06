@@ -70,9 +70,9 @@ spec:
 | `metadata.owner` | ja | Verantwortliche Stelle |
 | `metadata.effectiveFrom` | nein | Frühester Gültigkeitszeitpunkt (RFC 3339) |
 | `metadata.changeRef` | nein | Verweis auf den Merge-/Pull-Request |
-| `metadata.signature` | nein (K3: ja) | `method`, `ref`, `signer`. **`ssh-sig`** (vom Referenz-Gateway geprüft, §6.1): abgesetzte SSHSIG-Signatur (Ed25519, Namespace `aism-policy`) über die Policy-Datei; `ref` = Dateiname der Signatur im selben Verzeichnis (z. B. `policy.yaml.sig`), `signer` = Prinzipal aus `allowed_signers` (Pflicht). `git-tag-gpg`, `git-tag-ssh`, `sigstore-cosign` sind nur deklarativ; das Referenz-Gateway verifiziert sie nicht und lehnt sie bei Signaturpflicht ab. |
+| `metadata.signature` | nein (K3: ja) | `method`, `ref`, bei einer Einzelsignatur `signer`, bei einem Bündel `threshold`. **`ssh-sig`** (vom Referenz-Gateway geprüft, §6.1–§6.2): abgesetzte SSHSIG-Signatur (Ed25519, Namespace `aism-policy`) über die exakten Bytes der Policy-Datei. `ref` endet auf `.sig` (eine Signatur, `signer` Pflicht) oder `.sigs` (Bündel, `threshold` Pflicht). `git-tag-gpg`, `git-tag-ssh`, `sigstore-cosign` sind nur deklarativ; das Referenz-Gateway verifiziert sie nicht und lehnt sie bei Signaturpflicht ab. |
 
-Das Gateway MUSS `name`, `version`, `revision` und den SHA-256-Digest der geladenen Datei in jedem Audit-Eintrag mitschreiben (Ereignis `policy.loaded` beim Laden).
+Das Gateway MUSS `name`, `version`, `revision`, den SHA-256-Digest und die Identitäten der gezählten Signierer in jedem Audit-Eintrag mitschreiben (Ereignis `policy.loaded` beim Laden; die Identitäten stehen zusätzlich im Feld `signature`).
 
 ### 4.2 Bewertungsgrundsätze (`spec.defaults`)
 
@@ -255,8 +255,8 @@ Das Gateway SOLLTE zusätzlich einen Dry-Run-Modus anbieten (AISM-intern, z. B. 
    - relevante Tests der Konformitätssuite ([`../conformance/AISM-Konformitaet.md`](../conformance/AISM-Konformitaet.md)).
 4. **Review**: mindestens eine Freigabe durch einen Code-Owner; Änderungen an `routing`, `tools` mit `access: write` oder `audit` SOLLTEN zwei Freigaben erfordern.
 5. **Versionierung**: `metadata.version` wird gemäß §4.1 erhöht; CI setzt `metadata.revision`.
-6. **Signatur** (K3): nach dem Merge signiert eine berechtigte Stelle die Datei (§6.1); das Gateway lädt bei Signaturpflicht nur Policies mit gültiger Signatur.
-7. **Rollout**: Das Gateway lädt die neue Datei, prüft zuerst die Signatur, dann Schema und Semantik, und protokolliert `policy.loaded` mit Version, Revision, Digest und Signaturinformation. Bei Fehlern (auch: unsigniert, Signatur ungültig, unbekannter Schlüssel, Rollback) bleibt die vorherige gültige Version aktiv, und `policy.load_failed` wird protokolliert (`kept_active: true`). Ohne gültige Policy beim Start: fail-closed (alle Requests `503`).
+6. **Signatur** (K3): nach dem Merge signieren mindestens so viele verschiedene Berechtigte die Datei, wie die Schwelle des Schlüsselrings verlangt (§6.1, §6.2; K3-Standard 2). Das Gateway lädt bei Signaturpflicht nur Policies, die diese Schwelle erreichen.
+7. **Rollout**: Das Gateway lädt die neue Datei, prüft zuerst die Signatur, dann Schema und Semantik, und protokolliert `policy.loaded` mit Version, Revision, Digest, Signierer-Identitäten und Signaturinformation. Bei Fehlern (auch: unsigniert, Signatur ungültig, Schwelle verfehlt, unbekannter, abgelaufener oder widerrufener Schlüssel, Rollback der Policy oder des Schlüsselrings) bleibt die vorherige gültige Version aktiv, und `policy.load_failed` wird protokolliert (`kept_active: true`). Widerruft ein neuer Schlüsselring die Signierer der aktiven Policy, verwirft das Gateway sie (fail-closed). Ohne gültige Policy beim Start: alle Requests `503`.
 8. **Rollback**: Revert-Commit plus neuer Patch-Release mit **neuem `effectiveFrom`** (≥ dem der aktiven Policy); kein manuelles Editieren im laufenden Container. Das Gateway lehnt signierte Policies ab, deren `effectiveFrom` vor dem der aktiven Policy liegt (Schutz gegen das Wiedereinspielen alter, gültig signierter Versionen).
 
 ### 6.1 Signatur und Verifikation (`ssh-sig`)
@@ -273,10 +273,10 @@ bleibt als deklarative Methode möglich, wird aber vom Referenz-Gateway nicht ge
 | Namespace | `aism-policy` (verhindert, dass z. B. eine Git- oder Datei-Signatur desselben Schlüssels als Policy-Signatur gilt) |
 | Hash | `sha512` (Standard von `ssh-keygen`), `sha256` wird akzeptiert |
 | Schlüssel | nur `ssh-ed25519` (keine RSA-/ECDSA-/`sk-`-Schlüssel, keine Zertifikate) |
-| Vertrauensanker | OpenSSH-`allowed_signers`-Datei, **nicht** Teil der Policy, sondern Gateway-Konfiguration (`POLICY_ALLOWED_SIGNERS`, getrennt read-only gemountet). Zeilen mit `namespaces="…"` gelten nur, wenn `aism-policy` enthalten ist; `cert-authority`, `valid-after/-before` werden nicht ausgewertet (Zeile wird ignoriert). |
-| Signaturpflicht | `POLICY_REQUIRE_SIGNATURE=true` (Compose-Standard). Ohne Pflicht prüft das Gateway eine deklarierte Signatur trotzdem, wenn ein Vertrauensanker konfiguriert ist. |
-| Reihenfolge | Signatur → Schema → Semantik → Rollback-Prüfung; erst dann Aktivierung |
-| Status | `GET /aism/v1/policy` liefert `revision`, `signature.verified`, `signature.required`, `signer`, Schlüssel-Fingerprint und ggf. `last_load_error` |
+| Vertrauensanker | Entweder eine OpenSSH-`allowed_signers`-Datei (nur Einzelsignatur, Schwelle 1; `valid-after`/`valid-before` und `cert-authority` werden ignoriert) oder ein Schlüsselring (§6.2). Beides ist Gateway-Konfiguration, nicht Teil der Policy, und wird getrennt read-only gemountet. Liegt `keyring.yaml` neben `allowed_signers`, gilt der Schlüsselring; die Policy kann seine Schwelle nicht senken. |
+| Signaturpflicht | `POLICY_REQUIRE_SIGNATURE=true` (Compose-Standard, sobald ein Vertrauensanker gesetzt oder erkannt ist). Ohne Pflicht prüft das Gateway eine deklarierte Signatur trotzdem, wenn ein Anker konfiguriert ist. |
+| Reihenfolge | Schlüsselring → Signatur → Schema → Semantik → Rollback-Prüfung; erst dann Aktivierung |
+| Status | `GET /aism/v1/policy` liefert `revision`, `digest`, `signature.verified`, `signature.required`, `signature.signers` (Identitäten), `signature.threshold`, Fingerprints und ggf. `keyring.version` sowie `last_load_error` |
 
 Werkzeug: [`../tools/aism-policy-sign.py`](../tools/aism-policy-sign.py)
 
@@ -301,9 +301,44 @@ beobachtet beide Dateien und lädt nach jeder Änderung neu – ein Zwischenzust
 alte Version bleibt aktiv. Policy und Vertrauensanker werden als **Verzeichnis** gemountet, damit
 atomare Ersetzungen sichtbar werden (Einzeldatei-Bind-Mounts sehen sie nicht).
 
-Grenzen: keine Schlüsselrotation/-sperrung außer durch Ändern von `allowed_signers`; keine
-Mehrfachsignatur (Vier-Augen-Prinzip erfolgt im Git-Review, nicht kryptografisch); der Signierer
-bestätigt nur „diese Bytes“, nicht die inhaltliche Prüfung.
+Die Einzelsignatur bleibt für Schwelle 1 (K1/K2) gültig. K3 verlangt ein Bündel und einen Schlüsselring (§6.2). Der Signierer bestätigt nur „diese Bytes“, nicht die inhaltliche Prüfung.
+
+### 6.2 Schlüsselring, Rotation und Vier-Augen-Schwelle
+
+Der Schlüsselring (`keyring.yaml`, API `aism.trust/v1`, `kind: Keyring`) ist die Vertrauenswurzel, wenn Vier-Augen-Signaturen gebraucht werden. Er nennt für jeden Signierer Identität, öffentlichen `ssh-ed25519`-Schlüssel, Rollen (`policy`, `keyring`), Gültigkeitsfenster (`notBefore` einschließlich, `notAfter` ausschließlich) und `revoked`. `policyThreshold` ist die Mindestzahl **verschiedener** Identitäten für eine Policy (K3-Standard **2**; K1/K2 dürfen 1 setzen). `keyringThreshold` ist die Mindestzahl für eine Änderung des Rings selbst. Die kanonischen Bytes der Datei sind signiert; das Bündel liegt daneben (`keyring.yaml.sigs`, Namespace `aism-keyring`).
+
+| Regel | Festlegung |
+|---|---|
+| Genesis | Version 1, `prev` leer. Beim ersten Start akzeptiert das Gateway nur diese Genesis und speichert sie (`POLICY_KEYRING_STATE`, sonst neben dem Audit-Log). |
+| Nachfolger | Version = Vorgänger + 1, `prev` = SHA-256 der Vorgänger-Bytes. Gezählt werden nur Schlüssel, die **im Vorgänger** die Rolle `keyring` haben und zum Prüfzeitpunkt gültig sind. Ein Schlüssel, der nur im neuen Ring steht, zählt nicht: niemand kann sich allein eintragen oder andere allein entfernen. |
+| Rollback | Eine Version kleiner oder gleich der gespeicherten, oder ein anderer Digest derselben Version, wird abgelehnt. Die gespeicherte Wurzel bleibt aktiv. |
+| Überlappung | Rotation nimmt einen neuen Schlüssel auf, solange der alte noch gültig ist (`rotate-key` verkürzt `notAfter` des alten Schlüssels nur so weit, dass beide zum Rotationszeitpunkt gültig sind). Danach kann der alte Schlüssel widerrufen werden. Ein Widerruf, der weniger gültige Schlüssel übrig ließe als die Schwelle, wird abgelehnt. |
+| Policy-Bündel | `policy.yaml.sigs` (`kind: DetachedSignatures`) bindet jede SSHSIG an `subject.revision` und `subject.digest` (SHA-256 der Policy-Bytes). Dieselbe Identität zählt einmal. Abgelaufene, noch nicht gültige, widerrufene und unbekannte Schlüssel zählen nicht. `metadata.signature.threshold` darf die Ring-Schwelle nur erhöhen. |
+| Audit | `policy.loaded` schreibt die gezählten Identitäten und Fingerprints in die Hash-Kette, keine Schlüsseldateien und keine Passphrasen. |
+| Uhr | Gültigkeit richtet sich nach der Uhr des Gateways. |
+
+```bash
+# zwei Schlüssel außerhalb des Repositorys; private Schlüssel nie committen
+python3 tools/aism-policy-sign.py keygen --out ~/.aism-keys/alice --identity alice@example.com
+python3 tools/aism-policy-sign.py keygen --out ~/.aism-keys/bob --identity bob@example.com
+NB=2026-01-01T00:00:00Z; NA=2028-01-01T00:00:00Z
+python3 tools/aism-policy-sign.py init-keyring --out config/policy-trust/keyring.yaml \
+    --keyring-threshold 2 --policy-threshold 2 \
+    --member id=alice@example.com,pub=~/.aism-keys/alice/policy-signing.key.pub,roles=policy+keyring,not-before=$NB,not-after=$NA \
+    --member id=bob@example.com,pub=~/.aism-keys/bob/policy-signing.key.pub,roles=policy+keyring,not-before=$NB,not-after=$NA \
+    --sign ~/.aism-keys/alice/policy-signing.key=alice@example.com \
+    --sign ~/.aism-keys/bob/policy-signing.key=bob@example.com
+python3 tools/aism-policy-sign.py sign --keyring config/policy-trust/keyring.yaml \
+    --key ~/.aism-keys/alice/policy-signing.key --identity alice@example.com policy/policy.yaml
+python3 tools/aism-policy-sign.py sign --keyring config/policy-trust/keyring.yaml \
+    --key ~/.aism-keys/bob/policy-signing.key --identity bob@example.com policy/policy.yaml
+python3 tools/aism-policy-sign.py verify --keyring config/policy-trust/keyring.yaml policy/policy.yaml
+python3 tools/aism-policy-sign.py status --keyring config/policy-trust/keyring.yaml --policy policy/policy.yaml
+```
+
+Jede einzelne SSHSIG im Bündel lässt sich mit `ssh-keygen -Y verify -n aism-policy` prüfen; die Schwelle, die Fenster und der Widerruf stehen nur im Schlüsselring. Eine Rotation (`add-key`, `rotate-key`, `revoke-key`) schreibt erst, wenn das Quorum des aktuellen Rings signiert hat.
+
+Grenzen: kein HSM und keine `sk-`-Schlüssel; kein Transparenzlog (zwei Quoren können widersprüchliche Nachfolger erzeugen, das Gateway behält den ersten akzeptierten); die Rollback-Marke liegt in der State-Datei auf dem Audit-Volume (wer Trust-Mount und State-Datei zugleich ersetzen kann, setzt die Wurzel zurück); die Genesis beim ersten Start ist der aus der Hand installierte Anker. Der Signierer bestätigt nur die Bytes.
 
 ## 7. Optionale Abbildung auf OPA/Rego
 

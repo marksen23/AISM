@@ -274,14 +274,14 @@ docker compose config -q && docker compose up -d --build
 
 ### Policy signing
 
-The gateway only activates a policy whose detached signature `policy.yaml.sig` verifies against a trusted key in `config/policy-trust/allowed_signers` (env `POLICY_ALLOWED_SIGNERS`, enforced unless `AISM_POLICY_REQUIRE_SIGNATURE=false`). An unsigned, tampered or older (`effectiveFrom`) policy is rejected, the previous policy stays active, and the audit log records `policy.load_failed`. The format is OpenSSH **SSHSIG with Ed25519** (namespace `aism-policy`). It works offline, needs no infrastructure, and anyone can verify it independently:
+The gateway only activates a policy whose detached signature verifies. A single file `policy.yaml.sig` is checked against `config/policy-trust/allowed_signers` (env `POLICY_ALLOWED_SIGNERS`). For K3, a bundle `policy.yaml.sigs` is checked against a quorum keyring `config/policy-trust/keyring.yaml` (two distinct valid signers by default; one key cannot rotate the ring). An unsigned, tampered, under-threshold or older (`effectiveFrom`) policy is rejected, the previous policy stays active, and the audit log records `policy.load_failed` plus the signer identities. The format is OpenSSH **SSHSIG with Ed25519** (namespace `aism-policy`). It works offline, needs no infrastructure, and anyone can verify each signature independently:
 
 ```bash
 ssh-keygen -Y verify -f config/policy-trust/allowed_signers -I you@example.org -n aism-policy \
   -s policy/policy.yaml.sig < policy/policy.yaml
 ```
 
-`tools/aism-policy-sign.py sign` sets `metadata.revision` (Git commit, or a content hash outside Git) and `metadata.signature`, then writes the signature. The policy volume is mounted as a directory (`./policy:/etc/aism/policy:ro`), so the policy and its signature are always replaced together. Keep the private key off the server, for example on the admin workstation or a hardware token (`ssh-keygen -t ed25519-sk`); it must never be committed. Details: [`policy/AISM-Policy-Format.md`](policy/AISM-Policy-Format.md) §6.1, [`config/policy-trust/README.md`](config/policy-trust/README.md).
+`tools/aism-policy-sign.py sign` sets `metadata.revision` (Git commit, or a content hash outside Git) and `metadata.signature`, then writes the signature. With `--keyring` it appends to `policy.yaml.sigs` without rewriting the policy, so the second signer does not invalidate the first. The policy volume is mounted as a directory (`./policy:/etc/aism/policy:ro`), so the policy and its signatures are always replaced together. Keep private keys off the server and out of the repository. The quick start above is the one-signature anchor (threshold 1). K3 uses `init-keyring` / `rotate-key` / `revoke-key`; details and the threat-model limits (no HSM, no transparency log) are in [`policy/AISM-Policy-Format.md`](policy/AISM-Policy-Format.md) §6.1–§6.2 and [`config/policy-trust/README.md`](config/policy-trust/README.md).
 
 ### Reproducible builds of the local images
 
@@ -379,7 +379,8 @@ services:
       - "127.0.0.1:8000:8000"     # OpenAI-compatible API for local API clients / conformance tests
     environment:
       POLICY_PATH: /etc/aism/policy/policy.yaml
-      # K3-01/K3-08: only policies with a valid SSHSIG signature by a key in allowed_signers are loaded
+      # K3-01/K3-08/K3-11: refuse unsigned policies. keyring.yaml next to allowed_signers, when present,
+      # is the quorum trust anchor (threshold, validity, revocation); otherwise the single-sig file is.
       POLICY_REQUIRE_SIGNATURE: ${AISM_POLICY_REQUIRE_SIGNATURE:-true}
       POLICY_ALLOWED_SIGNERS: /etc/aism/trust/allowed_signers
       LISTEN_PUBLIC: 0.0.0.0:8000         # /v1/*, /health, /aism/v1/policy
@@ -392,7 +393,7 @@ services:
       AUDIT_LOG_PATH: /audit/audit.jsonl
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
     volumes:
-      # directory mount (not a single-file mount): atomic replacements of policy.yaml / policy.yaml.sig
+      # directory mount (not a single-file mount): atomic replacements of policy.yaml / policy.yaml.sig / policy.yaml.sigs
       # are visible to the hot reload
       - ./policy:/etc/aism/policy:ro
       - ./config/policy-trust:/etc/aism/trust:ro   # trust anchor, separate from the policy repo
@@ -567,7 +568,7 @@ None of the following exists yet; it is listed so that contributors know the int
 
 ## 9. Roadmap
 
-- **Governance gateway** (prototype in [`gateway/`](gateway/)): test with a real IdP (Keycloak/Entra ID); signing-key rotation and multi-signature (four-eyes) policies; name detection on real text (default held-out v2 masked recall 0.703; an optional cascade reaches 0.969 on v2 and 1.000 on frozen v3, GLiNER-only reaches 1.00, [`conformance/pii-eval/`](conformance/pii-eval/README.md)); OpenTelemetry export, hardening and load tests.
+- **Governance gateway** (prototype in [`gateway/`](gateway/)): test with a real IdP (Keycloak/Entra ID); name detection on real text (default held-out v2 masked recall 0.703; an optional cascade reaches 0.969 on v2 and 1.000 on frozen v3, GLiNER-only reaches 1.00, [`conformance/pii-eval/`](conformance/pii-eval/README.md)); OpenTelemetry export, hardening and load tests. Signing-key rotation and four-eyes policy signatures are in the keyring (§6.2 of the policy format); an HSM and a transparency log are not.
 - **Orchestrator** (prototype in [`orchestrator/`](orchestrator/)): persistent store for pending confirmations and a UI for them; per-query web-search policy evaluation; RAG ingest; MCP execution.
 - **Conformance suite**: CI now runs it against the mock stack. Still open: the real components (Open WebUI, llama.cpp on GPU, n8n, SearXNG), the remaining manual checks (K2-14, K3-06 model checksums), and a public test report format for third-party implementations.
 - **Specification**: public comment period towards AISM 1.0; mapping of the criteria to common control catalogues.

@@ -1,6 +1,7 @@
 """Policy loading: JSON-Schema validation, semantic checks, digest (Policy-Format §4, §6)."""
 from __future__ import annotations
 
+import datetime as dt
 import hashlib
 import json
 import pathlib
@@ -11,6 +12,7 @@ from typing import Any
 import jsonschema
 import yaml
 
+from . import keyring as trust
 from . import policysig
 
 
@@ -38,7 +40,8 @@ class Policy:
     def info(self) -> dict:
         m = self.meta
         return {"name": m["name"], "version": m["version"], "revision": m.get("revision"), "digest": self.digest,
-                "signature_verified": bool(self.signature.get("verified"))}
+                "signature_verified": bool(self.signature.get("verified")),
+                "signers": list(self.signature.get("signers") or [])}
 
     # ── lookups ──────────────────────────────────────────────────────
     def providers(self) -> list[dict]:
@@ -165,15 +168,19 @@ def _semantic_checks(p: dict) -> list[str]:
 class SignatureConfig:
     """Gateway-side trust configuration (NOT part of the policy, so a policy cannot weaken it)."""
     required: bool = False
-    allowed_signers: str | None = None   # path to an OpenSSH allowed_signers file
+    allowed_signers: str | None = None   # path to an OpenSSH allowed_signers file (single-signature deployments)
+    keyring: trust.KeyringDoc | None = None
+    now: dt.datetime | None = None
 
 
-def _check_signature(raw: dict, data: bytes, path: pathlib.Path, sc: SignatureConfig) -> dict:
+def _signature_block(raw: dict) -> tuple[dict, dict]:
     meta = raw.get("metadata") if isinstance(raw, dict) else None
     sig = (meta or {}).get("signature") if isinstance(meta, dict) else None
-    if not sc.required and not (sc.allowed_signers and sig):
-        return {"verified": False, "required": False}
-    if not isinstance(sig, dict):
+    return meta if isinstance(meta, dict) else {}, sig if isinstance(sig, dict) else {}
+
+
+def _require_shape(meta: dict, sig: dict, sc: SignatureConfig) -> str:
+    if not isinstance(sig, dict) or not sig:
         raise PolicyError("Signatur erforderlich, aber metadata.signature fehlt (unsignierte Policy abgelehnt)")
     if sig.get("method") != "ssh-sig":
         raise PolicyError(f"Signaturmethode {sig.get('method')!r} wird vom Gateway nicht verifiziert (erwartet ssh-sig)")
@@ -182,10 +189,50 @@ def _check_signature(raw: dict, data: bytes, path: pathlib.Path, sc: SignatureCo
     ref = str(sig.get("ref", ""))
     if not ref or "/" in ref or "\\" in ref or ref.startswith("."):
         raise PolicyError("metadata.signature.ref muss ein Dateiname im Policy-Verzeichnis sein")
-    if not sc.allowed_signers:
-        raise PolicyError("Signatur erforderlich, aber kein Vertrauensanker (POLICY_ALLOWED_SIGNERS) konfiguriert")
+    if sc.keyring is None and not sc.allowed_signers:
+        raise PolicyError("Signatur erforderlich, aber kein Vertrauensanker (POLICY_KEYRING oder POLICY_ALLOWED_SIGNERS) konfiguriert")
+    return ref
+
+
+def _result(sc: SignatureConfig, verification: trust.PolicyVerification, ref: str, doc: trust.KeyringDoc) -> dict:
+    return {"verified": True, "required": sc.required, "method": "ssh-sig", "signers": list(verification.signers),
+            "threshold": verification.threshold, "fingerprints": verification.fingerprints,
+            "namespace": verification.namespace, "keyring_version": doc.version, "keyring_digest": doc.digest,
+            "ref": ref}
+
+
+def _check_with_keyring(meta: dict, sig: dict, data: bytes, path: pathlib.Path, sc: SignatureConfig) -> dict:
+    ref = _require_shape(meta, sig, sc)
+    doc = sc.keyring
+    assert doc is not None
     try:
-        anchors = pathlib.Path(sc.allowed_signers).read_text(encoding="utf-8")
+        payload = (path.parent / ref).read_text(encoding="utf-8")
+    except OSError as exc:
+        raise PolicyError(f"Signatur nicht lesbar: {exc}") from exc
+    revision = str(meta["revision"])
+    raw_th = sig.get("threshold")
+    meta_th = int(raw_th) if raw_th is not None else None
+    try:
+        if ref.endswith(".sigs"):
+            bundle = payload
+        else:
+            bundle = trust.single_sig_bundle(data, payload, str(sig.get("signer") or ""), revision)
+        verification = trust.verify_policy(data, bundle, doc, revision, meta_th, sc.now)
+    except (trust.KeyringError, policysig.SignatureError, ValueError) as exc:
+        raise PolicyError(f"Signaturprüfung fehlgeschlagen: {exc}") from exc
+    return _result(sc, verification, ref, doc)
+
+
+def _check_signature(raw: dict, data: bytes, path: pathlib.Path, sc: SignatureConfig) -> dict:
+    meta, sig = _signature_block(raw)
+    anchored = bool(sc.allowed_signers) or sc.keyring is not None
+    if not sc.required and not (anchored and sig):
+        return {"verified": False, "required": False}
+    if sc.keyring is not None:
+        return _check_with_keyring(meta, sig, data, path, sc)
+    ref = _require_shape(meta, sig, sc)
+    try:
+        anchors = pathlib.Path(sc.allowed_signers or "").read_text(encoding="utf-8")
         armored = (path.parent / ref).read_text(encoding="utf-8")
     except OSError as exc:
         raise PolicyError(f"Signatur/Vertrauensanker nicht lesbar: {exc}") from exc
@@ -194,7 +241,8 @@ def _check_signature(raw: dict, data: bytes, path: pathlib.Path, sc: SignatureCo
     except policysig.SignatureError as exc:
         raise PolicyError(f"Signaturprüfung fehlgeschlagen: {exc}") from exc
     return {"verified": True, "required": sc.required, "method": "ssh-sig", "signer": info.principal,
-            "key_fingerprint": info.key_fingerprint, "namespace": info.namespace, "ref": ref}
+            "signers": [info.principal], "threshold": 1, "key_fingerprint": info.key_fingerprint,
+            "fingerprints": {info.principal: info.key_fingerprint}, "namespace": info.namespace, "ref": ref}
 
 
 def load_policy(path: str | pathlib.Path, schema_path: str | pathlib.Path,

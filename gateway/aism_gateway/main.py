@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import datetime as dt
 import hmac
 import json
 import logging
@@ -29,6 +30,7 @@ from . import trace as tracectx
 from .audit import AuditLog, sha256_json
 from .auth import AuthError, Subject, authenticate, resolve_secret
 from .pii import DetectorUnavailable, Masker, StreamDemasker, Vault, build_detectors, demask
+from . import keyring as trust
 from .policy import (Policy, PolicyError, SignatureConfig, allowed_collections, allowed_tools, data_class,
                      load_policy, match_route, web_search_allowed)
 
@@ -43,11 +45,26 @@ AUDIT_PATH_ENV = os.environ.get("AUDIT_LOG_PATH")  # overrides policy audit.sink
 RELOAD_SECONDS = float(os.environ.get("POLICY_RELOAD_SECONDS", "5"))
 UPSTREAM_TIMEOUT = float(os.environ.get("UPSTREAM_TIMEOUT_SECONDS", "120"))
 CA_BUNDLE = os.environ.get("AISM_CA_BUNDLE")
-# Policy signature (K3-01/K3-08). Trust config lives in the gateway environment, not in the policy.
+# Policy signature (K3-01/K3-08/K3-11). Trust config lives in the gateway environment, not in the policy.
+# A keyring.yaml next to allowed_signers is used when POLICY_KEYRING is unset (four-eyes deployments).
 ALLOWED_SIGNERS = os.environ.get("POLICY_ALLOWED_SIGNERS") or None
+_explicit_ring = os.environ.get("POLICY_KEYRING") or None
+if _explicit_ring:
+    KEYRING_PATH = _explicit_ring
+elif ALLOWED_SIGNERS and os.path.isfile(os.path.join(os.path.dirname(ALLOWED_SIGNERS), "keyring.yaml")):
+    KEYRING_PATH = os.path.join(os.path.dirname(ALLOWED_SIGNERS), "keyring.yaml")
+else:
+    KEYRING_PATH = None
 _req = os.environ.get("POLICY_REQUIRE_SIGNATURE")
-REQUIRE_SIGNATURE = (_req.lower() in ("1", "true", "yes")) if _req else bool(ALLOWED_SIGNERS)
+REQUIRE_SIGNATURE = (_req.lower() in ("1", "true", "yes")) if _req else bool(ALLOWED_SIGNERS or KEYRING_PATH)
 SIG_CFG = SignatureConfig(required=REQUIRE_SIGNATURE, allowed_signers=ALLOWED_SIGNERS)
+_state_env = os.environ.get("POLICY_KEYRING_STATE") or None
+if _state_env:
+    KEYRING_STATE = _state_env
+elif KEYRING_PATH and AUDIT_PATH_ENV:
+    KEYRING_STATE = str(os.path.join(os.path.dirname(AUDIT_PATH_ENV), "keyring-state.json"))
+else:
+    KEYRING_STATE = None
 CTX_TTL = 600
 INTERNAL_HEADERS_PREFIX = "x-aism-"
 
@@ -69,6 +86,7 @@ class ReqCtx:
 class State:
     policy: Policy | None = None
     policy_error: str | None = None
+    keyring_doc: trust.KeyringDoc | None = None
     attempted_mtime: tuple | None = None
     masker: Masker | None = None
     detector_errors: list[str] = []
@@ -116,22 +134,50 @@ def policy_files_state() -> tuple:
     if ALLOWED_SIGNERS:
         with contextlib.suppress(OSError):
             out.append(("@anchor", os.stat(ALLOWED_SIGNERS).st_mtime))
+    if KEYRING_PATH:
+        for label, name in (("@keyring", KEYRING_PATH), ("@keyring-sigs", KEYRING_PATH + ".sigs")):
+            with contextlib.suppress(OSError):
+                out.append((label, os.stat(name).st_mtime))
     return tuple(out)
+
+
+def _signature_config() -> SignatureConfig:
+    """Load the keyring (genesis, or a quorum-signed successor of the stored ring) before the policy."""
+    if not KEYRING_PATH:
+        return SIG_CFG
+    doc = trust.accept_path(KEYRING_PATH, KEYRING_STATE, previous=S.keyring_doc, now=SIG_CFG.now)
+    S.keyring_doc = doc
+    return SignatureConfig(required=SIG_CFG.required, allowed_signers=SIG_CFG.allowed_signers, keyring=doc,
+                           now=SIG_CFG.now)
+
+
+def _drop_if_unauthorized() -> None:
+    """A keyring update can revoke the signers of the policy that is still in memory."""
+    doc = S.keyring_doc
+    if S.policy is None or doc is None:
+        return
+    if not trust.signers_still_authorized(S.policy.signature, doc, SIG_CFG.now):
+        log.error("active policy dropped: signers no longer meet the keyring (fail-closed)")
+        S.policy = None
 
 
 def try_load(initial: bool = False) -> None:
     if initial:
         S.attempted_mtime = policy_files_state()
         if not REQUIRE_SIGNATURE:
-            log.warning("policy signature NOT required (POLICY_REQUIRE_SIGNATURE/POLICY_ALLOWED_SIGNERS unset) – "
+            log.warning("policy signature NOT required "
+                        "(POLICY_REQUIRE_SIGNATURE/POLICY_ALLOWED_SIGNERS/POLICY_KEYRING unset) – "
                         "not sufficient for AISM K3")
     try:
-        pol = load_policy(POLICY_PATH, SCHEMA_PATH, SIG_CFG, current=S.policy)
-    except PolicyError as exc:
-        # fail-closed on start; on reload keep the last valid policy (Policy-Format §6)
+        sc = _signature_config()
+        pol = load_policy(POLICY_PATH, SCHEMA_PATH, sc, current=S.policy)
+    except (PolicyError, trust.KeyringError) as exc:
+        # fail-closed on start; on reload keep the last valid policy unless the new keyring revokes it
         S.policy_error = str(exc)
         if initial:
             S.policy = None
+        else:
+            _drop_if_unauthorized()
         _ensure_audit(S.policy)
         S.audit.write("policy.load_failed", S.policy.info() if S.policy else None, error=str(exc)[:500],
                       kept_active=bool(S.policy))
@@ -254,6 +300,16 @@ async def policy_info():
     info["loaded_from"] = "file"
     info["schema"] = S.policy.raw["apiVersion"]
     info["signature"] = {**{k: v for k, v in S.policy.signature.items() if k != "ref"}, "required": REQUIRE_SIGNATURE}
+    if S.keyring_doc is not None:
+        doc = S.keyring_doc
+        now = SIG_CFG.now or dt.datetime.now(dt.timezone.utc)
+        info["keyring"] = {
+            "version": doc.version,
+            "digest": doc.digest,
+            "policy_threshold": doc.policy_threshold,
+            "keyring_threshold": doc.keyring_threshold,
+            "signers": [{"id": k.id, "roles": sorted(k.roles), "status": k.status_at(now)} for k in doc.keys],
+        }
     info["effective_from"] = S.policy.meta.get("effectiveFrom")
     if S.policy_error:
         info["last_load_error"] = S.policy_error[:300]   # a newer file was rejected; this policy stays active

@@ -14,7 +14,9 @@ Configuration via environment variables or pytest options (options win):
   AISM_AUDIT_LOG                         Path to the audit JSONL file (optional)
   AISM_TIMEOUT                           HTTP timeout in seconds, default 30
   AISM_REPORT                            Report path, default aism-report.json (badge files next to it)
-  AISM_ALLOWED_SIGNERS                   allowed_signers file; K3-01 then verifies the policy signature
+  AISM_ALLOWED_SIGNERS                   allowed_signers file; K3-01 verifies a single-signature policy with it
+  AISM_KEYRING                           keyring.yaml; K3-01 verifies a .sigs bundle, K3-12 rotates it
+  AISM_SIGNING_KEYS                      manifest (identity, relative key path) for K3-12; test keys only
   AISM_POLICY_FAULT_INJECTION            1 = K3-08 temporarily replaces the mounted policy (restored afterwards)
   AISM_POLICY_RELOAD_WAIT                seconds to wait for a policy reload (K3-08), default 15
   AISM_OIDC_TOKEN, AISM_OIDC_NEGATIVE_TOKENS   IdP tokens for K2-21 (valid / must be rejected)
@@ -34,7 +36,7 @@ import yaml
 
 HERE = pathlib.Path(__file__).resolve().parent
 REPO = HERE.parent.parent
-SUITE_VERSION = "0.2.0"
+SUITE_VERSION = "0.2.1"
 
 DEFAULT_DIRECT_URLS = ",".join([
     "http://127.0.0.1:8080/health",    # llama-server default port

@@ -41,16 +41,25 @@
           "type": "object",
           "additionalProperties": false,
           "required": ["method", "ref"],
-          "description": "ssh-sig: abgesetzte SSHSIG-Signatur (Ed25519, Namespace aism-policy) über die Policy-Datei; vom Gateway geprüft. Andere Methoden werden nur deklariert und vom Referenz-Gateway nicht verifiziert.",
+          "description": "ssh-sig: abgesetzte SSHSIG-Signatur (Ed25519, Namespace aism-policy) über die exakten Policy-Bytes. Eine Datei .sig ist eine Einzelsignatur (signer Pflicht). Eine Datei .sigs ist ein Bündel mehrerer Signaturen; threshold ist die Mindestzahl verschiedener gültiger Signierer und darf die Schwelle des Schlüsselrings nicht unterschreiten. Andere Methoden werden nur deklariert und vom Referenz-Gateway nicht verifiziert.",
           "properties": {
             "method": { "enum": ["ssh-sig", "git-tag-gpg", "git-tag-ssh", "sigstore-cosign"] },
             "ref": { "type": "string", "minLength": 1 },
-            "signer": { "type": "string" }
+            "signer": { "type": "string", "description": "Prinzipal der Einzelsignatur (.sig). Im Bündel (.sigs) stehen die Identitäten nur neben den Signaturen." },
+            "threshold": { "type": "integer", "minimum": 1, "maximum": 32, "description": "Mindestzahl verschiedener gültiger Signierer. Pflicht bei ref *.sigs." }
           },
-          "if": { "properties": { "method": { "const": "ssh-sig" } } },
+          "if": { "properties": { "method": { "const": "ssh-sig" } }, "required": ["method"] },
           "then": {
-            "required": ["signer"],
-            "properties": { "ref": { "pattern": "^[A-Za-z0-9._-]+\\.sig$", "description": "Dateiname der Signatur im Verzeichnis der Policy" } }
+            "oneOf": [
+              {
+                "required": ["signer"],
+                "properties": { "ref": { "pattern": "^[A-Za-z0-9._-]+\\.sig$", "description": "Dateiname der Einzelsignatur im Verzeichnis der Policy" } }
+              },
+              {
+                "required": ["threshold"],
+                "properties": { "ref": { "pattern": "^[A-Za-z0-9._-]+\\.sigs$", "description": "Dateiname des Signaturbündels im Verzeichnis der Policy" } }
+              }
+            ]
           }
         }
       }

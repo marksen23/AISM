@@ -37,8 +37,46 @@ signature() {
     echo "FAIL: tampered policy was accepted" >&2
     exit 1
   fi
+  # Four-eyes keyring: two runtime keys, threshold 2, quorum required to add a key.
+  cp policy/policy.example.yaml "$tmp/policy.yaml"
+  python3 tools/aism-policy-sign.py keygen --out "$tmp/alice" --identity alice@example.invalid
+  python3 tools/aism-policy-sign.py keygen --out "$tmp/bob" --identity bob@example.invalid
+  python3 tools/aism-policy-sign.py keygen --out "$tmp/carol" --identity carol@example.invalid
+  local nb na
+  nb="2020-01-01T00:00:00Z"
+  na="2100-01-01T00:00:00Z"
+  member() { printf 'id=%s,pub=%s,roles=policy+keyring,not-before=%s,not-after=%s' "$1" "$2" "$nb" "$na"; }
+  python3 tools/aism-policy-sign.py init-keyring --out "$tmp/keyring.yaml" \
+    --keyring-threshold 2 --policy-threshold 2 \
+    --member "$(member alice@example.invalid "$tmp/alice/policy-signing.key.pub")" \
+    --member "$(member bob@example.invalid "$tmp/bob/policy-signing.key.pub")" \
+    --sign "$tmp/alice/policy-signing.key=alice@example.invalid" \
+    --sign "$tmp/bob/policy-signing.key=bob@example.invalid"
+  python3 tools/aism-policy-sign.py sign --keyring "$tmp/keyring.yaml" \
+    --key "$tmp/alice/policy-signing.key" --identity alice@example.invalid "$tmp/policy.yaml"
+  python3 tools/aism-policy-sign.py sign --keyring "$tmp/keyring.yaml" \
+    --key "$tmp/bob/policy-signing.key" --identity bob@example.invalid "$tmp/policy.yaml"
+  python3 tools/aism-policy-sign.py verify --keyring "$tmp/keyring.yaml" "$tmp/policy.yaml"
+  printf '\n# tamper\n' >> "$tmp/policy.yaml"
+  if python3 tools/aism-policy-sign.py verify --keyring "$tmp/keyring.yaml" "$tmp/policy.yaml"; then
+    rm -rf "$tmp"
+    echo "FAIL: tampered multi-signed policy was accepted" >&2
+    exit 1
+  fi
+  if python3 tools/aism-policy-sign.py add-key --keyring "$tmp/keyring.yaml" \
+      --member "$(member carol@example.invalid "$tmp/carol/policy-signing.key.pub")" \
+      --sign "$tmp/alice/policy-signing.key=alice@example.invalid"; then
+    rm -rf "$tmp"
+    echo "FAIL: keyring change without quorum was accepted" >&2
+    exit 1
+  fi
+  python3 tools/aism-policy-sign.py add-key --keyring "$tmp/keyring.yaml" \
+    --member "$(member carol@example.invalid "$tmp/carol/policy-signing.key.pub")" \
+    --sign "$tmp/alice/policy-signing.key=alice@example.invalid" \
+    --sign "$tmp/bob/policy-signing.key=bob@example.invalid"
+  python3 tools/aism-policy-sign.py status --keyring "$tmp/keyring.yaml" | grep -q "version: 2"
   rm -rf "$tmp"
-  echo "signature OK (runtime key deleted; tamper rejected)"
+  echo "signature OK (runtime keys deleted; tamper and quorum-less keyring change rejected)"
 }
 
 pii() {
