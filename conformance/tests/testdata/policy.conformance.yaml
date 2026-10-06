@@ -77,9 +77,14 @@ spec:
       entity: PERSON
       type: ner
       ner:
-        model: "spacy:xx_ent_wiki_sm"   # Beispiel (Prototyp-Gateway); Erkennungsqualität nicht gemessen
+        # Measured default (conformance/pii-eval/README.md): small multilingual spaCy model already
+        # in the gateway image, together with person-gazetteer. Alternatives, same labels "PER":
+        #   spacy:de_core_news_md | spacy:de_core_news_lg
+        # GLiNER (minScore IS applied; set labels to the model strings, usually ["person"]):
+        #   gliner:urchade/gliner_multi_pii-v1
+        model: "spacy:xx_ent_wiki_sm"
         labels: ["PER"]
-        minScore: 0.80                  # Beispielschwelle, nicht kalibriert; spaCy-Kleinmodelle liefern keinen Score (Prototyp ignoriert den Wert)
+        minScore: 0.80                  # ignored for spaCy (no per-entity score); threshold for gliner
         languages: [de, en]
       masking: { strategy: placeholder, placeholderFormat: "<PERSON_{n}>", reversible: true, demaskFor: [it-ops, staff] }
 
@@ -91,6 +96,20 @@ spec:
       patterns:
         - '\b(?:Herrn?|Frau|Hr\.|Fr\.)\s+(?:(?:Dr|Prof)\.\s+)*(?P<pii>[A-ZÄÖÜÇŞİ][^\W\d_]+(?:-[A-ZÄÖÜ][^\W\d_]+)?(?:\s+[A-ZÄÖÜÇŞİ][^\W\d_]+(?:-[A-ZÄÖÜ][^\W\d_]+)?)?)'
         - '\b(?:Dr|Prof)\.\s+(?P<pii>[A-ZÄÖÜÇŞİ][^\W\d_]+(?:-[A-ZÄÖÜ][^\W\d_]+)?(?:\s+[A-ZÄÖÜÇŞİ][^\W\d_]+)?)'
+      masking: { strategy: placeholder, placeholderFormat: "<PERSON_{n}>", reversible: true, demaskFor: [it-ops, staff] }
+
+    - id: person-gazetteer
+      entity: PERSON
+      type: gazetteer
+      # Open-licensed German given/surname lists (gateway/aism_gateway/data/README.md) plus the
+      # context preset "de" (mein Name ist, signatures, salutations, "Danke <Name>", "<Name> sagt").
+      # file:<path> is resolved relative to this policy file. contextPreset: none disables the cues;
+      # contextRules replaces the preset. matchPairs: false disables "Given Surname" (any case).
+      gazetteer:
+        givenNames: builtin:de-given
+        surnames: builtin:de-surnames
+        matchPairs: true
+        contextPreset: de
       masking: { strategy: placeholder, placeholderFormat: "<PERSON_{n}>", reversible: true, demaskFor: [it-ops, staff] }
 
     - id: api-key

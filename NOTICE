@@ -2,3 +2,10 @@ AISM – AI Stack Reference Model (specification, policy format, conformance sui
 Copyright 2026 AISM contributors
 
 AISM is an independent project and is not affiliated with any other product or vendor named in its documentation.
+
+The German name lists under gateway/aism_gateway/data/ combine open-licensed sources.
+Stadt Köln given-name frequencies (frequency at least 2) are included via
+https://github.com/fxnn/vornamen and are licensed CC BY 3.0 DE; attribute Stadt Köln.
+Other rows come from ndsvw/JSON-Namen (MIT), PenTestical/german_names (MIT) and
+sigpwned/popular-names-by-country-dataset (CC0). Details and the rebuild command are in
+gateway/aism_gateway/data/README.md.

@@ -83,6 +83,32 @@ def _semantic_checks(p: dict) -> list[str]:
                 re.compile(pat)
             except re.error as exc:
                 errs.append(f"Detektor {d['id']}: Regex ungültig ({exc})")
+        if d["type"] == "gazetteer":
+            g = d.get("gazetteer") or {}
+            for key in ("givenNames", "surnames"):
+                ref = str(g.get(key, ""))
+                rel = ref[5:] if ref.startswith("file:") else ""
+                if ref.startswith("builtin:"):
+                    if ref not in ("builtin:de-given", "builtin:de-surnames"):
+                        errs.append(f"Detektor {d['id']}: unbekanntes Gazetteer {ref}")
+                elif ref.startswith("file:"):
+                    if not rel or rel.startswith(("/", "\\")) or ".." in pathlib.PurePosixPath(rel.replace("\\", "/")).parts:
+                        errs.append(f"Detektor {d['id']}: file:-Pfad ungültig ({ref})")
+                else:
+                    errs.append(f"Detektor {d['id']}: Gazetteer-Referenz {ref!r} muss builtin: oder file: sein")
+            if g.get("contextPreset", "de") not in ("de", "none"):
+                errs.append(f"Detektor {d['id']}: contextPreset {g.get('contextPreset')!r} ist unbekannt")
+            for rule in g.get("contextRules") or []:
+                if rule.get("accept") not in ("cue", "gazetteer-all", "gazetteer-any"):
+                    errs.append(f"Detektor {d['id']}: accept {rule.get('accept')!r} ist unbekannt")
+                for pat in rule.get("patterns") or []:
+                    try:
+                        cre = re.compile(pat)
+                    except re.error as exc:
+                        errs.append(f"Detektor {d['id']}: Kontextmuster ungültig ({exc})")
+                        continue
+                    if "pii" not in cre.groupindex:
+                        errs.append(f"Detektor {d['id']}: Kontextmuster ohne Gruppe (?P<pii>…)")
         for r in d["masking"].get("demaskFor", []):
             if r not in roles:
                 errs.append(f"Detektor {d['id']}: unbekannte Rolle {r}")

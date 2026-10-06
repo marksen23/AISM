@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
-import hashlib
 import hmac
 import json
 import logging
@@ -138,7 +137,7 @@ def try_load(initial: bool = False) -> None:
                       kept_active=bool(S.policy))
         log.error("policy load failed: %s", exc)
         return
-    dets, errs = build_detectors(pol.spec)
+    dets, errs = build_detectors(pol.spec, base_dir=os.path.dirname(os.path.abspath(POLICY_PATH)))
     S.policy, S.policy_error = pol, None
     S.masker, S.detector_errors = Masker(dets, _entity_rank(pol)), errs
     _ensure_audit(pol)

@@ -1,0 +1,21 @@
+target-version = "py312"
+line-length = 140
+
+[lint]
+# Classic Ruff default (pycodestyle E4/E7/E9 and Pyflakes). Pinned so a newer
+# Ruff release cannot turn on isort/refactor rules and force a reformat.
+# E741/E702 match the existing style (`l` as a line variable, short semicolon chains).
+select = ["E4", "E7", "E9", "F"]
+ignore = ["E741", "E702"]
+
+[lint.per-file-ignores]
+# Imports follow a sys.path insert, or avoid a cycle.
+"gateway/aism_gateway/auth.py" = ["E402"]
+"gateway/aism_gateway/pii.py" = ["E402"]
+"gateway/tests/test_units.py" = ["E402"]
+"gateway/tests/test_signing_oidc.py" = ["E402"]
+"orchestrator/tests/test_units.py" = ["E402"]
+"tools/aism-policy-sign.py" = ["E402"]
+"tools/build_name_gazetteer.py" = ["E402"]
+"conformance/pii-eval/evaluate.py" = ["E402"]
+"conformance/pii-eval/generate_dataset.py" = ["E402"]

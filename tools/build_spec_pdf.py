@@ -1,7 +1,13 @@
 """Render a Markdown document to PDF next to it (Python-Markdown + headless Chrome).
 Usage: python tools/build_spec_pdf.py [doc.md ...]   default: AISM-Spezifikation.md
 Needs: pip install markdown; google-chrome or chromium."""
-import pathlib, shutil, subprocess, sys, tempfile, markdown
+import pathlib
+import shutil
+import subprocess
+import sys
+import tempfile
+
+import markdown
 
 repo = pathlib.Path(__file__).resolve().parent.parent
 docs = [pathlib.Path(a).resolve() for a in sys.argv[1:]] or [repo / "AISM-Spezifikation.md"]

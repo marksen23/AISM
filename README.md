@@ -250,7 +250,9 @@ AISM is meant to be checked, not believed. The reference stack produces evidence
 | Which software ran | images pinned by `@sha256` digest; locally built images are reproducible (identical digests in two clean builds) | S-07 · AISM-K3-05 |
 | One request across all stages | W3C `traceparent` propagated; trace ID in every audit entry | S-10 · AISM-K3-02, -K3-03 |
 
-The conformance levels are a **technical self-test** against the specification. They are not a certification and do not establish legal compliance. How well names and other free-text PII are detected is measured separately, on synthetic German data, in [`conformance/pii-eval/`](conformance/pii-eval/README.md). The results are honest but limited: about 14 % of person names in the held-out set remain unmasked.
+The conformance levels are a **technical self-test** against the specification. They are not a certification and do not establish legal compliance. How well names and other free-text PII are detected is measured separately, on synthetic German data, in [`conformance/pii-eval/`](conformance/pii-eval/README.md). On the fresh held-out set the default detector (German name gazetteer plus `xx_ent_wiki_sm`) leaves about 30 % of person names unmasked. The older held-out set, which the first measurement reported at 14 % unmasked, is easier; the same default reaches about 6 % unmasked there. Both sets are synthetic.
+
+GitHub Actions (`.github/workflows/ci.yml`) runs the same steps as [`tools/ci-local.sh`](tools/ci-local.sh): Ruff, gateway and orchestrator unit tests, JSON Schema validation of `policy/policy.example.yaml`, an Ed25519 signature round trip with a key generated at runtime, the PII recall gate, a two-build digest comparison, and the conformance suite on the Docker stack. The cloud-fallback scenario runs first, then the full suite. The report and the shields.io badge are uploaded as artifacts. That job uses the capture mock. It does not start Open WebUI, llama.cpp, n8n or SearXNG.
 
 ## 7. Running the AISM Reference Stack
 
@@ -565,9 +567,9 @@ None of the following exists yet; it is listed so that contributors know the int
 
 ## 9. Roadmap
 
-- **Governance gateway** (prototype in [`gateway/`](gateway/)): test with a real IdP (Keycloak/Entra ID); signing-key rotation and multi-signature (four-eyes) policies; better name detection (measured recall for masked person names ≈ 0.86 on synthetic German data, [`conformance/pii-eval/`](conformance/pii-eval/README.md)); OpenTelemetry export, hardening and load tests.
+- **Governance gateway** (prototype in [`gateway/`](gateway/)): test with a real IdP (Keycloak/Entra ID); signing-key rotation and multi-signature (four-eyes) policies; name detection beyond the gazetteer plus small spaCy model (fresh held-out masked recall 0.70; an optional GLiNER model reaches 1.00 at about 80 ms/sentence, [`conformance/pii-eval/`](conformance/pii-eval/README.md)); OpenTelemetry export, hardening and load tests.
 - **Orchestrator** (prototype in [`orchestrator/`](orchestrator/)): persistent store for pending confirmations and a UI for them; per-query web-search policy evaluation; RAG ingest; MCP execution.
-- **Conformance suite**: run it in CI and against the real components (Open WebUI, llama.cpp on GPU, n8n, SearXNG); automate the remaining manual checks (K2-14, K3-06 model checksums); publish a public test report format for third-party implementations.
+- **Conformance suite**: CI now runs it against the mock stack. Still open: the real components (Open WebUI, llama.cpp on GPU, n8n, SearXNG), the remaining manual checks (K2-14, K3-06 model checksums), and a public test report format for third-party implementations.
 - **Specification**: public comment period towards AISM 1.0; mapping of the criteria to common control catalogues.
 - **Reference configurations**: AMD/ROCm and Apple Silicon; Compose profiles for smaller setups (no RAG, no agents); example n8n workflows for read-only tool calls.
 
@@ -582,9 +584,9 @@ None of the following exists yet; it is listed so that contributors know the int
 | [`gateway/README.md`](gateway/README.md) | English | Governance gateway prototype (S2): features, configuration, limitations |
 | [`orchestrator/README.md`](orchestrator/README.md) | English | Orchestrator prototype (S3): tool loop, confirmation flow, web search |
 | [`deploy/firewall/README.md`](deploy/firewall/README.md) | English | Reference host firewall: no internet egress from the frontend network; results on a real Docker host incl. IPv6 |
-| [`conformance/pii-eval/README.md`](conformance/pii-eval/README.md) | German | Synthetic German PII evaluation set and measured detection rates (regex + NER) |
+| [`conformance/pii-eval/README.md`](conformance/pii-eval/README.md) | German | Synthetic German PII evaluation and measured detection rates (regex, gazetteer, spaCy, optional GLiNER) |
 | [`config/policy-trust/README.md`](config/policy-trust/README.md) | English | Trust anchor (`allowed_signers`) for policy signatures |
-| [`tools/`](tools/) | English | `aism-policy-sign.py` (keygen/sign/verify), `resolve_digests.py` (registry digests), `repro_build.sh` (reproducible build check), `build_spec_pdf.py` (Markdown → PDF for the spec, policy format and conformance documents) |
+| [`tools/`](tools/) | English | `ci-local.sh` (same steps as CI), `aism-policy-sign.py` (keygen/sign/verify), `validate_policy.py` (JSON Schema), `build_name_gazetteer.py` (rebuild the German name lists), `resolve_digests.py` (registry digests), `repro_build.sh` (reproducible build check), `build_spec_pdf.py` (Markdown → PDF for the spec, policy format and conformance documents) |
 | [`diagram.png`](diagram.png) | English | Architecture and request flow ([`diagram.dot`](diagram.dot), [`diagram.mmd`](diagram.mmd)) |
 
 ## 11. Related projects

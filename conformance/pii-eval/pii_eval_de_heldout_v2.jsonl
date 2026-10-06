@@ -1,0 +1,94 @@
+{"id": "h2-000", "text": "Könntest du Gül Neumann heute noch erreichen?", "entities": [{"start": 12, "end": 23, "type": "PERSON", "value": "Gül Neumann", "oov": true}], "tags": ["person", "full", "ext"]}
+{"id": "h2-001", "text": "Könntest du Björn Wagner heute noch erreichen?", "entities": [{"start": 12, "end": 24, "type": "PERSON", "value": "Björn Wagner", "oov": false}], "tags": ["person", "full", "ext"]}
+{"id": "h2-002", "text": "Könntest du Hannah Abiola heute noch erreichen?", "entities": [{"start": 12, "end": 25, "type": "PERSON", "value": "Hannah Abiola", "oov": true}], "tags": ["person", "full", "ext"]}
+{"id": "h2-003", "text": "Könntest du Ostap Abiola heute noch erreichen?", "entities": [{"start": 12, "end": 24, "type": "PERSON", "value": "Ostap Abiola", "oov": true}], "tags": ["person", "full", "ext"]}
+{"id": "h2-004", "text": "i. V. Hannah Haddad", "entities": [{"start": 6, "end": 19, "type": "PERSON", "value": "Hannah Haddad", "oov": true}], "tags": ["person", "full", "ext"]}
+{"id": "h2-005", "text": "i. V. Paul Klein", "entities": [{"start": 6, "end": 16, "type": "PERSON", "value": "Paul Klein", "oov": false}], "tags": ["person", "full", "ext"]}
+{"id": "h2-006", "text": "i. V. Gül Meyer", "entities": [{"start": 6, "end": 15, "type": "PERSON", "value": "Gül Meyer", "oov": true}], "tags": ["person", "full", "ext"]}
+{"id": "h2-007", "text": "i. V. Ostap Bergström", "entities": [{"start": 6, "end": 21, "type": "PERSON", "value": "Ostap Bergström", "oov": true}], "tags": ["person", "full", "ext"]}
+{"id": "h2-008", "text": "Gezeichnet: Brankica Richter", "entities": [{"start": 12, "end": 28, "type": "PERSON", "value": "Brankica Richter", "oov": true}], "tags": ["person", "full", "ext"]}
+{"id": "h2-009", "text": "Gezeichnet: Gül Haddad", "entities": [{"start": 12, "end": 22, "type": "PERSON", "value": "Gül Haddad", "oov": true}], "tags": ["person", "full", "ext"]}
+{"id": "h2-010", "text": "Gezeichnet: Ostap Meyer", "entities": [{"start": 12, "end": 23, "type": "PERSON", "value": "Ostap Meyer", "oov": true}], "tags": ["person", "full", "ext"]}
+{"id": "h2-011", "text": "Gezeichnet: Ilaria Richter", "entities": [{"start": 12, "end": 26, "type": "PERSON", "value": "Ilaria Richter", "oov": true}], "tags": ["person", "full", "ext"]}
+{"id": "h2-012", "text": "Ich bin emma iwanow und rufe wegen des Ausfalls an.", "entities": [{"start": 8, "end": 19, "type": "PERSON", "value": "emma iwanow", "oov": true}], "tags": ["person", "lower", "ext"]}
+{"id": "h2-013", "text": "Ich bin jonas reitmeier und rufe wegen des Ausfalls an.", "entities": [{"start": 8, "end": 23, "type": "PERSON", "value": "jonas reitmeier", "oov": true}], "tags": ["person", "lower", "ext"]}
+{"id": "h2-014", "text": "Ich bin ilaria braun und rufe wegen des Ausfalls an.", "entities": [{"start": 8, "end": 20, "type": "PERSON", "value": "ilaria braun", "oov": true}], "tags": ["person", "lower", "ext"]}
+{"id": "h2-015", "text": "Ich bin brankica neumann und rufe wegen des Ausfalls an.", "entities": [{"start": 8, "end": 24, "type": "PERSON", "value": "brankica neumann", "oov": true}], "tags": ["person", "lower", "ext"]}
+{"id": "h2-016", "text": "Beste Grüße\nFelix Richter\nEmpfang", "entities": [{"start": 12, "end": 25, "type": "PERSON", "value": "Felix Richter", "oov": false}], "tags": ["person", "full", "ext"]}
+{"id": "h2-017", "text": "Beste Grüße\nPaul Diallo\nEmpfang", "entities": [{"start": 12, "end": 23, "type": "PERSON", "value": "Paul Diallo", "oov": true}], "tags": ["person", "full", "ext"]}
+{"id": "h2-018", "text": "Beste Grüße\nFelix Meyer\nEmpfang", "entities": [{"start": 12, "end": 23, "type": "PERSON", "value": "Felix Meyer", "oov": false}], "tags": ["person", "full", "ext"]}
+{"id": "h2-019", "text": "Beste Grüße\nBrankica Klein\nEmpfang", "entities": [{"start": 12, "end": 26, "type": "PERSON", "value": "Brankica Klein", "oov": true}], "tags": ["person", "full", "ext"]}
+{"id": "h2-020", "text": "Hi Wolfgang, kurzer Hinweis zum Change.", "entities": [{"start": 3, "end": 11, "type": "PERSON", "value": "Wolfgang", "oov": false}], "tags": ["person", "first", "ext"]}
+{"id": "h2-021", "text": "Hi Paul, kurzer Hinweis zum Change.", "entities": [{"start": 3, "end": 7, "type": "PERSON", "value": "Paul", "oov": false}], "tags": ["person", "first", "ext"]}
+{"id": "h2-022", "text": "Hi Dimitrios, kurzer Hinweis zum Change.", "entities": [{"start": 3, "end": 12, "type": "PERSON", "value": "Dimitrios", "oov": false}], "tags": ["person", "first", "ext"]}
+{"id": "h2-023", "text": "Hi Ilaria, kurzer Hinweis zum Change.", "entities": [{"start": 3, "end": 9, "type": "PERSON", "value": "Ilaria", "oov": true}], "tags": ["person", "first", "ext"]}
+{"id": "h2-024", "text": "Lieber Björn, die Freigabe liegt bei dir.", "entities": [{"start": 7, "end": 12, "type": "PERSON", "value": "Björn", "oov": false}], "tags": ["person", "first", "ext"]}
+{"id": "h2-025", "text": "Lieber Lena, die Freigabe liegt bei dir.", "entities": [{"start": 7, "end": 11, "type": "PERSON", "value": "Lena", "oov": false}], "tags": ["person", "first", "ext"]}
+{"id": "h2-026", "text": "Lieber Björn, die Freigabe liegt bei dir.", "entities": [{"start": 7, "end": 12, "type": "PERSON", "value": "Björn", "oov": false}], "tags": ["person", "first", "ext"]}
+{"id": "h2-027", "text": "Lieber Gül, die Freigabe liegt bei dir.", "entities": [{"start": 7, "end": 10, "type": "PERSON", "value": "Gül", "oov": true}], "tags": ["person", "first", "ext"]}
+{"id": "h2-028", "text": "Gül meldet, dass das VPN wieder steht.", "entities": [{"start": 0, "end": 3, "type": "PERSON", "value": "Gül", "oov": true}], "tags": ["person", "first", "ext"]}
+{"id": "h2-029", "text": "Gül meldet, dass das VPN wieder steht.", "entities": [{"start": 0, "end": 3, "type": "PERSON", "value": "Gül", "oov": true}], "tags": ["person", "first", "ext"]}
+{"id": "h2-030", "text": "Ilaria meldet, dass das VPN wieder steht.", "entities": [{"start": 0, "end": 6, "type": "PERSON", "value": "Ilaria", "oov": true}], "tags": ["person", "first", "ext"]}
+{"id": "h2-031", "text": "Brankica meldet, dass das VPN wieder steht.", "entities": [{"start": 0, "end": 8, "type": "PERSON", "value": "Brankica", "oov": true}], "tags": ["person", "first", "ext"]}
+{"id": "h2-032", "text": "Vielen Dank Marie.", "entities": [{"start": 12, "end": 17, "type": "PERSON", "value": "Marie", "oov": false}], "tags": ["person", "first", "ext"]}
+{"id": "h2-033", "text": "Vielen Dank Gül.", "entities": [{"start": 12, "end": 15, "type": "PERSON", "value": "Gül", "oov": true}], "tags": ["person", "first", "ext"]}
+{"id": "h2-034", "text": "Vielen Dank Hannah.", "entities": [{"start": 12, "end": 18, "type": "PERSON", "value": "Hannah", "oov": false}], "tags": ["person", "first", "ext"]}
+{"id": "h2-035", "text": "Vielen Dank Moritz.", "entities": [{"start": 12, "end": 18, "type": "PERSON", "value": "Moritz", "oov": false}], "tags": ["person", "first", "ext"]}
+{"id": "h2-036", "text": "Für Rückfragen steht Prof. Schulz bereit.", "entities": [{"start": 27, "end": 33, "type": "PERSON", "value": "Schulz", "oov": false}], "tags": ["person", "title_last", "ext"]}
+{"id": "h2-037", "text": "Für Rückfragen steht Herr Dr. Haddad bereit.", "entities": [{"start": 30, "end": 36, "type": "PERSON", "value": "Haddad", "oov": true}], "tags": ["person", "title_last", "ext"]}
+{"id": "h2-038", "text": "Für Rückfragen steht Herr Abiola bereit.", "entities": [{"start": 26, "end": 32, "type": "PERSON", "value": "Abiola", "oov": true}], "tags": ["person", "title_last", "ext"]}
+{"id": "h2-039", "text": "Für Rückfragen steht Herr Dr. Lehmann bereit.", "entities": [{"start": 30, "end": 37, "type": "PERSON", "value": "Lehmann", "oov": false}], "tags": ["person", "title_last", "ext"]}
+{"id": "h2-040", "text": "Emma und Ostap teilen sich das Postfach.", "entities": [{"start": 0, "end": 4, "type": "PERSON", "value": "Emma", "oov": false}, {"start": 9, "end": 14, "type": "PERSON", "value": "Ostap", "oov": true}], "tags": ["person", "first", "ext"]}
+{"id": "h2-041", "text": "Emma und Gül teilen sich das Postfach.", "entities": [{"start": 0, "end": 4, "type": "PERSON", "value": "Emma", "oov": false}, {"start": 9, "end": 12, "type": "PERSON", "value": "Gül", "oov": true}], "tags": ["person", "first", "ext"]}
+{"id": "h2-042", "text": "Hannah und Lena teilen sich das Postfach.", "entities": [{"start": 0, "end": 6, "type": "PERSON", "value": "Hannah", "oov": false}, {"start": 11, "end": 15, "type": "PERSON", "value": "Lena", "oov": false}], "tags": ["person", "first", "ext"]}
+{"id": "h2-043", "text": "Yaren und Yaren teilen sich das Postfach.", "entities": [{"start": 0, "end": 5, "type": "PERSON", "value": "Yaren", "oov": true}, {"start": 10, "end": 15, "type": "PERSON", "value": "Yaren", "oov": true}], "tags": ["person", "first", "ext"]}
+{"id": "h2-044", "text": "Der Nutzeraccount von wolfgang reitmeier ist gesperrt.", "entities": [{"start": 22, "end": 40, "type": "PERSON", "value": "wolfgang reitmeier", "oov": true}], "tags": ["person", "lower", "ext"]}
+{"id": "h2-045", "text": "Der Nutzeraccount von lena iwanow ist gesperrt.", "entities": [{"start": 22, "end": 33, "type": "PERSON", "value": "lena iwanow", "oov": true}], "tags": ["person", "lower", "ext"]}
+{"id": "h2-046", "text": "Der Nutzeraccount von yaren vuković ist gesperrt.", "entities": [{"start": 22, "end": 35, "type": "PERSON", "value": "yaren vuković", "oov": true}], "tags": ["person", "lower", "ext"]}
+{"id": "h2-047", "text": "Der Nutzeraccount von emma wolf ist gesperrt.", "entities": [{"start": 22, "end": 31, "type": "PERSON", "value": "emma wolf", "oov": false}], "tags": ["person", "lower", "ext"]}
+{"id": "h2-048", "text": "Ansprechpartner: Prof. Gül Lehmann", "entities": [{"start": 23, "end": 34, "type": "PERSON", "value": "Gül Lehmann", "oov": true}], "tags": ["person", "title_full", "ext"]}
+{"id": "h2-049", "text": "Ansprechpartner: Herr Dr. Ilaria Abiola", "entities": [{"start": 26, "end": 39, "type": "PERSON", "value": "Ilaria Abiola", "oov": true}], "tags": ["person", "title_full", "ext"]}
+{"id": "h2-050", "text": "Ansprechpartner: Frau Dr. Jonas Braun", "entities": [{"start": 26, "end": 37, "type": "PERSON", "value": "Jonas Braun", "oov": false}], "tags": ["person", "title_full", "ext"]}
+{"id": "h2-051", "text": "Ansprechpartner: Herr Dr. Björn Haddad", "entities": [{"start": 26, "end": 38, "type": "PERSON", "value": "Björn Haddad", "oov": true}], "tags": ["person", "title_full", "ext"]}
+{"id": "h2-052", "text": "Bitte björn wolf nicht auf den Verteiler setzen.", "entities": [{"start": 6, "end": 16, "type": "PERSON", "value": "björn wolf", "oov": false}], "tags": ["person", "lower", "ext"]}
+{"id": "h2-053", "text": "Bitte ostap braun nicht auf den Verteiler setzen.", "entities": [{"start": 6, "end": 17, "type": "PERSON", "value": "ostap braun", "oov": true}], "tags": ["person", "lower", "ext"]}
+{"id": "h2-054", "text": "Bitte felix schulz nicht auf den Verteiler setzen.", "entities": [{"start": 6, "end": 18, "type": "PERSON", "value": "felix schulz", "oov": false}], "tags": ["person", "lower", "ext"]}
+{"id": "h2-055", "text": "Bitte ilaria wagner nicht auf den Verteiler setzen.", "entities": [{"start": 6, "end": 19, "type": "PERSON", "value": "ilaria wagner", "oov": true}], "tags": ["person", "lower", "ext"]}
+{"id": "h2-056", "text": "Die neue Adresse lautet lena_lange@example.net.", "entities": [{"start": 24, "end": 46, "type": "EMAIL", "value": "lena_lange@example.net"}], "tags": ["other", "ext"]}
+{"id": "h2-057", "text": "Die neue Adresse lautet klein5@example.com.", "entities": [{"start": 24, "end": 42, "type": "EMAIL", "value": "klein5@example.com"}], "tags": ["other", "ext"]}
+{"id": "h2-058", "text": "Die neue Adresse lautet uelkue.klein@example.com.", "entities": [{"start": 24, "end": 48, "type": "EMAIL", "value": "uelkue.klein@example.com"}], "tags": ["other", "ext"]}
+{"id": "h2-059", "text": "Die neue Adresse lautet p.lange@example.net.", "entities": [{"start": 24, "end": 43, "type": "EMAIL", "value": "p.lange@example.net"}], "tags": ["other", "ext"]}
+{"id": "h2-060", "text": "Rücküberweisung auf AT44 6061 7088 8656 9309 veranlassen.", "entities": [{"start": 20, "end": 44, "type": "IBAN", "value": "AT44 6061 7088 8656 9309"}], "tags": ["other", "ext"]}
+{"id": "h2-061", "text": "Rücküberweisung auf CH7846881655283732969 veranlassen.", "entities": [{"start": 20, "end": 41, "type": "IBAN", "value": "CH7846881655283732969"}], "tags": ["other", "ext"]}
+{"id": "h2-062", "text": "Rücküberweisung auf DE97 5911 1766 3024 5664 92 veranlassen.", "entities": [{"start": 20, "end": 47, "type": "IBAN", "value": "DE97 5911 1766 3024 5664 92"}], "tags": ["other", "ext"]}
+{"id": "h2-063", "text": "Rücküberweisung auf AT70 4772 4833 5158 0890 veranlassen.", "entities": [{"start": 20, "end": 44, "type": "IBAN", "value": "AT70 4772 4833 5158 0890"}], "tags": ["other", "ext"]}
+{"id": "h2-064", "text": "IBAN CH82 4394 1855 7885 2452 1 ist hinterlegt.", "entities": [{"start": 5, "end": 31, "type": "IBAN", "value": "CH82 4394 1855 7885 2452 1"}], "tags": ["other", "ext"]}
+{"id": "h2-065", "text": "IBAN CH37 1490 1173 5259 2025 0 ist hinterlegt.", "entities": [{"start": 5, "end": 31, "type": "IBAN", "value": "CH37 1490 1173 5259 2025 0"}], "tags": ["other", "ext"]}
+{"id": "h2-066", "text": "IBAN CH62 1928 2540 5450 9612 9 ist hinterlegt.", "entities": [{"start": 5, "end": 31, "type": "IBAN", "value": "CH62 1928 2540 5450 9612 9"}], "tags": ["other", "ext"]}
+{"id": "h2-067", "text": "IBAN DE16036075612199983720 ist hinterlegt.", "entities": [{"start": 5, "end": 27, "type": "IBAN", "value": "DE16036075612199983720"}], "tags": ["other", "ext"]}
+{"id": "h2-068", "text": "Der Schlüssel AKIACIMXQT0FELMRTMMI stand in der Konsole.", "entities": [{"start": 14, "end": 34, "type": "SECRET", "value": "AKIACIMXQT0FELMRTMMI"}], "tags": ["other", "ext"]}
+{"id": "h2-069", "text": "Der Schlüssel AKIAJ29MCA8PVE5A2XTQ stand in der Konsole.", "entities": [{"start": 14, "end": 34, "type": "SECRET", "value": "AKIAJ29MCA8PVE5A2XTQ"}], "tags": ["other", "ext"]}
+{"id": "h2-070", "text": "Der Schlüssel sk-j5yL93SswJDhuQJaU8bFnGEQcdWJWyFg stand in der Konsole.", "entities": [{"start": 14, "end": 49, "type": "SECRET", "value": "sk-j5yL93SswJDhuQJaU8bFnGEQcdWJWyFg"}], "tags": ["other", "ext"]}
+{"id": "h2-071", "text": "Der Schlüssel sk-yxusHptDSmuuTAxl6tzgBXLnAKikHsWr stand in der Konsole.", "entities": [{"start": 14, "end": 49, "type": "SECRET", "value": "sk-yxusHptDSmuuTAxl6tzgBXLnAKikHsWr"}], "tags": ["other", "ext"]}
+{"id": "h2-072", "text": "Gül Wolf erreicht man unter ines_kowalski@example.net, Konto CH60 8897 1929 0761 1285 2.", "entities": [{"start": 0, "end": 8, "type": "PERSON", "value": "Gül Wolf", "oov": true}, {"start": 28, "end": 53, "type": "EMAIL", "value": "ines_kowalski@example.net"}, {"start": 61, "end": 87, "type": "IBAN", "value": "CH60 8897 1929 0761 1285 2"}], "tags": ["other", "ext"]}
+{"id": "h2-073", "text": "Marie Diallo erreicht man unter sophie.hartmann@example.com, Konto CH03 2933 8585 1898 3301 5.", "entities": [{"start": 0, "end": 12, "type": "PERSON", "value": "Marie Diallo", "oov": true}, {"start": 32, "end": 59, "type": "EMAIL", "value": "sophie.hartmann@example.com"}, {"start": 67, "end": 93, "type": "IBAN", "value": "CH03 2933 8585 1898 3301 5"}], "tags": ["other", "ext"]}
+{"id": "h2-074", "text": "Dimitrios Iwanow erreicht man unter j.koch@mail.example.com, Konto CH20 7063 1918 1527 1956 1.", "entities": [{"start": 0, "end": 16, "type": "PERSON", "value": "Dimitrios Iwanow", "oov": true}, {"start": 36, "end": 59, "type": "EMAIL", "value": "j.koch@mail.example.com"}, {"start": 67, "end": 93, "type": "IBAN", "value": "CH20 7063 1918 1527 1956 1"}], "tags": ["other", "ext"]}
+{"id": "h2-075", "text": "Felix Iwanow erreicht man unter hartmann69@example.com, Konto CH4672327211775249242.", "entities": [{"start": 0, "end": 12, "type": "PERSON", "value": "Felix Iwanow", "oov": true}, {"start": 32, "end": 54, "type": "EMAIL", "value": "hartmann69@example.com"}, {"start": 62, "end": 83, "type": "IBAN", "value": "CH4672327211775249242"}], "tags": ["other", "ext"]}
+{"id": "h2-076", "text": "Die maximale Wartezeit beträgt fünf Minuten.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "h2-077", "text": "Frank und frei bleibt die Diskussion im Forum.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "h2-078", "text": "Bitte die Müller GmbH nicht mit dem Lager verwechseln.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "h2-079", "text": "Kostenstelle Lange gehört zum Bereich Finanzen.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "h2-080", "text": "Der Drucker im Flur heißt nicht Wolf.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "h2-081", "text": "Teams und Outlook waren heute Morgen langsam.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "h2-082", "text": "Wer übernimmt die Bereitschaft nächste Woche?", "entities": [], "tags": ["negative", "ext"]}
+{"id": "h2-083", "text": "Schick mir das Protokoll bis Donnerstag.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "h2-084", "text": "Leite das an das Funktionspostfach weiter.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "h2-085", "text": "Meine Adresse findet sich auf der Visitenkarte im Wiki.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "h2-086", "text": "Sehr geehrte Damen und Herren, der Dienst ist wieder da.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "h2-087", "text": "Hallo zusammen vom Standort Dresden.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "h2-088", "text": "Danke für die Übersicht, das reicht.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "h2-089", "text": "Mein Name ist in der Signatur der Mailingliste nicht enthalten.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "h2-090", "text": "Viele Grüße\nService-Desk\nIntern", "entities": [], "tags": ["negative", "ext"]}
+{"id": "h2-091", "text": "Projekt Phoenix hat keinen Personenbezug.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "h2-092", "text": "Die Referenz AT00 0000 0000 ist ein Platzhalter.", "entities": [], "tags": ["negative", "ext"]}
+{"id": "h2-093", "text": "Qwen und Docker bleiben auf dem Build-Rechner.", "entities": [], "tags": ["negative", "ext"]}

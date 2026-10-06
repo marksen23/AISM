@@ -1,25 +1,37 @@
 # PII-Erkennung: Messung auf synthetischen deutschen Daten
 
-Stand: 2026-10-05. Gemessen wird die Erkennung des Gateway-Prototyps im AISM Reference Stack (S2) mit den
+Stand: 2026-10-06. Gemessen wird die Erkennung des Gateway-Prototyps im AISM Reference Stack (S2) mit den
 `piiDetectors` der Konformitäts-Testpolicy – derselbe Code wie im Gateway
 (`aism_gateway.pii.Masker.resolve`, inkl. Überlappungsauflösung), Kontext `prompt`.
 
 **Kurzfassung (ehrlich):** E-Mail, IBAN und die getesteten Secret-Formate werden auf diesen Daten
-vollständig erkannt (regelbasiert, deterministisch). **Personennamen nicht:** auf dem Held-out-Set
-bleiben mit jedem der drei getesteten spaCy-Modelle **14 % der Namen im Klartext** (Recall maskiert
-0,86), v. a. kleingeschriebene Namen, alleinstehende Vornamen und seltenere Namen. Die Daten sind
-klein, synthetisch und schablonenbasiert; reale Texte (Tippfehler, Kontext, andere Namen) sind
-schwieriger. Die Zahlen sind daher **eine Obergrenze für diese Satzmuster, kein Qualitätsnachweis**.
-M-12 (fail-closed bei Detektorausfall) schützt nicht vor *Fehlklassifikation* – Namen, die NER
-nicht erkennt, gehen unmaskiert an S3–S6. Für Cloud-Egress ist das ein relevantes Restrisiko.
+vollständig maskiert (regelbasiert, deterministisch). **Personennamen nicht.**
+
+Der früher veröffentlichte Wert **0,86** maskierter Recall gilt für das **alte** Held-out-Set
+(50 Namen, Regex plus spaCy, ohne Gazetteer). Dieselbe Datei, nachträglich mit dem neuen Standard
+gemessen und nicht zum Abstimmen der Regeln verwendet: **0,94**.
+
+Maßgeblich ist das **neue** Held-out-Set v2. Es wurde erst erzeugt, nachdem die Regeln auf dem
+erweiterten Dev-Set festlagen, und ist absichtlich härter (andere Schablonen, disjunkte Namen,
+Kontextformeln, die der Detektor nicht kennt). Dort liegt der alte Detektor bei **0,594** und der
+neue Standard (Gazetteer plus `spacy:xx_ent_wiki_sm`) bei **0,703** maskiert, Präzision 0,868,
+etwa 1,5 ms/Satz. Rund 30 % der Namen bleiben im Klartext. Das CI-Gate
+([`gate.json`](gate.json)) steht auf diesem Wert, nicht auf 0,86: 0,86 wäre auf v2 eine Senkung
+der Latte. Die 0,94 auf dem alten Set sind kein Ersatz für die 0,70 auf dem neuen.
+
+Die Daten sind klein, synthetisch und schablonenbasiert. Reale Texte sind nicht gemessen und
+schwieriger. Die Zahlen sind **eine Obergrenze für diese Satzmuster, kein Qualitätsnachweis**.
+M-12 (fail-closed bei Detektorausfall) schützt nicht vor Fehlklassifikation. Für Cloud-Egress
+bleibt ein nicht erkannter Name ein Restrisiko.
 
 ## Daten
 
 | Datei | Inhalt |
 |---|---|
-| [`generate_dataset.py`](generate_dataset.py) | deterministischer Generator (Seeds 20261005 / 4711) |
-| [`pii_eval_de.jsonl`](pii_eval_de.jsonl) | **Dev-Set**: 165 Sätze, 185 Entitäten (90 PERSON, 45 EMAIL, 30 IBAN, 20 SECRET), 25 Negativsätze (Orte, Firmen, Produkte, „Max.“, „frank und frei“, IBAN mit falscher Prüfziffer) |
-| [`pii_eval_de_heldout.jsonl`](pii_eval_de_heldout.jsonl) | **Held-out-Set**: 73 Sätze, 80 Entitäten, andere Schablonen und Seed; erst *nach* den Korrekturen erzeugt und nur zum Messen verwendet |
+| [`generate_dataset.py`](generate_dataset.py) | deterministischer Generator (Seeds 20261005 / 4711 für die ersten Dateien; 20261006 für die Dev-Erweiterung `dx-*`; 424242 für Held-out v2 `h2-*`) |
+| [`pii_eval_de.jsonl`](pii_eval_de.jsonl) | **Dev-Set**: die ursprünglichen 165 Sätze (unverändert) plus 71 Sätze Erweiterung. Zusammen 236 Sätze, 241 Entitäten (146 PERSON, 45 EMAIL, 30 IBAN, 20 SECRET). Die Erweiterung trägt `oov` |
+| [`pii_eval_de_heldout.jsonl`](pii_eval_de_heldout.jsonl) | **Held-out v1**: 73 Sätze, 80 Entitäten. Historische Messung 0,86. Nicht zum Abstimmen der Gazetteer-Regeln verwendet |
+| [`pii_eval_de_heldout_v2.jsonl`](pii_eval_de_heldout_v2.jsonl) | **Held-out v2 (maßgeblich)**: 94 Sätze, 88 Entitäten (64 PERSON, 8 EMAIL, 12 IBAN, 4 SECRET), davon 41 mit `oov: true`. Namen und Schablonen disjunkt zur Dev-Erweiterung |
 
 Alle Werte sind synthetisch: zufällige Kombinationen gängiger Vor-/Nachnamen (inkl. ü/ö/ß,
 türkischer und anderer Namen), E-Mail-Domains nach RFC 2606, IBANs mit gültiger mod-97-Prüfziffer
@@ -84,7 +96,7 @@ Modelle: `xx_ent_wiki_sm` 3.8.0 (Policy-Standard), `de_core_news_sm` 3.8.0 und
 |  | IBAN | 30 | 1.00 | 1.00 | 0 | 1.00 | 0 | 3.15 |
 |  | SECRET | 20 | 1.00 | 1.00 | 0 | 1.00 | 0 | 3.15 |
 
-**C) Held-out-Set, nach den Korrekturen (maßgeblich)** (73 Sätze; Entitäten: PERSON 50, EMAIL 10, IBAN 15, SECRET 5)
+**C) Held-out v1, nach den Korrekturen von 2026-10-05 (historisch, nicht mehr das CI-Gate)** (73 Sätze; Entitäten: PERSON 50, EMAIL 10, IBAN 15, SECRET 5)
 
 | Erkennung | Typ | n | Recall strikt | Recall maskiert | teilweise | Präzision | FP | ms/Satz |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
@@ -118,6 +130,74 @@ Modelle: `xx_ent_wiki_sm` 3.8.0 (Policy-Standard), `de_core_news_sm` 3.8.0 und
 |  | IBAN | 15 | 1.00 | 1.00 | 0 | 1.00 | 0 | 2.87 |
 |  | SECRET | 5 | 1.00 | 1.00 | 0 | 1.00 | 0 | 2.87 |
 
+## Messung 2026-10-06 (Gazetteer, deutsche spaCy-Modelle, GLiNER)
+
+Profile tauschen nur die Personen-Detektoren. `before` ist der Stand von Abschnitt C: `person-title` plus `spacy:xx_ent_wiki_sm`, ohne Gazetteer. `policy` ist die Datei unverändert und entspricht `gaz-xx`.
+
+Auswahl **vor** dem Blick auf v2, auf dem erweiterten Dev-Set: EMAIL/IBAN/SECRET maskiert müssen 1,0 bleiben, Personen-Präzision mindestens etwa 0,85, und eine neue schwere Abhängigkeit nur, wenn der Gewinn gegen `gaz-xx` mindestens 0,03 maskierten Recall bringt. `de_core_news_md` lag darunter (+0,021). `de_core_news_lg` ist mehrere hundert Megabyte, senkt auf dem Dev-Set den strikten SECRET-Recall auf 0,95 (maskiert bleibt 1,0) und ist auf v2 nicht durchgängig besser als `md`. GLiNER (`urchade/gliner_multi_pii-v1`, Label `person`, `minScore` 0,35) erreicht maskiert 1,00 inklusive unbekannter Namen, braucht aber torch und etwa 80–95 ms/Satz. **Standard bleibt Gazetteer (Paare plus Kontext-Preset `de`) plus `spacy:xx_ent_wiki_sm`.** Das Modell liegt schon im Image. Nach v2 wurde daran nichts geändert, auch nicht an den Kontextformeln, die v2 absichtlich unbekannt lässt (`i. V.`, `Gezeichnet`, `Ich bin`, `Ansprechpartner`, `Könntest du`).
+
+Latenz: ein frischer Prozess je Profil, CPU, ein Satz nach dem anderen, Modell vor der Schleife geladen, kein separates Warmup. Die Millisekunden schwanken zwischen Läufen; der Recall nicht. `person_by_vocab` auf dem Dev-Set zählt nur die 56 PERSON-Spannen der Erweiterung (`dx-*`, 23 in der Liste, 33 außerhalb), nicht die ursprünglichen 90.
+
+**E) Erweitertes Dev-Set, Auswahlmenge** (236 Sätze; PERSON 146, EMAIL 45, IBAN 30, SECRET 20). EMAIL/IBAN/SECRET maskiert 1,0 und Präzision 1,0, außer: `spacy-lg` und `gaz-lg` SECRET strikt 0,950 (maskiert 1,0); `gliner` und `gaz-gliner` EMAIL strikt 0,933 (maskiert 1,0).
+
+| Profil | R strikt | R maskiert | teilweise | Präzision | FP | ms/Satz | in Liste | außerhalb |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| before | 0.747 | 0.849 | 1 | 0.874 | 18 | 1.83 | 0.913 | 0.545 |
+| spacy-md | 0.788 | 0.890 | 2 | 0.886 | 17 | 3.68 | 0.913 | 0.697 |
+| spacy-lg | 0.767 | 0.918 | 0 | 0.887 | 17 | 3.72 | 0.913 | 0.788 |
+| pairs | 0.562 | 0.562 | 0 | 1.000 | 0 | 0.02 | 0.609 | 0.152 |
+| context | 0.452 | 0.452 | 0 | 1.000 | 0 | 0.06 | 0.870 | 0.636 |
+| gazetteer | 0.740 | 0.740 | 0 | 1.000 | 0 | 0.04 | 1.000 | 0.636 |
+| **gaz-xx (Standard)** | **0.801** | **0.904** | **0** | **0.880** | **18** | **1.53** | **1.000** | **0.697** |
+| gaz-md | 0.822 | 0.925 | 2 | 0.890 | 17 | 3.63 | 1.000 | 0.788 |
+| gaz-lg | 0.788 | 0.938 | 0 | 0.890 | 17 | 3.89 | 1.000 | 0.818 |
+| gliner | 0.774 | 1.000 | 0 | 0.874 | 21 | 94.97 | 1.000 | 1.000 |
+| gaz-gliner | 0.774 | 1.000 | 0 | 0.874 | 21 | 88.37 | 1.000 | 1.000 |
+
+Das Gazetteer allein hat auf diesem Set 0 False Positives. Die 18 FP von `gaz-xx` sind dieselben wie bei `before` (spaCy: „Wer“, „Meine Adresse“, „Herr Dr“, „Max“ und weitere Satzanfänge). Quelle: [`results-dev-isolated.json`](results-dev-isolated.json).
+
+**F) Held-out v2, Berichtsmenge** (94 Sätze; PERSON 64, EMAIL 8, IBAN 12, SECRET 4). EMAIL, IBAN und SECRET: Recall maskiert 1,0 und Präzision 1,0 in jedem Profil. `policy` wurde separat geprüft und trifft `gaz-xx` (0,703).
+
+| Profil | R strikt | R maskiert | teilweise | Präzision | FP | ms/Satz | in Liste | außerhalb |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| before | 0.375 | 0.594 | 0 | 0.844 | 7 | 1.68 | 0.652 | 0.561 |
+| spacy-md | 0.406 | 0.734 | 0 | 0.922 | 4 | 4.76 | 0.826 | 0.683 |
+| spacy-lg | 0.375 | 0.609 | 0 | 0.867 | 6 | 3.98 | 0.565 | 0.634 |
+| pairs | 0.234 | 0.250 | 1 | 1.000 | 0 | 0.02 | 0.478 | 0.122 |
+| context | 0.328 | 0.328 | 0 | 1.000 | 0 | 0.03 | 0.609 | 0.171 |
+| gazetteer | 0.391 | 0.406 | 1 | 1.000 | 0 | 0.04 | 0.826 | 0.171 |
+| **gaz-xx / policy** | **0.484** | **0.703** | **1** | **0.868** | **7** | **1.51** | **0.913** | **0.585** |
+| gaz-md | 0.406 | 0.734 | 0 | 0.922 | 4 | 3.94 | 0.826 | 0.683 |
+| gaz-lg | 0.484 | 0.734 | 0 | 0.887 | 6 | 4.28 | 0.826 | 0.683 |
+| gliner | 0.828 | 1.000 | 0 | 0.877 | 9 | 81.79 | 1.000 | 1.000 |
+| gaz-gliner | 0.812 | 1.000 | 0 | 0.877 | 9 | 81.49 | 1.000 | 1.000 |
+
+Quelle: [`results-heldout-v2.json`](results-heldout-v2.json). CI-Schwelle: PERSON `recall_masked` ≥ 0,703, EMAIL/IBAN/SECRET ≥ 1,0, Profil `policy`.
+
+**G) Held-out v1, nur nachgemessen** (nicht zum Tunen, nicht das Gate). `before` trifft den veröffentlichten Wert 0,86.
+
+| Profil | R strikt | R maskiert | Präzision | FP | ms/Satz |
+|---|---:|---:|---:|---:|---:|
+| before | 0.720 | 0.860 | 0.956 | 2 | 2.25 |
+| gazetteer | 0.840 | 0.840 | 1.000 | 0 | 0.06 |
+| gaz-xx | 0.800 | 0.940 | 0.959 | 2 | 1.70 |
+| gaz-md | 0.900 | 0.980 | 0.925 | 4 | 5.22 |
+| gaz-lg | 0.900 | 1.000 | 1.000 | 0 | 5.28 |
+| gliner | 0.800 | 1.000 | 0.962 | 2 | 80.47 |
+
+### Vorher / nachher
+
+| Menge | Detektor | PERSON maskiert | Präzision | FP | ms/Satz |
+|---|---|---:|---:|---:|---:|
+| Held-out v1 | before (veröffentlicht) | 0.860 | 0.956 | 2 | 2.25 |
+| Held-out v1 | gaz-xx | 0.940 | 0.959 | 2 | 1.70 |
+| Held-out v2 | before | 0.594 | 0.844 | 7 | 1.68 |
+| Held-out v2 | gaz-xx (Standard, CI-Gate) | 0.703 | 0.868 | 7 | 1.51 |
+
+Was weiterhin durchrutscht: Namen, die nicht in den Listen stehen und keinen starken Kontext haben (kleingeschrieben im Fließtext, alleinstehende Vornamen wie Ülkü, Ines, Chinedu, Sabine). Listen-Namen mit Paar oder Cue liegen auf v2 bei 0,913 maskiert. Das Gazetteer allein ist präzise (v2: 0 FP) und schwach im Recall (0,406). Größere spaCy-Modelle sind nicht einheitlich besser: `de_core_news_lg` allein liegt auf v2 bei 0,609, unter `md` (0,734). GLiNER ist die Qualitätsoption und zu schwer für den Image-Standard.
+
+Die Listen (5921 Vornamen, 1998 Nachnamen, Stand 2026-10-06) sind Häufigkeitslisten, kein Register. „Mustermann“ fehlt; Erika und Max Mustermann maskiert weiterhin spaCy, das die Konformitätssuite braucht. Lizenzen: [`../../gateway/aism_gateway/data/README.md`](../../gateway/aism_gateway/data/README.md).
+
 ## Gefundene Schwächen und Korrekturen
 
 1. **IBAN gefolgt von Großbuchstaben-Token wurde nie erkannt** (Dev-Set A: 5/30 verfehlt, alle
@@ -129,9 +209,13 @@ Modelle: `xx_ent_wiki_sm` 3.8.0 (Policy-Standard), `de_core_news_sm` 3.8.0 und
    **Ergänzung**: Regex-Detektor `person-title` in den Policies (maskiert per benannter Gruppe
    `(?P<pii>…)` nur den Namen; neue Policy-Format-Regel). Effekt auf dem Held-out-Set klein
    (0,84 → 0,86), da dort wenige Anreden vorkommen; auf dem Dev-Set größer, aber dort entwickelt.
-3. **Nicht korrigiert:** kleingeschriebene Namen („ines wagner“), alleinstehende Vornamen
-   („Danke Max!“, „Moritz sagt …“), seltene Namen („Ülkü“), Über-Maskierung großgeschriebener
-   Satzanfänge („Meine Adresse“, „Wer“, „Schick“, „Leite“) und Produktnamen („Teams“).
+3. **Gazetteer (2026-10-06), auf der Dev-Erweiterung entwickelt, nicht auf Held-out v1 oder v2:**
+   Paare unabhängig von der Großschreibung („anna müller“), starke Cues auch für unbekannte
+   Namen („mein Name ist …“, Signatur, Grußformel) und schwache Cues nur für gelistete Tokens
+   („Danke, Max!“, „Anna sagt“, „Liebe Anna“). „Mein Name ist im Telefonbuch“, „Hallo zusammen“,
+   „Max. 5 Geräte“ und „frank und frei“ bleiben unmaskiert. **Nicht gelöst:** unbekannte Namen
+   ohne starken Cue, und die spaCy-False-Positives an Satzanfängen. Die Kontextformeln, die nur
+   in v2 vorkommen, wurden nach der Messung nicht nachgetragen.
 
 ## Bewertung und Empfehlung
 
@@ -140,23 +224,29 @@ Modelle: `xx_ent_wiki_sm` 3.8.0 (Policy-Standard), `de_core_news_sm` 3.8.0 und
   Cloud-Fallback daher nur für `public`/`internal` ohne erkannte Entitäten – ein *nicht erkannter*
   Name fällt aber genau in diese Klasse. Betreiber SOLLTEN Cloud-Egress nur mit einem auf eigenen
   Daten gemessenen Detektor freigeben oder auf Rollen/Anwendungsfälle ohne Personenbezug begrenzen.
-- `de_core_news_md` ist auf dem Held-out-Set beim strikten Recall leicht besser (0,78 vs. 0,72),
-  beim datenschutzrelevanten Recall gleichauf (0,86) und ≈ 2× langsamer. Ein Modellwechsel allein
-  löst das Problem nicht; nächste Schritte wären ein größeres Modell (`de_core_news_lg`, Transformer)
-  oder ein dediziertes PII-Modell, Gazetteers für Vornamen und eine Messung auf echten,
-  pseudonymisierten Betriebsdaten.
+- Der Standard ist Gazetteer plus `xx_ent_wiki_sm` (Abschnitt F: 0,703 maskiert auf v2, etwa 1,5 ms).
+  `de_core_news_md` mit Gazetteer liegt auf v2 bei 0,734 und etwa 4 ms, ist aber nicht im Image.
+  `de_core_news_lg` ist auf v2 nicht besser als `md` und auf dem Dev-Set beim strikten SECRET-Recall
+  schlechter. GLiNER ist über `ner.model` zuschaltbar (`gliner:urchade/gliner_multi_pii-v1`,
+  Labels `person`, `minScore` 0,35): auf v2 maskiert 1,00 bei etwa 82 ms/Satz. Eine Messung auf
+  echten, pseudonymisierten Betriebsdaten fehlt.
 
 ## Reproduzieren
 
 ```bash
-python3 conformance/pii-eval/generate_dataset.py
-pip install <de_core_news_sm/md-Wheels>      # optional, zusätzlich zu xx_ent_wiki_sm
-python3 conformance/pii-eval/evaluate.py --ner none --ner spacy:xx_ent_wiki_sm \
-  --ner spacy:de_core_news_sm --ner spacy:de_core_news_md --out results-dev.json
-python3 conformance/pii-eval/evaluate.py --data conformance/pii-eval/pii_eval_de_heldout.jsonl \
-  --ner none --ner spacy:xx_ent_wiki_sm --ner spacy:de_core_news_sm --ner spacy:de_core_news_md --out results-heldout.json
+python3 conformance/pii-eval/generate_dataset.py   # schreibt Dev, v1 und v2 neu; Seeds sind fest
+python3 conformance/pii-eval/evaluate.py \
+  --data conformance/pii-eval/pii_eval_de_heldout_v2.jsonl \
+  --profile policy --gate conformance/pii-eval/gate.json --no-misses
+# Varianten: --profile before|spacy-md|spacy-lg|pairs|context|gazetteer|gaz-xx|gaz-md|gaz-lg|gliner|gaz-gliner
+# de_core_news_md/lg und GLiNER (torch, transformers) sind nicht im Gateway-Image.
 ```
 
-Ergebnisdateien: `results-v0-before-fixes.json` (A), `results-dev.json` (B), `results-heldout.json`
-(C), `results-heldout-no-title-rule.json` (D) – jeweils mit allen Fehltreffern (`misses`) und
-False Positives.
+`tools/ci-local.sh pii` prüft nur das Profil `policy` gegen [`gate.json`](gate.json).
+
+Ergebnisdateien der Messung von 2026-10-05: `results-v0-before-fixes.json` (A), `results-dev.json` (B),
+`results-heldout.json` (C), `results-heldout-no-title-rule.json` (D).
+Messung 2026-10-06: `results-dev-isolated.json` (E), `results-heldout-v2.json` (F),
+`results-heldout-v1-remeasure.json` (G). `results-dev-variants.json` ist ein früherer gemeinsamer
+Lauf mit Fehltreffern; die Millisekunden darin sind verzerrt, weil das erste Profil den Prozess
+aufwärmt. Die Tabellen nutzen die isolierten Läufe.

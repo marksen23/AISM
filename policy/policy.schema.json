@@ -181,17 +181,48 @@
       "properties": {
         "id": { "$ref": "#/$defs/id" },
         "entity": { "type": "string", "pattern": "^[A-Z][A-Z_]*$" },
-        "type": { "enum": ["regex", "ner", "checksum"] },
+        "type": { "enum": ["regex", "ner", "checksum", "gazetteer"] },
         "patterns": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
         "ner": {
           "type": "object",
           "additionalProperties": false,
           "required": ["model", "labels", "minScore"],
           "properties": {
-            "model": { "type": "string" },
+            "model": {
+              "type": "string",
+              "pattern": "^(spacy|gliner):\\S+$",
+              "description": "spacy:<modell> (minScore wird ignoriert) oder gliner:<modell> (minScore ist die Schwelle; Labels z. B. person)"
+            },
             "labels": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
             "minScore": { "type": "number", "minimum": 0, "maximum": 1 },
             "languages": { "type": "array", "items": { "type": "string", "pattern": "^[a-z]{2}$" } }
+          }
+        },
+        "gazetteer": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["givenNames", "surnames"],
+          "description": "Listenreferenz builtin:de-given / builtin:de-surnames oder file:<relativer Pfad>. contextPreset de ist der deutsche Referenzregelsatz; contextRules ersetzt ihn.",
+          "properties": {
+            "givenNames": { "type": "string", "pattern": "^(builtin:de-given|file:[A-Za-z0-9_./-]+)$" },
+            "surnames": { "type": "string", "pattern": "^(builtin:de-surnames|file:[A-Za-z0-9_./-]+)$" },
+            "matchPairs": { "type": "boolean", "default": true, "description": "Vorname unmittelbar gefolgt von Nachname, unabhängig von der Großschreibung" },
+            "contextPreset": { "enum": ["de", "none"], "default": "de" },
+            "contextRules": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["accept", "patterns"],
+                "properties": {
+                  "accept": {
+                    "enum": ["cue", "gazetteer-all", "gazetteer-any"],
+                    "description": "cue: ein Token nur wenn gelistet, zwei oder drei namensförmige Token auch sonst. gazetteer-all: jedes Token gelistet. gazetteer-any: mindestens eines."
+                  },
+                  "patterns": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 }
+                }
+              }
+            }
           }
         },
         "checksum": { "enum": ["iban-mod97", "luhn"] },
@@ -206,7 +237,8 @@
       "allOf": [
         { "if": { "properties": { "type": { "const": "regex" } } }, "then": { "required": ["patterns"] } },
         { "if": { "properties": { "type": { "const": "ner" } } }, "then": { "required": ["ner"] } },
-        { "if": { "properties": { "type": { "const": "checksum" } } }, "then": { "required": ["patterns", "checksum"] } }
+        { "if": { "properties": { "type": { "const": "checksum" } } }, "then": { "required": ["patterns", "checksum"] } },
+        { "if": { "properties": { "type": { "const": "gazetteer" } } }, "then": { "required": ["gazetteer"] } }
       ]
     },
 

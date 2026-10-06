@@ -1,5 +1,4 @@
 """Unit tests for the gateway prototype (run: python -m pytest gateway/tests)."""
-import json
 import pathlib
 import sys
 
@@ -84,6 +83,73 @@ def test_policy_semantic_error(tmp_path):
     f.write_text(bad)
     with pytest.raises(PolicyError):
         load_policy(f, SCHEMA)
+
+
+_PERSON_MASK = {"strategy": "placeholder", "placeholderFormat": "<PERSON_{n}>", "reversible": True, "demaskFor": ["staff"]}
+_TITLE_PATTERNS = [
+    r"\b(?:Herrn?|Frau|Hr\.|Fr\.)\s+(?:(?:Dr|Prof)\.\s+)*(?P<pii>[A-ZÄÖÜÇŞİ][^\W\d_]+(?:-[A-ZÄÖÜ][^\W\d_]+)?(?:\s+[A-ZÄÖÜÇŞİ][^\W\d_]+(?:-[A-ZÄÖÜ][^\W\d_]+)?)?)",
+    r"\b(?:Dr|Prof)\.\s+(?P<pii>[A-ZÄÖÜÇŞİ][^\W\d_]+(?:-[A-ZÄÖÜ][^\W\d_]+)?(?:\s+[A-ZÄÖÜÇŞİ][^\W\d_]+)?)",
+]
+
+
+def _gazetteer_masker():
+    spec = {"piiDetectors": [
+        {"id": "person-title", "entity": "PERSON", "type": "regex", "patterns": _TITLE_PATTERNS, "masking": _PERSON_MASK},
+        {"id": "person-gazetteer", "entity": "PERSON", "type": "gazetteer", "masking": _PERSON_MASK,
+         "gazetteer": {"givenNames": "builtin:de-given", "surnames": "builtin:de-surnames",
+                       "matchPairs": True, "contextPreset": "de"}},
+    ]}
+    dets, errs = build_detectors(spec)
+    assert not errs, errs
+    return Masker(dets, {"PERSON": 2})
+
+
+def _masked(masker, text):
+    out, _ = masker.mask(text, Vault(), "prompt")
+    return out
+
+
+def test_gazetteer_pairs_and_context_rules():
+    m = _gazetteer_masker()
+    pair = _masked(m, "anna müller").casefold()
+    assert "anna" not in pair and "müller" not in pair
+    assert "ines" not in _masked(m, "mein name ist ines holtkamp").casefold()
+    assert "nkechi" not in _masked(m, "Mein Name ist Nkechi Ngono").casefold()
+    assert "sabine" not in _masked(m, "Unterschrift: Sabine Holtkamp").casefold()
+    assert "chinedu" not in _masked(m, "i. A. Chinedu Çelik").casefold()
+    assert "<PERSON_1>" in _masked(m, "Danke, Max!")
+    assert "<PERSON_1>" in _masked(m, "Liebe Anna")
+    assert "<PERSON_1>" in _masked(m, "Anna sagt hallo")
+    signed = _masked(m, "Viele Grüße, Anna Müller\nIT-Service")
+    assert "Anna" not in signed and "Müller" not in signed and "IT-Service" in signed
+    titled = _masked(m, "Frau Müller hat geschrieben")
+    assert "Frau" in titled and "Müller" not in titled
+    for plain in (
+        "Mein Name ist im Telefonbuch",
+        "Hallo zusammen",
+        "Max. 5 Geräte",
+        "frank und frei",
+        "kannst du ines holtkamp bescheid geben",
+        "Wer sagt das",
+        "Firma Müller GmbH",
+        "Projekt Phoenix",
+        "Viele Grüße\nIT-Service",
+    ):
+        assert _masked(m, plain) == plain, plain
+
+
+def test_example_policy_masks_mustermann(masker):
+    out, ents = masker.mask("Erika Mustermann und Max Mustermann", Vault(), "prompt")
+    assert "Erika" not in out and "Max" not in out and "Mustermann" not in out
+    assert "PERSON" in ents
+
+
+def test_gazetteer_absolute_file_rejected(tmp_path):
+    bad = POLICY.read_text().replace("givenNames: builtin:de-given", "givenNames: file:/etc/passwd")
+    path = tmp_path / "p.yaml"
+    path.write_text(bad)
+    with pytest.raises(PolicyError):
+        load_policy(path, SCHEMA)
 
 
 def test_traceparent():
