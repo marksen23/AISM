@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| Dokumentstatus | Entwurf 0.2 (Testsuite 0.2.1, Nachtrag 06.10.2026: K3-11 Vier-Augen, K3-12 Schlüsselrotation) |
+| Dokumentstatus | Entwurf 0.2 (Testsuite 0.3.0, Nachtrag 06.10.2026: K3-11/K3-12 Vier-Augen; K3-13 Object Lock, K3-14 Prüfpunkte, K3-15 Fail-closed) |
 | Datum | 05.10.2026 |
 | Bezug | [`../AISM-Spezifikation.md`](../AISM-Spezifikation.md) §9 (M-xx, S-xx), [`../policy/AISM-Policy-Format.md`](../policy/AISM-Policy-Format.md), Testsuite [`tests/`](tests/) |
 | Normative Sprache | MUSS / SOLLTE gemäß RFC 2119 |
@@ -21,7 +21,7 @@ Die Stufen heißen **K1–K3**, damit sie nicht mit den AISM-Stufen S1–S7 oder
 |---|---|---|---|
 | **K1** | Basic | Gateway erzwungen, OpenAI-kompatible API inkl. SSE, Health, Authentifizierung, kein Bypass | M-01, M-06, M-13 sowie §6.2 Schritt 1 (AuthN) |
 | **K2** | Governed | K1 + PII-Maskierung, Tool-Allowlist und Schemaprüfung, Audit ohne Klartext-PII, RAG nur nach Maskierung, gültige Policy geladen, Cloud standardmäßig aus | zusätzlich M-02, M-04, M-05, M-07, M-08, M-09, M-11, M-12, M-15 |
-| **K3** | Sovereign/Auditable | K2 + signierte Policy-Versionen, Trace-IDs Ende-zu-Ende, Cloud-Fallback mit Nachweis, reproduzierbares Deployment (Digests), manipulationserkennbares Audit | zusätzlich S-02, S-07, S-10, S-11, S-13, **die in K3 als Pflicht gelten** |
+| **K3** | Sovereign/Auditable | K2 + signierte Policy-Versionen, Trace-IDs Ende-zu-Ende, Cloud-Fallback mit Nachweis, reproduzierbares Deployment (Digests), manipulationserkennbares Audit (Hash-Kette, signierte Prüfpunkte, Object-Lock-Senke, Fail-closed) | zusätzlich S-02, S-07, S-10, S-11, S-13, **die in K3 als Pflicht gelten** |
 
 Eine Stufe gilt als **erreicht**, wenn alle MUSS-Tests dieser und aller darunterliegenden Stufen **bestanden** sind. Übersprungene MUSS-Tests (fehlende Voraussetzung) gelten als **nicht erreicht**. Fehlgeschlagene SOLLTE-Tests verhindern die Stufe nicht, werden aber im Bericht ausgewiesen.
 
@@ -106,6 +106,9 @@ Spalte **Art**: `live`, `capture`, `audit`, `static`, `manuell`. Spalte **Status
 | AISM-K3-10 | SOLLTE | M-04, PEP-4, PEP-9, S-13 | Szenario | lokales Modell gestoppt, Cloud-Test-Policy, HTTPS-Mock-Provider (`compose.cloud-fallback.yml`) | ohne PII und mit Rolle `it-ops`: Antwort vom Cloud-Modell (JSON und Stream), keine `X-AISM-*`-Header beim Provider, Audit `egress.cloud` mit `reason: local_unavailable`; mit PII bzw. ohne Rolle: `503`, nichts beim Provider | impl. |
 | AISM-K3-11 | MUSS | S-11 | live | `GET /aism/v1/policy` und der letzte Audit-Eintrag `policy.loaded` | `signature.threshold` ≥ 2; mindestens zwei verschiedene Identitäten in `signature.signers`; dieselben Identitäten (keine privaten Schlüssel) im Audit | impl. |
 | AISM-K3-12 | MUSS | S-11 | live | Schlüsselring zur Laufzeit um einen überlappend gültigen Schlüssel erweitern (`AISM_KEYRING`, `AISM_SIGNING_KEYS`, Quorum der bisherigen Schlüssel); danach eine Änderung mit nur einer Signatur versuchen | Gateway bleibt bereit, Policy-Digest unverändert, `keyring.version` steigt um 1; die quorumlose Änderung wird abgelehnt und die Version bleibt | impl. |
+| AISM-K3-13 | MUSS | S-02 | live | eine versionierte Entry-Kopie in der Object-Lock-Senke per Version-ID löschen; abweichende Bytes ohne Sperr-Header schreiben und die neue Version wieder entfernen | Löschen der gesperrten Version wird abgelehnt (HTTP ≥ 400), die Bytes dieser Version bleiben; die Schattenversion ist danach weg | impl. |
+| AISM-K3-14 | MUSS | S-02 | live | `tools/aism-audit-verify.py` gegen die lokale JSONL, die Prüfpunkte, den Schlüsselring (Rolle `audit`) und die WORM-Senke, einschließlich `keyring-state.json` | Bericht `ok: true`, Exit 0; Kette, Signaturen und Spiegel ohne Befund | impl. |
+| AISM-K3-15 | MUSS | S-02 | live+capture | ungesperrtes Objekt `{prefix}fault/block` anlegen (`AISM_AUDIT_FAULT_INJECTION=1`); Chat-Request; Objekt in `finally` löschen | `/health` und der Request antworten `503` mit `audit_unavailable`; der Capture-Mock sieht den Nonce nicht; danach ist das Gateway wieder bereit | impl. |
 
 ## 4. Testdaten
 
@@ -214,6 +217,8 @@ Ergebnis: **`achieved_level: K3`**, 37 bestanden, 0 fehlgeschlagen, 0 übersprun
 
 Ein früherer Docker-Lauf **ohne** vorheriges Cloud-Szenario ergab 36 bestanden und K3-04 übersprungen (K2). Der K3-Nachweis braucht also beide Läufe.
 
+Die Tabelle ist der Lauf vom 05.10.2026. Der Katalog danach enthält zusätzlich AISM-K3-11, AISM-K3-12 und, seit dem Nachtrag zur Audit-Senke, AISM-K3-13, AISM-K3-14 und AISM-K3-15. Dafür startet die Suite SeaweedFS als `audit-worm` (Apache-2.0, per Digest gepinnt). `prepare_audit_sink.sh` schreibt `s3.json` zur Laufzeit; der Audit-Schlüssel `aism-audit@localhost` (Rolle `audit`) signiert Prüfpunkte und steht nicht in `allowed_signers`. CI verlangt für den vollständigen Bericht weiterhin `achieved_level: K3`, `failed: 0`, `skipped: 0`.
+
 ### 7.3 Szenario Cloud-Fallback (AISM-K3-04, AISM-K3-10)
 
 [`tests/prepare_cloud_scenario.sh`](tests/prepare_cloud_scenario.sh) signiert die Cloud-Test-Policy [`tests/testdata/policy.conformance-cloud.yaml`](tests/testdata/policy.conformance-cloud.yaml) und erzeugt eine Test-CA mit Serverzertifikat. Der CA-Schlüssel wird danach gelöscht. [`tests/compose.cloud-fallback.yml`](tests/compose.cloud-fallback.yml) startet einen HTTPS-Mock-Provider im `egress`-Netz; der lokale Inferenz-Mock `llama-mock` wird **gestoppt**. Ergebnis (6 Tests, alle bestanden; [`scenario_cloud_fallback.py`](tests/scenario_cloud_fallback.py)):
@@ -249,3 +254,4 @@ Gateway-Prototyp und Orchestrator-Stub lokal (Python 3.13, uvicorn), Runner in e
 2. Lauf mit den echten Komponenten (Open WebUI, llama.cpp auf GPU, n8n, SearXNG) und einem echten IdP. Der Mock-Lauf läuft in CI; die echten Komponenten nicht.
 3. K3-04 hängt davon ab, dass vorher Cloud-Egress stattfand. Für Installationen mit dauerhaft deaktiviertem Cloud-Routing ist zu klären, ob K3-04 „nicht anwendbar“ statt „übersprungen“ werten soll.
 4. Prüfung des Bestätigungsablaufs über die Oberfläche (Open WebUI) fehlt; die Suite prüft nur die API.
+5. AISM-K3-13 prüft Object Lock auf der S3-API. Ein Löschen über den Filer von SeaweedFS ist nicht Teil der Suite; die Referenz veröffentlicht den Filer nicht. Die TSA-Zertifikatskette wird nicht geprüft.

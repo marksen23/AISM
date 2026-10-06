@@ -11,6 +11,8 @@ bound to the policy bytes; the bundle also records revision and digest. Distinct
 identities count once. Expired, revoked and unknown keys do not count.
 
 No HSM and no transparency log. The gateway clock decides validity windows.
+Roles are ``policy`` (signs policies), ``keyring`` (signs the next ring) and ``audit``
+(signs audit checkpoints only; it does not count toward either quorum).
 """
 from __future__ import annotations
 
@@ -26,7 +28,7 @@ import yaml
 from . import policysig
 
 NAMESPACE = "aism-keyring"
-ROLES = frozenset({"policy", "keyring"})
+ROLES = frozenset({"policy", "keyring", "audit"})
 BUNDLE_VERSION = "aism.trust/v1"
 
 

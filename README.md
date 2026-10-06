@@ -244,7 +244,7 @@ AISM is meant to be checked, not believed. The reference stack produces evidence
 |---|---|---|
 | Which rules were in force | every audit entry carries policy name, version, revision and SHA-256 digest; the policy file is signed and the gateway reports `signature.verified` | M-15, S-11 · AISM-K2-09, -K3-01, -K3-09 |
 | That a tampered or unsigned policy is not used | fault injection: the suite swaps in unsigned and modified files, the gateway keeps the previous policy and logs `policy.load_failed` | S-11 · AISM-K3-08 |
-| That the log was not edited afterwards | hash chain (`prev_hash` = SHA-256 of the previous line), continued across restarts | S-02 · AISM-K3-07 |
+| That the log was not edited afterwards | hash chain (`prev_hash` = SHA-256 of the previous line) plus signed Ed25519 checkpoints and an S3 Object Lock mirror (SeaweedFS, run locally). A full queue or a marked sink outage returns 503; entries are not dropped. `tools/aism-audit-verify.py` checks the chain, the signatures and the mirror | S-02 · AISM-K3-07, -K3-13, -K3-14, -K3-15 |
 | What left the organisation | `egress.cloud` with rule ID, provider, policy digest and SHA-256 of the masked payload; web searches as `egress.websearch` with a query hash | S-13 · AISM-K3-04, -K3-10, -K2-19 |
 | That no plaintext PII reached models or logs | capture mock records what S3–S6 receive; the audit log is searched for the synthetic test values | M-02, M-05 · AISM-K2-03, -K2-08 |
 | Which software ran | images pinned by `@sha256` digest; locally built images are reproducible (identical digests in two clean builds) | S-07 · AISM-K3-05 |

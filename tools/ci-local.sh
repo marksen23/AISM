@@ -119,17 +119,23 @@ repro() {
 }
 
 _ensure_env() {
-  if [[ -f .env ]]; then
-    return 0
-  fi
   umask 077
-  local v
-  for v in AISM_UI_CLIENT_KEY AISM_FORWARD_JWT_SECRET AISM_INTERNAL_TOKEN \
-           AISM_QDRANT_API_KEY AISM_N8N_WEBHOOK_TOKEN AISM_SEARXNG_SECRET; do
-    printf '%s=%s\n' "$v" "$(openssl rand -hex 32)"
-  done > .env
+  if [[ ! -f .env ]]; then
+    local v
+    for v in AISM_UI_CLIENT_KEY AISM_FORWARD_JWT_SECRET AISM_INTERNAL_TOKEN \
+             AISM_QDRANT_API_KEY AISM_N8N_WEBHOOK_TOKEN AISM_SEARXNG_SECRET; do
+      printf '%s=%s\n' "$v" "$(openssl rand -hex 32)"
+    done > .env
+    echo "wrote .env with runtime secrets (not committed)"
+  fi
+  local name
+  for name in AISM_AUDIT_S3_ACCESS_KEY AISM_AUDIT_S3_SECRET_KEY; do
+    if ! grep -q "^${name}=" .env; then
+      printf '%s=%s\n' "$name" "$(openssl rand -hex 16)" >> .env
+      echo "added $name to .env (not committed)"
+    fi
+  done
   chmod 600 .env
-  echo "wrote .env with runtime secrets (not committed)"
 }
 
 _wait_health() {
@@ -172,6 +178,7 @@ PY
 
 conformance() {
   _ensure_env
+  bash conformance/tests/prepare_audit_sink.sh
   bash conformance/tests/prepare_cloud_scenario.sh
   # Globals: the EXIT trap runs after this function returns (locals would already be gone).
   COMPOSE_C=(docker compose -f docker-compose.yml -f conformance/tests/compose.conformance.yml)
@@ -184,7 +191,7 @@ conformance() {
   trap cleanup EXIT
 
   # Cloud-fallback first, on the same audit volume the full run will read (K3-04).
-  "${COMPOSE_CL[@]}" up -d --build governance-proxy orchestrator aism-mock mock-cloud llama-mock mock-idp
+  "${COMPOSE_CL[@]}" up -d --build governance-proxy orchestrator aism-mock mock-cloud llama-mock mock-idp audit-worm
   "${COMPOSE_CL[@]}" stop llama-mock
   _wait_health
   "${COMPOSE_CL[@]}" --profile runner run --rm \
@@ -194,7 +201,7 @@ conformance() {
     -k "fallback or audit or egress"
   "${COMPOSE_CL[@]}" down
 
-  "${COMPOSE_C[@]}" up -d --build governance-proxy orchestrator aism-mock mock-idp
+  "${COMPOSE_C[@]}" up -d --build governance-proxy orchestrator aism-mock mock-idp audit-worm
   _wait_health
   "${COMPOSE_C[@]}" --profile runner run --rm \
     -e AISM_REPORT=/repo/conformance/reports/ci/aism-report.json \

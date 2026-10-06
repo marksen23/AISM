@@ -14,6 +14,7 @@
 | Nachtrag 06.10.2026 | Personen-Gazetteer und Kontextregeln als Policy-Detektor (`type: gazetteer`); NER-Modelle `spacy:` und `gliner:` in der Policy wählbar. Standard bleibt `spacy:xx_ent_wiki_sm` plus Gazetteer. Messung auf einem frischen Held-out-Set: [`conformance/pii-eval/README.md`](conformance/pii-eval/README.md). CI führt Lint, Unit-Tests, Schema, Signatur, PII-Gate, reproduzierbaren Build und die Konformitätssuite (Mocks) aus. |
 | Nachtrag 06.10.2026 (2) | Optionale NER-Kaskade (`ner.cascade`): das schnelle Modell läuft immer, ein schwereres Modell nur auf verdächtigen Sätzen, fail-closed wenn das Sekundärmodell konfiguriert aber nicht ladbar ist. Standard-Policy und Standard-Image bleiben ohne torch. Messung: [`conformance/pii-eval/README.md`](conformance/pii-eval/README.md) Abschnitt H. |
 | Nachtrag 06.10.2026 (3) | Schlüsselrotation und Vier-Augen-Signaturen (§6.2.1): quorum-signierter Schlüsselring mit Gültigkeitsfenstern und Widerruf, Bündel `policy.yaml.sigs`, Schwelle (K3-Standard 2), Anti-Rollback des Rings. Tests AISM-K3-11, AISM-K3-12. Kein HSM, kein Transparenzlog. |
+| Nachtrag 06.10.2026 (4) | Audit über die lokale Datei hinaus (§6.2.2): S3 Object Lock als eigene Senke, signierte Prüfpunkte (Rolle `audit`), begrenzte Warteschlange mit Fail-closed, Sicherung von `keyring-state.json`. Tests AISM-K3-13, AISM-K3-14, AISM-K3-15. Kein Cloud-Dienst erforderlich. |
 | Sprache | Deutsch; Protokoll-, Feld- und Produktnamen im Original |
 
 > **Hinweis:** „AISM“ bezeichnet das Referenzmodell; die Referenzimplementierung heißt „AISM Reference Stack“. AISM ist ein unabhängiges Projekt ohne Verbindung zu anderen Produkten ähnlichen Namens oder Zwecks. Die mit „AISM-Bezeichnung“ gekennzeichneten Kürzel (z. B. *SSGP*, *GVP*) sind **ausschließlich interne Modellbegriffe**. Es handelt sich **nicht** um Protokolle oder Standards. Auf der Leitung werden ausschließlich die jeweils genannten realen Standards verwendet.
@@ -319,7 +320,7 @@ Fällt die PII-Erkennung aus, MUSS das Gateway **fail-closed** reagieren: keine 
 
 - Die Policy SOLLTE signiert sein (S-11). Referenzverfahren: **SSHSIG mit Ed25519**. Begründung: offline nutzbar, keine Infrastruktur (kein Rekor/Fulcio), mit `ssh-keygen -Y verify -n aism-policy` je Signatur unabhängig prüfbar. Sigstore `cosign sign-blob` bleibt eine gleichwertige Alternative (`method: sigstore`) und ist im Prototyp nicht umgesetzt.
 - Signiert werden die exakten Bytes der Policy-Datei. `metadata.revision` (Git-Commit oder Inhalts-SHA-256) MUSS gesetzt sein und ist mitsigniert. `metadata.signature` verweist auf `policy.yaml.sig` (eine Signatur, `signer`) oder `policy.yaml.sigs` (Bündel, `threshold`). Das Bündel nennt zusätzlich Revision und SHA-256-Digest; jede Signatur ist an diese Bytes gebunden.
-- Vertrauensanker, nicht Teil der Policy: für Schwelle 1 eine `allowed_signers`-Datei; für mehrere Signierer ein Schlüsselring (`keyring.yaml`, Namespace `aism-keyring`). Der Ring nennt Identität, öffentlichen Schlüssel, Rollen (`policy`, `keyring`), `notBefore`/`notAfter` und Widerruf. `policyThreshold` ist die Mindestzahl verschiedener gültiger Identitäten (K3-Standard **2**; K1/K2 dürfen 1 setzen). Eine Policy darf diese Schwelle nicht senken. Dieselbe Identität zählt einmal. Abgelaufene, widerrufene und unbekannte Schlüssel zählen nicht.
+- Vertrauensanker, nicht Teil der Policy: für Schwelle 1 eine `allowed_signers`-Datei; für mehrere Signierer ein Schlüsselring (`keyring.yaml`, Namespace `aism-keyring`). Der Ring nennt Identität, öffentlichen Schlüssel, Rollen (`policy`, `keyring`, `audit`), `notBefore`/`notAfter` und Widerruf. `policyThreshold` ist die Mindestzahl verschiedener gültiger Identitäten (K3-Standard **2**; K1/K2 dürfen 1 setzen). Eine Policy darf diese Schwelle nicht senken. Dieselbe Identität zählt einmal. Abgelaufene, widerrufene und unbekannte Schlüssel zählen nicht. Die Rolle `audit` signiert nur Audit-Prüfpunkte (§6.2.2) und zählt weder zum Policy- noch zum Schlüsselring-Quorum.
 - Den Ring ändert nur ein Quorum (`keyringThreshold`) von Schlüsseln, die im **bisherigen** Ring gültig sind. Ein Schlüssel kann sich nicht allein eintragen und andere nicht allein entfernen. Die Version steigt streng monoton; `prev` bindet den Digest des Vorgängers. Eine ältere oder abweichende Fassung wird abgelehnt (Anti-Rollback). Rotation überlappt: der neue Schlüssel wird gültig, bevor der alte endet oder widerrufen wird. Das Gateway speichert den akzeptierten Ring (`POLICY_KEYRING_STATE`, sonst neben dem Audit-Log) und prüft ihn beim Start und beim Neuladen.
 - Ist eine Signatur gefordert (`POLICY_REQUIRE_SIGNATURE`, Standard sobald `POLICY_ALLOWED_SIGNERS` oder ein `keyring.yaml` gesetzt ist), MUSS S2 eine Policy ohne ausreichende gültige Signaturen **ablehnen**. Die zuvor aktive Policy bleibt aktiv (`policy.load_failed`, `kept_active: true`), es sei denn, der neue Ring widerruft ihre Signierer; dann verwirft S2 sie (fail-closed). Beim Start ohne gültige Policy leitet S2 nichts weiter (M-15).
 - Anti-Rollback der Policy: eine signierte Policy mit älterem `metadata.effectiveFrom` als die aktive wird abgelehnt.
@@ -329,8 +330,37 @@ Fällt die PII-Erkennung aus, MUSS das Gateway **fail-closed** reagieren: keine 
 **Sicherheitsanforderungen**
 - Keine TLS-Interception; ausgehende TLS-Verbindungen zu Cloud-APIs MÜSSEN Zertifikate regulär validieren.
 - Platzhalter-Zuordnungstabellen (Platzhalter ↔ Klartext) MÜSSEN request-gebunden, nur im Speicher und mit begrenzter Lebensdauer gehalten werden.
-- Audit-Log SOLLTE append-only und manipulationserkennbar gespeichert werden (z. B. Hash-Verkettung oder externes WORM-Ziel).
+- Audit-Log SOLLTE append-only und manipulationserkennbar gespeichert werden. Die Referenz verkettet die lokale Datei und spiegelt sie in eine Object-Lock-Senke (§6.2.2).
 - Secrets für Cloud-APIs liegen ausschließlich im Gateway, nicht in S1 oder S3.
+
+#### 6.2.2 Audit-Kette, Prüfpunkte und unveränderliche Senke
+
+Die lokale JSONL-Datei bleibt die geordnete Kette. Jede Zeile trägt `seq` (ab 1) und `prev_hash` = `sha256:` + SHA-256 der vorherigen Rohzeile (UTF-8, ohne Zeilenumbruch). Die erste Zeile trägt 64 Nullen. Klartext-PII steht nicht in der Zeile (M-05).
+
+Weitere Senken stehen in `audit.sinks` und werden vom Policy-Schema geprüft.
+
+| Senke | Rolle |
+|---|---|
+| `s3-object-lock` | Pflichtfähige WORM-Senke. S3-kompatibel, Object Lock, Modus `compliance`, Aufbewahrung je Objekt (`retentionDays`). Kein Bucket-Standard, damit nur die vom Gateway gesetzten Objekte gesperrt sind. |
+| `syslog` | Optionale Weiterleitung (RFC 5424; TCP mit Oktettzählung nach RFC 6587, UDP ein Datagramm). Kein Integritätsanker. Ein Fehler bleibt in `GET /aism/v1/audit` sichtbar und verwirft den Eintrag nicht. |
+
+Die Referenz startet dafür SeaweedFS 4.48 (Apache-2.0) als eigenen Prozess (`audit-worm`, Profil `audit-worm`). Das Gateway spricht nur die S3-API über HTTP und bindet den Dienst nicht ein. MinIO und Garage stehen unter AGPL-3.0; sie sind nicht die Referenz. Dieselbe Senken-Konfiguration kann auf einen anderen S3-Speicher mit Object Lock im Compliance-Modus zeigen. Wer MinIO oder Garage daneben betreibt, hat die AGPL für dieses separate Programm zu beachten; sie färbt das Gateway nicht.
+
+Prüfpunkte entstehen alle `everyEntries` Einträge oder alle `everySeconds` Sekunden. Ein Prüfpunkt nennt die Anzahl, den Kopf-Hash und einen Merkle-Baum (RFC 6962, SHA-256, leerer Baum über leere Bytes). Signiert wird das kanonische JSON mit einem eigenen Ed25519-Schlüssel (SSHSIG, Namespace `aism-audit`). Die Identität steht im Schlüsselring mit der Rolle `audit`; der private Schlüssel liegt nur in `AUDIT_SIGNING_KEY`. Prüfpunkte liegen neben dem Log (`checkpoints/`) und in der WORM-Senke. RFC 3161 ist optional und offline-sicher: ein Zeitstempel-Ausfall blockiert keine Anfrage. Der Prüfer kontrolliert Status und Imprint, nicht die Zertifikatskette der TSA.
+
+Fail-closed, wenn `audit.failClosed` gesetzt ist: die Zeile und ein Satz in der begrenzten Datei `audit-queue.json` werden vor der Rückkehr von `write` per `fsync` geschrieben. Die Pflichtkopie verlässt die Warteschlange erst, wenn die Senke sie annimmt. Dieselben Bytes werden erneut angenommen; abweichende Bytes sind ein Konflikt und halten die Warteschlange. Ist sie voll, antwortet das Gateway mit `503 audit_unavailable`. Einträge werden nicht verworfen. `AISM_AUDIT_FAULT_INJECTION=1` und das ungesperrte Objekt `{prefix}fault/block` markieren die Senke in Tests sofort als nicht verfügbar.
+
+`keyring-state.json` (Anti-Rollback des Schlüsselrings) wird inhaltsadressiert in dieselbe Senke kopiert.
+
+Werkzeug: [`tools/aism-audit-verify.py`](tools/aism-audit-verify.py). Es prüft Kettenfortsetzung, Prüfpunkt-Signaturen, Lücken, Umordnung, Abschneiden und die WORM-Kopie gegen die lokale Datei. Der Bericht ist JSON (`ok`, `findings`). Exit 0 bei `ok`, sonst 1.
+
+Grenzen, die diese Fassung nicht schließt:
+
+- Object Lock gilt auf der S3-API. Filer, Admin und Volume bleiben in der Referenz unveröffentlicht; ein Löschen am Filer umgeht die Sperre.
+- Wer die S3-Zugangsdaten hat, kann eine neue Version anlegen, eine gesperrte Version aber nicht löschen. Der Prüfer wertet abweichende Versionen und Delete-Marker auf `entries/` und `checkpoints/` als Befund.
+- Der Prüfer wendet `notBefore`, `notAfter` und `revoked` nicht auf historische Prüfpunkte an; der Ring kennt keinen Widerrufszeitpunkt. Wer den öffentlichen Schlüssel unter derselben Identität ersetzt, macht alte Prüfpunkte ungültig.
+- Ein Quorum, das den Audit-Schlüssel tauscht und die Geschichte neu signiert, wird von dieser Prüfung nicht erkannt.
+- Die TSA-PKI und ein HSM sind nicht umgesetzt.
 
 ### 6.3 S3 – Orchestrierung & Agenten
 
@@ -813,7 +843,7 @@ Weiterhin offen:
 1. **Gruppen aus Open WebUI:** Das von Open WebUI weitergeleitete JWT enthält keine Gruppen. Für gruppenbasierte Rollen über Open WebUI bleibt nur OIDC-Durchreichung des IdP-Tokens oder eine andere vertrauenswürdige Quelle; Ende-zu-Ende mit Open WebUI und einem echten IdP (z. B. Keycloak) nicht geprüft.
 2. **PII-Erkennung:** E-Mail, IBAN und Secrets auf den synthetischen Sätzen maskiert 1,0. Personennamen: auf dem älteren Held-out-Set 0,86 (nur spaCy) bzw. 0,94 mit Gazetteer plus `xx_ent_wiki_sm`. Auf dem frischen, härteren Held-out-Set v2 bleibt der Standard bei **0,70** maskiert (Präzision 0,87, etwa 1,5 ms/Satz auf CPU). Namen ohne Listen- und Kontexttreffer, insbesondere kleingeschrieben und nicht im Gazetteer, gehen auf diesem Pfad weiter durch. Eine optionale Kaskade (GLiNER nur auf verdächtigen Sätzen) erreicht auf v2 maskiert 0,969 und auf einem vorher eingefrorenen Set v3 1,000, bei etwa 49–55 ms/Satz auf diesen namensdichten Sätzen; sie ist nicht der Standard und braucht torch. Nur-GLiNER bleibt bei maskiert 1,00 und etwa 70–80 ms/Satz. Reale Texte sind nicht gemessen. Details: [`conformance/pii-eval/README.md`](conformance/pii-eval/README.md).
 3. **Perplexica:** Die API ist versionsabhängig. Zudem ruft Perplexica selbst ein LLM auf; die Konfiguration muss sicherstellen, dass dieser Aufruf über S2 läuft. Perplexica hängt am `frontend`-Netz und hat mit der Referenz-Firewall keinen Internet-Egress.
-4. **Audit-Speicherung:** Die Hash-Kette ist umgesetzt; externes WORM-Ziel, Zugriffskontrolle auf das Audit-Log und Schutz gegen das Abschneiden des Log-Endes sind festzulegen. Aufbewahrungsfristen werden in der Policy konfiguriert, ihre rechtliche Grundlage liegt außerhalb dieser Spezifikation.
+4. **Audit-Speicherung:** Hash-Kette, signierte Prüfpunkte und eine lokal betreibbare Object-Lock-Senke sind umgesetzt (§6.2.2), einschließlich Fail-closed über eine begrenzte Warteschlange (AISM-K3-13, AISM-K3-14, AISM-K3-15). Offen bleiben der Schutz eines veröffentlichten Filers, die Prüfung einer TSA-Zertifikatskette, ein Widerrufszeitpunkt für den Audit-Schlüssel und die rechtliche Grundlage der Aufbewahrungsfrist (die Policy trägt nur die Zahl).
 5. **MCP-Transport:** Auswahl stdio vs. HTTP-basierter Transport und deren Authentifizierung im Container-Kontext.
 6. **Apple Silicon:** Native Inferenz außerhalb von Containern (geplant, README §8) liegt außerhalb des Device-Mapping-Modells von S7 und braucht eine eigene Beschreibung.
 7. **Leistungskennzahlen:** Diese Spezifikation enthält bewusst keine Latenz- oder Durchsatzwerte. Messmethodik und Referenzmessungen sind separat zu erstellen.

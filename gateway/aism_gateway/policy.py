@@ -161,6 +161,37 @@ def _semantic_checks(p: dict) -> list[str]:
         for r in c["allow"]["roles"]:
             if r not in roles:
                 errs.append(f"Collection {c['id']}: unbekannte Rolle {r}")
+
+    audit = spec.get("audit") or {}
+    seen_sinks: set[str] = set()
+    required_worm = False
+    for sink in audit.get("sinks") or []:
+        sid = str(sink.get("id"))
+        if sid in seen_sinks:
+            errs.append(f"doppelte Audit-Senke: {sid}")
+        seen_sinks.add(sid)
+        if sink.get("type") == "s3-object-lock":
+            endpoint = str(sink.get("endpoint") or "")
+            if not endpoint.startswith(("http://", "https://")):
+                errs.append(f"Senke {sid}: endpoint muss http:// oder https:// sein")
+            prefix = str(sink.get("prefix") or "")
+            if prefix.startswith("/") or ".." in prefix.replace("\\", "/").split("/"):
+                errs.append(f"Senke {sid}: prefix ungültig")
+            mode = str(sink.get("lockMode") or "compliance").lower()
+            if audit.get("failClosed") and sink.get("required", True):
+                if mode != "compliance":
+                    errs.append(f"Senke {sid}: failClosed verlangt lockMode compliance")
+                else:
+                    required_worm = True
+        elif sink.get("type") == "syslog":
+            endpoint = str(sink.get("endpoint") or "")
+            if not endpoint.startswith(("tcp://", "udp://")):
+                errs.append(f"Senke {sid}: syslog endpoint muss tcp:// oder udp:// sein")
+    if audit.get("failClosed") and not required_worm:
+        errs.append("audit.failClosed verlangt eine required s3-object-lock-Senke im Compliance-Modus")
+    algorithm = (audit.get("integrity") or {}).get("algorithm")
+    if algorithm not in (None, "sha256"):
+        errs.append("das Referenz-Gateway verkettet Audit-Einträge nur mit sha256")
     return errs
 
 

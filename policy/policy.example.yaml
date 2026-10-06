@@ -281,6 +281,30 @@ spec:
     retention:
       days: 180                  # Beispielwert; maßgeblich ist die interne Vorgabe
       basis: "Interne Aufbewahrungsrichtlinie (Verweis einzutragen)"
-    integrity: { hashChain: true, algorithm: sha256 }
+    failClosed: false            # K3: true, zusammen mit einer required s3-object-lock-Senke
+    queue: { maxEntries: 1024 }  # dauerhafte Warteschlange; voll = Request abgelehnt, nie verwerfen
+    sinks:
+      - id: worm
+        type: s3-object-lock
+        required: false          # K3: true (Object Lock, Compliance). Separater Dienst, nicht verlinkt.
+        endpoint: http://audit-worm:8333
+        bucket: aism-audit
+        region: us-east-1
+        accessKeyRef: env:AISM_AUDIT_S3_ACCESS_KEY
+        secretKeyRef: env:AISM_AUDIT_S3_SECRET_KEY
+        lockMode: compliance
+        retentionDays: 3650
+        prefix: aism/
+      - id: siem
+        type: syslog
+        required: false          # Weiterleitung, kein Integritätsanker; Fehler stehen in /aism/v1/audit
+        endpoint: udp://127.0.0.1:1514
+    integrity:
+      hashChain: true
+      algorithm: sha256
+      # K3-Prüfpunkt: Ed25519, Namespace aism-audit, Schlüsselring-Rolle audit.
+      # Der private Schlüssel liegt nur in AUDIT_SIGNING_KEY, nicht in der Policy.
+      # checkpoint: { everyEntries: 100, everySeconds: 60, merkle: true, signer: audit@example.com }
+      # witness: { type: rfc3161, url: http://tsa.example/tsa, optional: true }
     decisionLog: { enabled: true, includeRuleTrace: true }
     traceContext: w3c-traceparent

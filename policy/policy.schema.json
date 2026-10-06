@@ -543,12 +543,37 @@
             "basis": { "type": "string", "description": "Verweis auf interne Aufbewahrungsvorgabe; rechtliche Fristen sind nicht Teil dieses Formats" }
           }
         },
+        "failClosed": {
+          "type": "boolean",
+          "default": false,
+          "description": "K3: Pflicht-Senke wird dauerhaft gepuffert. Ist die Warteschlange voll, wird kein Request angenommen. Einträge werden nie verworfen."
+        },
+        "queue": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "maxEntries": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000,
+              "default": 1024,
+              "description": "Begrenzte dauerhafte Warteschlange für Pflicht-Senken. Ist sie voll, wird der Eintrag nicht geschrieben und der Request abgelehnt."
+            }
+          }
+        },
+        "sinks": {
+          "type": "array",
+          "description": "Zusätzliche Senken neben sink (die lokale Hash-Kette). s3-object-lock ist die WORM-Senke; syslog ist eine Weiterleitung und kein Integritätsanker.",
+          "items": { "$ref": "#/$defs/auditSink" }
+        },
         "integrity": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
             "hashChain": { "type": "boolean" },
-            "algorithm": { "enum": ["sha256", "sha512"] }
+            "algorithm": { "enum": ["sha256", "sha512"] },
+            "checkpoint": { "$ref": "#/$defs/auditCheckpoint" },
+            "witness": { "$ref": "#/$defs/auditWitness" }
           }
         },
         "decisionLog": {
@@ -561,6 +586,66 @@
           }
         },
         "traceContext": { "enum": ["w3c-traceparent", "none"], "default": "w3c-traceparent" }
+      }
+    },
+
+    "auditSink": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "type": { "enum": ["s3-object-lock", "syslog"] },
+        "required": {
+          "type": "boolean",
+          "default": true,
+          "description": "Pflicht-Senke: Ausfall füllt die Warteschlange und blockiert bei Überlauf. Eine optionale Senke (syslog) darf fehlschlagen, der Zähler sink_errors bleibt sichtbar."
+        },
+        "endpoint": { "type": "string", "minLength": 1 },
+        "bucket": { "type": "string", "pattern": "^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$" },
+        "region": { "type": "string", "default": "us-east-1" },
+        "prefix": { "type": "string" },
+        "accessKeyRef": { "$ref": "#/$defs/secretRef" },
+        "secretKeyRef": { "$ref": "#/$defs/secretRef" },
+        "lockMode": { "enum": ["compliance", "governance"], "default": "compliance" },
+        "retentionDays": { "type": "integer", "minimum": 1 },
+        "facility": { "type": "integer", "minimum": 0, "maximum": 23 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "s3-object-lock" } }, "required": ["type"] },
+          "then": { "required": ["endpoint", "bucket", "accessKeyRef", "secretKeyRef", "retentionDays"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "syslog" } }, "required": ["type"] },
+          "then": { "required": ["endpoint"] }
+        }
+      ]
+    },
+
+    "auditCheckpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["everyEntries", "everySeconds", "signer"],
+      "description": "Signierter Prüfpunkt (Ed25519, Namespace aism-audit). signer ist eine Identität im Schlüsselring mit Rolle audit, nicht ein Policy-Schlüssel.",
+      "properties": {
+        "everyEntries": { "type": "integer", "minimum": 1 },
+        "everySeconds": { "type": "integer", "minimum": 1 },
+        "merkle": { "type": "boolean", "default": true },
+        "signer": { "type": "string", "minLength": 1, "maxLength": 200 }
+      }
+    },
+
+    "auditWitness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "url"],
+      "description": "Optionale RFC-3161-Zeitstempelung. Ein Ausfall blockiert den Request nicht (offline-sicher).",
+      "properties": {
+        "type": { "const": "rfc3161" },
+        "url": { "type": "string", "minLength": 1 },
+        "optional": { "type": "boolean", "default": true },
+        "timeoutSeconds": { "type": "integer", "minimum": 1, "maximum": 30, "default": 3 }
       }
     }
   }
